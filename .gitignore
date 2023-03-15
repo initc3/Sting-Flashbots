@@ -3,3 +3,6 @@ __pycache__/
 data/*
 chain/build
 chain/poa/data/
+*key.txt
+*sealed*.txt
+*.pem

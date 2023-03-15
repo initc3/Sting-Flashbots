@@ -2,14 +2,14 @@ from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
 from src.builder.sting.enclave.enclave import warp_encrypted_block
 from src.relayer.enclave.enclave import deliver_block, steal_preimage
-from src.utils import local_url, instantiate_contract, get_account, refill_ether, get_public_key
+from src.utils import local_url, instantiate_contract, get_account, refill_ether, get_public_key, relayer_key_path
 
 
 def wrap_new_block(w3, preimage):
     contract = instantiate_contract('Honeypot', w3)
     relayer_account = get_account(w3, 'relayer')
     refill_ether(w3, relayer_account.address)
-    relayer_public_key = get_public_key(f'src/relayer/enclave/private_key.txt')
+    relayer_public_key = get_public_key(relayer_key_path)
     return warp_encrypted_block(preimage, w3, contract, relayer_account, relayer_public_key)
 
 

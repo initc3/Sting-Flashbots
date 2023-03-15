@@ -1,16 +1,40 @@
 import random
 
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
 from eth_abi import encode_single
 from eth_utils import keccak
-from src.utils import build_tx, sign_tx, Block, encrypt, decrypt, str_to_bytes, get_public_key, get_private_key, bytes_to_int, int_to_bytes
-
+from src.utils import build_tx, sign_tx, Block, str_to_bytes, bytes_to_int, int_to_bytes, asym_encrypt
 
 sealed_preimage_localtion = f'src/builder/sting/enclave/sealed_preimage.txt'
-sealed_key_location = f'src/builder/sting/enclave/private_key.txt'
+key_location = f'src/builder/sting/enclave/key.txt'
 
 
 def sample():
     return random.randint(0, 10000)
+
+
+def get_sym_key():
+    try:
+        with open(key_location, 'r') as f:
+            key = eval(f.readline())
+    except Exception as e:
+        key = get_random_bytes(16)
+        with open(key_location, 'w') as f:
+            f.write(str(key))
+    return key
+
+
+def sym_encrypt(plaintext, key):
+    cipher = AES.new(key, AES.MODE_EAX)
+    ciphertext, tag = cipher.encrypt_and_digest(plaintext)
+    return cipher.nonce, tag, ciphertext
+
+
+def sym_decrypt(ciphertext, key):
+    nonce, tag, ciphertext = ciphertext
+    cipher = AES.new(key, AES.MODE_EAX, nonce)
+    return cipher.decrypt_and_verify(ciphertext, tag)
 
 
 def create_puzzle():
@@ -20,9 +44,9 @@ def create_puzzle():
     puzzle = keccak(encode_single('uint', preimage))
     print(f'puzzle {puzzle}')
 
-    ### TODO: replace it w/ a symmetric encryption scheme
-    public_key = get_public_key(sealed_key_location)
-    sealed_preimage = encrypt(int_to_bytes(preimage), public_key)
+    bytes_preimage = int_to_bytes(preimage)
+    key = get_sym_key()
+    sealed_preimage = sym_encrypt(bytes_preimage, key)
 
     with open(sealed_preimage_localtion, 'w') as f:
         f.write(f'{sealed_preimage}')
@@ -31,11 +55,11 @@ def create_puzzle():
 
 
 def fetch_preimage():
-    private_key = get_private_key(sealed_key_location)
+    key = get_sym_key()
 
     with open(sealed_preimage_localtion, 'r') as f:
         sealed_preimage = eval(f.readline())
-        preimage = bytes_to_int(decrypt(sealed_preimage, private_key))
+        preimage = bytes_to_int(sym_decrypt(sealed_preimage, key))
         print(f'preimage: {preimage}')
         return preimage
 
@@ -53,4 +77,4 @@ def warp_encrypted_block(preimage, w3, contract, account, relayer_public_key):
 
     tx_list = [signed_tx]
     block = Block(tx_list)
-    return encrypt(str_to_bytes(block.serialize()), relayer_public_key)
+    return asym_encrypt(str_to_bytes(block.serialize()), relayer_public_key)

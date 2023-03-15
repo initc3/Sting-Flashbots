@@ -3,6 +3,7 @@ from src.utils import get_account, parse_contract, local_url, refill_ether, tran
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
 
+
 if __name__ == '__main__':
 
     w3 = Web3(HTTPProvider(local_url))

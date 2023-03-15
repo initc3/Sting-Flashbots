@@ -35,7 +35,10 @@ python3 -m src.relayer.honest
 ```
 
 
-### Malicious relayer steal the preimage and replace the bounty claim tx
+### Test with malicious relayer steal the preimage and replace the bounty claim tx
 ```
+bash chain/chain.sh
+python3 -m src.builder.sting.setup_bounty
+python3 -m src.builder.sting.claim_bounty
 python3 -m src.relayer.malicious
 ```

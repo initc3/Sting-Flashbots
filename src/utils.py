@@ -1,9 +1,9 @@
 import json
 import os
 
-from src.ecc.cipher import ElGamal
-from src.ecc.curve import Curve25519, Point
-from src.ecc.key import get_public_key, gen_keypair
+from Crypto.Cipher import PKCS1_OAEP, AES
+from Crypto.PublicKey import RSA
+from Crypto.Random import get_random_bytes
 from eth_account.datastructures import SignedTransaction
 from hexbytes import HexBytes
 
@@ -15,6 +15,8 @@ contract_addr_dict = {
 }
 
 ether_unit = 10**18
+
+relayer_key_path = f'src/relayer/enclave/'
 
 
 def serialize_signed_tx(signed_tx):
@@ -62,14 +64,6 @@ class Block:
             contract = instantiate_contract('Honeypot', w3)
             log = contract.events.BountyClaimed().processReceipt(receipt)
             print(f'winner {log[0]["args"]["winner"]}')
-
-
-def str_to_bytes(st):
-    return bytes(st, encoding='utf-8')
-
-
-def bytes_to_str(bt):
-    return bt.decode(encoding='utf-8')
 
 
 def parse_contract(contract_name):
@@ -151,39 +145,68 @@ def transact(func_to_call, w3, account, value=0):
     return send_tx(signed_tx, w3)
 
 
-def encrypt(data, public_key): ### data is of bytes
-    # c1, c2 = ElGamal(Curve25519).encrypt(data, public_key)
-    # return c1.x, c1.y, c2.x, c2.y
-    return data
+def gen_keypair(key_path):
+    key = RSA.generate(2048)
+    private_key = key.export_key()
+    with open(f'{key_path}/private.pem', 'wb') as f:
+        f.write(private_key)
+
+    public_key = key.publickey().export_key()
+    with open(f'{key_path}/receiver.pem', 'wb') as f:
+        f.write(public_key)
+
+    return key, key.publickey()
 
 
-def decrypt(sealed_data, private_key):
-    # c1 = Point(sealed_data[0], sealed_data[1], Curve25519)
-    # c2 = Point(sealed_data[2], sealed_data[3], Curve25519)
-    # print(c1)
-    # print(c2)
-    # return ElGamal(Curve25519).decrypt(private_key, c1, c2)
-    return sealed_data
-
-
-def get_keypair(private_key_location):
+def get_private_key(key_path):
     try:
-        with open(private_key_location, 'r') as f:
-            private_key = int(f.readline())
-        public_key = get_public_key(private_key, Curve25519)
+        private_key = RSA.import_key(open(f'{key_path}/private.pem').read())
     except Exception as _:
-        private_key, public_key = gen_keypair(Curve25519)
-        with open(private_key_location, 'w') as f:
-            f.write(f'{private_key}')
-    return private_key, public_key
+        private_key, _ = gen_keypair(key_path)
+
+    return private_key
 
 
-def get_public_key(private_key_location):
-    return get_keypair(private_key_location)[1]
+def get_public_key(key_path):
+    try:
+        recipient_key = RSA.import_key(open(f'{key_path}/receiver.pem').read())
+    except Exception as _:
+        _, recipient_key = gen_keypair(key_path)
+
+    return recipient_key
+
+def asym_encrypt(plaintext, recipient_key):
+    session_key = get_random_bytes(16)
+
+    # Encrypt the session key with the public RSA key
+    cipher_rsa = PKCS1_OAEP.new(recipient_key)
+    enc_session_key = cipher_rsa.encrypt(session_key)
+
+    # Encrypt the data with the AES session key
+    cipher_aes = AES.new(session_key, AES.MODE_EAX)
+    ciphertext, tag = cipher_aes.encrypt_and_digest(plaintext)
+
+    return enc_session_key, cipher_aes.nonce, tag, ciphertext
 
 
-def get_private_key(private_key_location):
-    return get_keypair(private_key_location)[0]
+def asym_decrypt(ciphertext, private_key):
+    enc_session_key, nonce, tag, ciphertext = ciphertext
+
+    # Decrypt the session key with the private RSA key
+    cipher_rsa = PKCS1_OAEP.new(private_key)
+    session_key = cipher_rsa.decrypt(enc_session_key)
+
+    # Decrypt the data with the AES session key
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
+    return cipher_aes.decrypt_and_verify(ciphertext, tag)
+
+
+def str_to_bytes(st):
+    return bytes(st, encoding='utf-8')
+
+
+def bytes_to_str(bt):
+    return bt.decode(encoding='utf-8')
 
 
 def bytes_to_int(x):
