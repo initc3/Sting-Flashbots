@@ -1,0 +1,16 @@
+version: '3.3'
+
+services:
+  dev:
+    image: sting
+    build:
+      context: .
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./:/Sting-Flashbots
+    working_dir:
+      /Sting-Flashbots
+    platform: "linux/amd64"
+    command: tail -F anything

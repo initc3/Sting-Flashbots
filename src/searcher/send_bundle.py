@@ -1,35 +1,16 @@
 ### Source: https://github.com/flashbots/web3-flashbots/blob/master/examples/simple.py
 
-import os
-
 from src.searcher.flashbots import flashbot
+from src.utils import get_balance, get_account
 from uuid import uuid4
 from web3 import Web3, HTTPProvider
 from web3.exceptions import TransactionNotFound
-from web3.types import TxParams
 
 
 CHAIN_ID = 5
 
-
-def get_balance(w3, addr):
-    balance = w3.eth.get_balance(addr)
-    print(f'balance of {addr} is {Web3.fromWei(balance, "ether")} ether')
-    return balance
-
-
-def get_account(w3, account_name):
-    path = f'keystores/{account_name}'
-    for filename in os.listdir(path):
-        with open(f'{path}/{filename}', 'r') as keyfile:
-            encrypted_key = keyfile.read()
-            private_key = w3.eth.account.decrypt(encrypted_key, '')
-            account = w3.eth.account.privateKeyToAccount(private_key)
-            return account
-
-
 w3 = Web3(HTTPProvider('https://goerli.infura.io/v3/6a82d2519efb4d748c02552e02e369c1'))
-signer = get_account(w3, 'signer')
+signer = get_account(w3, 'admin')
 get_balance(w3, signer.address)
 
 sender = get_account(w3, 'sender')
