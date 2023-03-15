@@ -5,8 +5,9 @@ docker-compose build
 
 ### Create docker container and enter the container environment
 ```
+mkdir data
 docker-compose up -d
-docker exec -it sting-flashbots-dev-1 bash
+docker-compose exec dev bash
 ```
 
 ### Compile Solidity contracts in `chain/contracts`
