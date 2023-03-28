@@ -16,7 +16,6 @@ fs.mounts = [
   { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
   { path = "/usr/{{ arch_libdir }}", uri = "file:/usr/{{ arch_libdir }}" },
   { path = "{{ entrypoint }}", uri = "file:{{ entrypoint }}" },
-  { path = "/etc/hosts", uri = "file:helper-files/hosts" },
 
   { path = "/usr/local/bin/python3.10", uri = "file:/usr/local/bin/python3.10"},
   { path = "/usr/local/lib/libpython3.10.so.1.0", uri = "file:/usr/local/lib/libpython3.10.so.1.0"},
