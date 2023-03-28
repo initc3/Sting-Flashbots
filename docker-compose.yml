@@ -10,7 +10,45 @@ services:
       - NET_ADMIN
     volumes:
       - ./:/Sting-Flashbots
-    working_dir:
-      /Sting-Flashbots
+    working_dir: /Sting-Flashbots
     platform: "linux/amd64"
     command: tail -F anything
+
+  aesmd:
+    image: initc3/linux-sgx:2.19
+    devices:
+      - /dev/isgx
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+    user: aesmd
+    working_dir: /opt/intel/sgx-aesm-service/aesm
+    environment:
+      LD_LIBRARY_PATH: /opt/intel/sgx-aesm-service/aesm
+    command: ./aesm_service --no-daemon
+
+  gramine:
+    image: sting-gramine
+    build:
+      context: .
+      dockerfile: gramine.Dockerfile
+    depends_on:
+      - aesmd
+    devices:
+      - /dev/isgx
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      SGX_SPID: ${SGX_SPID}
+      IAS_PRIMARY_KEY: ${IAS_PRIMARY_KEY}
+    # working_dir: /Sting-Flashbots
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+      - ./:/Sting-Flashbots
+
+volumes:
+  aesmd-socket:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "rw"

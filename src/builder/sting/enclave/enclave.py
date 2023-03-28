@@ -1,14 +1,17 @@
+#!/usr/bin/env python3
 import random
-
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
-from eth_abi import encode_single
+from web3 import Web3, HTTPProvider
+from web3.middleware import geth_poa_middleware
+from eth_abi import encode
+from utils import build_tx, sign_tx, Block, str_to_bytes, bytes_to_int, int_to_bytes, asym_encrypt, local_url
+
 from eth_utils import keccak
-from src.utils import build_tx, sign_tx, Block, str_to_bytes, bytes_to_int, int_to_bytes, asym_encrypt
 
-sealed_preimage_localtion = f'src/builder/sting/enclave/sealed_preimage.txt'
-key_location = f'src/builder/sting/enclave/key.txt'
-
+sealed_preimage_localtion = f'/data/sealed_preimage.txt'
+key_location = f'/data/key.txt'
+output_location = f'output/output.txt'
 
 def sample():
     return random.randint(0, 10000)
@@ -37,34 +40,37 @@ def sym_decrypt(ciphertext, key):
     return cipher.decrypt_and_verify(ciphertext, tag)
 
 
-def create_puzzle():
+def ecall_create_puzzle():
     preimage = sample()
     print(f'preimage: {preimage}')
 
-    puzzle = keccak(encode_single('uint', preimage))
+    puzzle = keccak(encode(['uint'], [preimage]))
     print(f'puzzle {puzzle}')
 
     bytes_preimage = int_to_bytes(preimage)
-    key = get_sym_key()
-    sealed_preimage = sym_encrypt(bytes_preimage, key)
+    # key = get_sym_key()
+    # print(f'bytes_preimage {bytes_preimage}')
+    # sealed_preimage = sym_encrypt(bytes_preimage, key)
 
     with open(sealed_preimage_localtion, 'w') as f:
-        f.write(f'{sealed_preimage}')
+        f.write(f'{bytes_preimage}')
 
+    with open(output_location, "wb") as f:
+        f.write(puzzle)
     return puzzle
 
 
 def fetch_preimage():
-    key = get_sym_key()
-
     with open(sealed_preimage_localtion, 'r') as f:
         sealed_preimage = eval(f.readline())
-        preimage = bytes_to_int(sym_decrypt(sealed_preimage, key))
+        preimage = bytes_to_int(sealed_preimage)#sym_decrypt(sealed_preimage, key))
         print(f'preimage: {preimage}')
         return preimage
 
 
-def claim_bounty(w3, contract, account, relayer_public_key):
+def ecall_claim_bounty(contract, account, relayer_public_key):
+    w3 = Web3(HTTPProvider(local_url))
+    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     preimage = fetch_preimage()
     return warp_encrypted_block(preimage, w3, contract, account, relayer_public_key)
 
@@ -78,3 +84,5 @@ def warp_encrypted_block(preimage, w3, contract, account, relayer_public_key):
     tx_list = [signed_tx]
     block = Block(tx_list)
     return asym_encrypt(str_to_bytes(block.serialize()), relayer_public_key)
+
+ecall_create_puzzle()
