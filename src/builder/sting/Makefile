@@ -63,6 +63,7 @@ endif
 clean:
 	$(RM) *.manifest *.manifest.sgx *.token *.sig OUTPUT* *.PID TEST_STDOUT TEST_STDERR
 	$(RM) -r scripts/__pycache__
+	$(RM) -r output/* /Sting-Flashbots/data/*
 
 .PHONY: distclean
 distclean: clean

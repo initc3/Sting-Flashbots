@@ -57,5 +57,5 @@ sgx.trusted_files = [
 ]
 
 sgx.allowed_files = [
-  "file:/Sting-Flashbots/output/",
+  "file:output/",
 ]
