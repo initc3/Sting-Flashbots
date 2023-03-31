@@ -33,6 +33,6 @@ geth \
     --ws.api admin,debug,eth,miner,net,personal,shh,txpool,web3 \
     --syncmode full \
     --ipcpath "$DATADIR/geth.ipc" \
-    2>> $DATADIR/geth.log &
+    2>&1 | tee $DATADIR/geth.log &
 
-sleep 5
+sleep infinity

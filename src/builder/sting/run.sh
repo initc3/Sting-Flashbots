@@ -1,1 +1,0 @@
-gramine-sgx ./python ./enclave/enclave.py

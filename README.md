@@ -1,45 +1,67 @@
+### Set Intel IAS SPID
+
+```
+export RA_CLIENT_SPID=<spid>
+```
+
 ### Build docker image
+
 ```
-docker-compose build
+docker compose build
 ```
 
-### Create docker container and enter the container environment
+### Create docker containers for blockchain network, builder, and relayer
+
 ```
-mkdir data
-docker-compose up -d
-docker-compose exec dev bash
+docker compose up -d
 ```
 
-### Compile Solidity contracts in `chain/contracts`
+### Enter Relayer container
+
 ```
-bash chain/compile.sh
+docker compose exec relayer bash
 ```
 
-### Start localnet
+### Enter Builder container in *seperate terminal*
+
 ```
-bash chain/chain.sh
+docker compose exec builder bash
 ```
+
+
+### Generate the relayer public/private key and SGX quote & report
+```
+./setup.sh
+```
+
 
 ### Deploy Honeypot contract and setup puzzle
+
+* Create puzzle
+* Setup Honeypot contract
+* Claim Bounty
+
 ```
-python3 -m src.builder.sting.setup_bounty
+./run.sh
 ```
 
-### Create bounty claim tx and wrap in an encrypted block
-```
-python3 -m src.builder.sting.claim_bounty
-```
+### Honest relayer delivers the block picked
 
-### Honest relayer deliver the block picked
 ```
-python3 -m src.relayer.honest
+./honest.sh
 ```
 
 
-### Test with malicious relayer steal the preimage and replace the bounty claim tx
+### Malicious relayer steal the preimage and replace the bounty claim tx
+
+*Address of the HoneyPot contract is hardcoded and you can only claim the bounty once so restart the network and rerun the protocol the other relayer*
 ```
-bash chain/chain.sh
-python3 -m src.builder.sting.setup_bounty
-python3 -m src.builder.sting.claim_bounty
-python3 -m src.relayer.malicious
+docker compose exec eth ./chain/chain.sh
+docker compose exec relayer ./setup.sh
+docker compose exec builder ./run.sh
+```
+
+
+```
+docker compose exec relayer ./malicious.sh
 ```
