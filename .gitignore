@@ -6,7 +6,7 @@ chain/poa/data/
 *sealed*.txt
 *.pem
 builder/*data/*
-builder/CLAIM_BOUNTY
+builder/src/CLAIM_BOUNTY
 relayer/*data/*
 *python.manifest
 *python.manifest.sgx

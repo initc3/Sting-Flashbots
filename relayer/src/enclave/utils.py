@@ -1,7 +1,9 @@
-import random
-import socket
+#!/usr/bin/env python3
+
 import json
 import os
+import random
+import socket
 
 from Crypto.Cipher import PKCS1_OAEP, AES
 from Crypto.PublicKey import RSA
@@ -21,48 +23,6 @@ contract_addr_dict = {
 }
 
 
-
-def bytes_to_int(x):
-    return int.from_bytes(x, 'big')
-
-def bytes_to_str(bt):
-    return bt.decode(encoding='utf-8')
-
-def hex_to_bytes(hx):
-    return bytes.fromhex(hx)
-
-def int_to_bytes(x):
-    return x.to_bytes((x.bit_length() + 7) // 8, 'big')
-
-def str_to_bytes(st):
-    return bytes(st, encoding='utf-8')
-
-def sample():
-    return random.randint(0, 10000)
-
-def asym_encrypt(plaintext, recipient_key):
-    session_key = get_random_bytes(16)
-
-    # Encrypt the session key with the public RSA key
-    cipher_rsa = PKCS1_OAEP.new(recipient_key)
-    enc_session_key = cipher_rsa.encrypt(session_key)
-
-    # Encrypt the data with the AES session key
-    cipher_aes = AES.new(session_key, AES.MODE_EAX)
-    ciphertext, tag = cipher_aes.encrypt_and_digest(plaintext)
-
-    return enc_session_key, cipher_aes.nonce, tag, ciphertext
-
-def asym_decrypt(ciphertext, private_key):
-    enc_session_key, nonce, tag, ciphertext = ciphertext
-
-    # Decrypt the session key with the private RSA key
-    cipher_rsa = PKCS1_OAEP.new(private_key)
-    session_key = cipher_rsa.decrypt(enc_session_key)
-
-    # Decrypt the data with the AES session key
-    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-    return cipher_aes.decrypt_and_verify(ciphertext, tag)
 
 def serialize_signed_tx(signed_tx):
     return str({
@@ -106,7 +66,6 @@ class Block:
             print("receipt", receipt)
             contract = instantiate_contract('Honeypot', w3)
             log = contract.events.BountyClaimed().processReceipt(receipt)
-            print(f'log {log}')
             print(f'winner {log[0]["args"]["winner"]}')
 
 def decrypt_block(encrypted_block, private_key):
@@ -134,6 +93,14 @@ def instantiate_contract(contract_name, w3):
     abi, bytecode = parse_contract(contract_name)
     return w3.eth.contract(address=contract_addr_dict[contract_name], abi=abi)
 
+def get_account(w3, account_name):
+    path = f'/input/{account_name}'
+    for filename in os.listdir(path):
+        with open(f'{path}/{filename}', 'r') as keyfile:
+            encrypted_key = keyfile.read()
+            private_key = w3.eth.account.decrypt(encrypted_key, '')
+            account = w3.eth.account.privateKeyToAccount(private_key)
+            return account
 def build_tx(func_to_call, w3, account_addr, value=0, nonce=0):
     return func_to_call.build_transaction({
         'from': account_addr,
@@ -154,11 +121,43 @@ def wait_for_receipt(tx_hash, w3):
     return w3.eth.wait_for_transaction_receipt(tx_hash)
 
 
-def get_account(w3, account_name):
-    path = f'/input/{account_name}'
-    for filename in os.listdir(path):
-        with open(f'{path}/{filename}', 'r') as keyfile:
-            encrypted_key = keyfile.read()
-            private_key = w3.eth.account.decrypt(encrypted_key, '')
-            account = w3.eth.account.privateKeyToAccount(private_key)
-            return account
+
+
+def asym_encrypt(plaintext, recipient_key):
+    session_key = get_random_bytes(16)
+
+    # Encrypt the session key with the public RSA key
+    cipher_rsa = PKCS1_OAEP.new(recipient_key)
+    enc_session_key = cipher_rsa.encrypt(session_key)
+
+    # Encrypt the data with the AES session key
+    cipher_aes = AES.new(session_key, AES.MODE_EAX)
+    ciphertext, tag = cipher_aes.encrypt_and_digest(plaintext)
+
+    return enc_session_key, cipher_aes.nonce, tag, ciphertext
+
+def asym_decrypt(ciphertext, private_key):
+    enc_session_key, nonce, tag, ciphertext = ciphertext
+
+    # Decrypt the session key with the private RSA key
+    cipher_rsa = PKCS1_OAEP.new(private_key)
+    session_key = cipher_rsa.decrypt(enc_session_key)
+
+    # Decrypt the data with the AES session key
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
+    return cipher_aes.decrypt_and_verify(ciphertext, tag)
+
+def bytes_to_str(bt):
+    return bt.decode(encoding='utf-8')
+
+def bytes_to_int(x):
+    return int.from_bytes(x, 'big')
+
+def int_to_bytes(x):
+    return x.to_bytes((x.bit_length() + 7) // 8, 'big')
+
+def hex_to_bytes(hx):
+    return bytes.fromhex(hx)
+
+def sample():
+    return random.randint(0, 10000)

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from utils import relayer_public_key_path, relayer_private_key_path
 
 from Crypto.PublicKey import RSA

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json
 import os
 import socket
@@ -7,6 +9,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from eth_account.datastructures import SignedTransaction
 from hexbytes import HexBytes
+
 
 ip_addr = socket.gethostbyname('eth')
 local_url = f'http://{ip_addr}:8545'
@@ -57,7 +60,7 @@ class Block:
     def apply(self, w3):
         for tx in self.tx_list:
             receipt = send_tx(tx, w3)
-            print(receipt)
+            print("receipt", receipt)
             contract = instantiate_contract('Honeypot', w3)
             log = contract.events.BountyClaimed().processReceipt(receipt)
             print(f'winner {log[0]["args"]["winner"]}')
@@ -67,17 +70,9 @@ def parse_contract(contract_name):
     contract = json.load(open(f'/Sting-Flashbots/chain/build/contracts/{contract_name}.json'))
     return contract['abi'], contract['bytecode']
 
-
 def instantiate_contract(contract_name, w3):
     abi, bytecode = parse_contract(contract_name)
     return w3.eth.contract(address=contract_addr_dict[contract_name], abi=abi)
-
-
-def get_balance(w3, addr):
-    balance = w3.eth.get_balance(addr)
-    print(f'balance of {addr} is {balance}')
-    return balance
-
 
 def get_account(w3, account_name):
     path = f'/Sting-Flashbots/chain/keystores/{account_name}'
@@ -88,6 +83,10 @@ def get_account(w3, account_name):
             account = w3.eth.account.privateKeyToAccount(private_key)
             return account
 
+def get_balance(w3, addr):
+    balance = w3.eth.get_balance(addr)
+    print(f'balance of {addr} is {balance}')
+    return balance
 
 def transfer_ether(w3, sender_addr, receiver_addr, amt):
     w3.eth.defaultAccount = sender_addr
@@ -185,7 +184,6 @@ def asym_encrypt(plaintext, recipient_key):
 
     return enc_session_key, cipher_aes.nonce, tag, ciphertext
 
-
 def asym_decrypt(ciphertext, private_key):
     enc_session_key, nonce, tag, ciphertext = ciphertext
 
@@ -197,26 +195,20 @@ def asym_decrypt(ciphertext, private_key):
     cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
     return cipher_aes.decrypt_and_verify(ciphertext, tag)
 
-
 def str_to_bytes(st):
     return bytes(st, encoding='utf-8')
-
 
 def bytes_to_str(bt):
     return bt.decode(encoding='utf-8')
 
-
 def bytes_to_int(x):
     return int.from_bytes(x, 'big')
-
 
 def int_to_bytes(x):
     return x.to_bytes((x.bit_length() + 7) // 8, 'big')
 
+def hex_to_bytes(hx):
+    return bytes.fromhex(hx)
 
 def bytes_to_hex(bt):
     return '0x' + bt.hex()
-
-
-def hex_to_bytes(hx):
-    return bytes.fromhex(hx)
