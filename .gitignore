@@ -1,8 +1,15 @@
 .idea/
 __pycache__/
-data/*
 chain/build
 chain/poa/data/
 *key.txt
 *sealed*.txt
 *.pem
+builder/*data/*
+builder/src/CLAIM_BOUNTY
+relayer/*data/*
+*python.manifest
+*python.manifest.sgx
+*python.sig
+*python.token
+*OUTPUT

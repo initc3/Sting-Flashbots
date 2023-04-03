@@ -1,7 +1,12 @@
-from src.builder.sting.enclave.enclave import create_puzzle
-from src.utils import get_account, parse_contract, local_url, refill_ether, transact, ether_unit
+#!/usr/bin/env python3
+
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
+
+from utils import local_url, get_account, parse_contract, refill_ether, transact, ether_unit
+
+
+puzzle_location = f'/Sting-Flashbots/builder/output_data/puzzle.txt'
 
 
 if __name__ == '__main__':
@@ -10,8 +15,8 @@ if __name__ == '__main__':
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     sting_account = get_account(w3, 'sting')
     refill_ether(w3, sting_account.address)
-
-    puzzle = create_puzzle()
+    with open(puzzle_location, "rb") as f:
+        puzzle = f.read()
     bounty = int(0.5 * ether_unit)
     abi, bytecode = parse_contract('Honeypot')
     receipt = transact(w3.eth.contract(
