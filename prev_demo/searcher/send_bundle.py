@@ -1,7 +1,7 @@
 ### Source: https://github.com/flashbots/web3-flashbots/blob/master/examples/simple.py
 
-from src.searcher.flashbots import flashbot
-from src.utils import get_balance, get_account
+from lib.flashbots import flashbot
+from prev_demo.utils import get_balance, get_account
 from uuid import uuid4
 from web3 import Web3, HTTPProvider
 from web3.exceptions import TransactionNotFound

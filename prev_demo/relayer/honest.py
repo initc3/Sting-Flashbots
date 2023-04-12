@@ -1,8 +1,8 @@
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
 
-from src.relayer.enclave.enclave import deliver_block
-from src.utils import local_url
+from prev_demo.relayer.enclave.enclave import deliver_block
+from prev_demo.utils import local_url
 
 if __name__ == '__main__':
 

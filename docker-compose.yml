@@ -10,6 +10,11 @@ services:
       - NET_ADMIN
     volumes:
       - ./:/Sting-Flashbots
+      - ./lib/ecdsa/account.py:/usr/local/lib/python3.9/site-packages/eth_account/account.py
+      - ./lib/ecdsa/signing.py:/usr/local/lib/python3.9/site-packages/eth_account/_utils/signing.py
+      - ./lib/ecdsa/datatypes.py:/usr/local/lib/python3.9/site-packages/eth_keys/datatypes.py
+      - ./lib/ecdsa/main.py:/usr/local/lib/python3.9/site-packages/eth_keys/backends/native/main.py
+      - ./lib/ecdsa/ecdsa.py:/usr/local/lib/python3.9/site-packages/eth_keys/backends/native/ecdsa.py
     working_dir:
       /Sting-Flashbots
     platform: "linux/amd64"

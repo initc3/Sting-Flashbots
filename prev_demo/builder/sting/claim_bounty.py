@@ -1,7 +1,7 @@
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
-from src.builder.sting.enclave.enclave import claim_bounty
-from src.utils import local_url, get_account, refill_ether, instantiate_contract, get_public_key, relayer_key_path
+from chain import claim_bounty
+from prev_demo.utils import local_url, get_account, refill_ether, instantiate_contract, get_public_key, relayer_key_path
 
 
 if __name__ == '__main__':

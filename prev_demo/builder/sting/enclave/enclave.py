@@ -4,7 +4,7 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from eth_abi import encode_single
 from eth_utils import keccak
-from src.utils import build_tx, sign_tx, Block, str_to_bytes, bytes_to_int, int_to_bytes, asym_encrypt
+from prev_demo.utils import build_tx, sign_tx, Block, str_to_bytes, bytes_to_int, int_to_bytes, asym_encrypt
 
 sealed_preimage_localtion = f'src/builder/sting/enclave/sealed_preimage.txt'
 key_location = f'src/builder/sting/enclave/key.txt'

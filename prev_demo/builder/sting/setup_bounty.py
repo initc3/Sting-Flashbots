@@ -1,5 +1,5 @@
-from src.builder.sting.enclave.enclave import create_puzzle
-from src.utils import get_account, parse_contract, local_url, refill_ether, transact, ether_unit
+from prev_demo.builder.sting.enclave.enclave import create_puzzle
+from prev_demo.utils import get_account, parse_contract, local_url, refill_ether, transact, ether_unit
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     receipt = transact(w3.eth.contract(
         abi=abi,
         bytecode=bytecode
-    ).constructor(puzzle), w3, sting_account, bounty)
+    ).constructor(puzzle), w3, sting_account, bounty, k=123)
     contract_addr = receipt['contractAddress']
     print(f'Deployed to: {contract_addr}')
 

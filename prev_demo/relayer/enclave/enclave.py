@@ -1,4 +1,4 @@
-from src.utils import get_private_key, bytes_to_str, Block, bytes_to_int, hex_to_bytes, relayer_key_path, asym_decrypt
+from prev_demo.utils import get_private_key, bytes_to_str, Block, bytes_to_int, hex_to_bytes, relayer_key_path, asym_decrypt
 
 
 def decrypt_block(encrypted_block):

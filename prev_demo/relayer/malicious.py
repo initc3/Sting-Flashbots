@@ -1,8 +1,8 @@
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
-from src.builder.sting.enclave.enclave import warp_encrypted_block
-from src.relayer.enclave.enclave import deliver_block, steal_preimage
-from src.utils import local_url, instantiate_contract, get_account, refill_ether, get_public_key, relayer_key_path
+from prev_demo.builder.sting.enclave.enclave import warp_encrypted_block
+from prev_demo.relayer.enclave.enclave import deliver_block, steal_preimage
+from prev_demo.utils import local_url, instantiate_contract, get_account, refill_ether, get_public_key, relayer_key_path
 
 
 def wrap_new_block(w3, preimage):
