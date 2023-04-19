@@ -28,7 +28,7 @@ fs.mounts = [
 
   { path = "/input", uri = "file:/Sting-Flashbots/builder/input_data"},
   { path = "/output", uri = "file:/Sting-Flashbots/builder/output_data"},
-  { type = "encrypted", path = "/data/", uri = "file:/Sting-Flashbots/builder/enclave_data/", key_name = "_sgx_mrenclave" },
+  { type = "{{ sealing_filetype }}", path = "/data/", uri = "file:/Sting-Flashbots/builder/enclave_data/", key_name = "{{ sealing_key }}" },
 ]
 
 sys.stack.size = "2M"
