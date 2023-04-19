@@ -48,30 +48,33 @@ services:
       LD_LIBRARY_PATH: /opt/intel/sgx-aesm-service/aesm
     command: ./aesm_service --no-daemon
 
-#configration from https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
+#configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
     image: "ethereum/client-go:latest"
-    command: --datadir=/execution init /execution/genesis.json
+    command: --datadir=/genesis init /execution/genesis.json
     volumes:
-      - ./chain/execution:/execution
       - ./chain/execution/genesis.json:/execution/genesis.json
+      - genesis:/genesis
+
   create-beacon-chain-genesis:
     image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
     command:
       - testnet
       - generate-genesis
       - --num-validators=64
-      - --output-ssz=/consensus/genesis.ssz
+      - --output-ssz=/genesis/genesis.ssz
       - --chain-config-file=/consensus/config.yml
     volumes:
-      - ./chain/consensus:/consensus
+      - ./chain/consensus:/consensus/
+      - genesis:/genesis/
+
   beacon-chain:
     image: "eth-pos-devnet_beacon-chain:latest"
     command:
-      - --datadir=/consensus/beacondata
+      - --datadir=/beacondata
       # No peers to sync with in this testnet, so setting to 0
       - --min-sync-peers=0
-      - --genesis-state=/consensus/genesis.ssz
+      - --genesis-state=/genesis/genesis.ssz
       - --interop-eth1data-votes
       - --bootstrap-node=
       # The chain configuration file used for setting up Prysm
@@ -98,12 +101,14 @@ services:
     volumes:
       - ./chain/consensus:/consensus
       - ./chain/execution/jwtsecret:/execution/jwtsecret
+      - genesis:/genesis/
+      # - ./chain/consensus/beacondata:/beacondata
 
   validator:
     image: "gcr.io/prysmaticlabs/prysm/validator:latest"
     command:
       - --beacon-rpc-provider=beacon-chain:4000
-      - --datadir=/consensus/validatordata
+      - --datadir=/validatordata
       - --accept-terms-of-use
       - --interop-num-validators=64
       - --interop-start-index=0
@@ -115,6 +120,7 @@ services:
         condition: service_started
     volumes:
       - ./chain/consensus:/consensus
+      # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
   aesmd-socket:
@@ -123,3 +129,4 @@ volumes:
       type: "tmpfs"
       device: "tmpfs"
       o: "rw"
+  genesis:
