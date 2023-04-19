@@ -21,7 +21,6 @@ ENCLAVE_SIZE ?= 1024G
 
 GETH_BRANCH ?= main
 GETH_REPO ?= https://github.com/flashbots/builder
-# GETH_COMMIT ?= a36c68f12cdc45f52184b563dab475f340e00dd7
 
 MBEDTLS_PATH = https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.3.0.tar.gz
 
@@ -151,8 +150,7 @@ geth.args:
 			--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
 		> $@
 endif
-# 	--bootnodes=enode://9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066@18.168.182.86:30303,enode://ec66ddcf1a974950bd4c782789a7e04f8aa7110a72569b6e65fcd51e937e74eed303b1ea734e4d19cfaec9fbff9b6ee65bf31dcb50ba79acce9dd63a6aca61c7@52.14.151.177:30303 \
-	--miner.extradata='Illuminate Dmocrtz Dstrib Prtct' \
+
 
 
 ############################## GETH EXECUTABLE ###############################
@@ -185,11 +183,6 @@ $(PATCHED_GOLEVELDB): $(SRCDIR)/PATCHED
 	mv $(PATCHED_GOLEVELDB)* $(PATCHED_GOLEVELDB)
 	patch -d $(PATCHED_GOLEVELDB) -p1 < geth-patches/0002-goleveldb.patch
 
-# cp /geth-sgx/accountcmd.go /geth-sgx/go-ethereum/cmd/geth/accountcmd.go
-# cp /geth-sgx/flags.go /geth-sgx/go-ethereum/cmd/utils/flags.go
-# cp /geth-sgx/keystore.go /geth-sgx/go-ethereum/accounts/keystore/keystore.go
-# cp /geth-sgx/account_cache.go /geth-sgx/go-ethereum/accounts/keystore/account_cache.go
-# cp /geth-sgx/watch.go /geth-sgx/go-ethereum/accounts/keystore/watch.go
 # Build Geth
 $(SRCDIR)/build/bin/geth: $(PATCHED_GOLEVELDB)
 	cd $(SRCDIR) && \
