@@ -1,6 +1,7 @@
 import os
 import random
 
+from eth_utils import keccak
 from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
 from src.SF.SF_Application.SF_Application import generate_stinger
@@ -65,19 +66,21 @@ def compute_pedersen_commitment(x, r):
     return bytes_to_int(hex_to_bytes(ser(C))), r
 
 
-def make_evidence(w3, bundle):
-    victim_tx = bundle[0]
+def make_evidence(w3, victim_bundle):
+    victim_hash = bytes_to_int(keccak(str_to_bytes(serialize_tx_list(victim_bundle))))
+    print(f'victim_hash {victim_hash}')
 
-    C, r = make_pedersen_commitment(victim_tx.r)
+    C, r = make_pedersen_commitment(victim_hash)
 
     print(f'use commitment {C} as k in signature')
 
     adv_tx, unsigned_adv_tx = create_tx(w3, C, 'sting')
+    print(f'adv_tx {adv_tx}')
 
     ###TODO: integrate with builder
-    bundle.insert(0, adv_tx)
+    new_bundle = [adv_tx] + victim_bundle
 
-    return bundle, r, unsigned_adv_tx
+    return new_bundle, r, unsigned_adv_tx
 
 
 def apply(bundle):
@@ -88,14 +91,15 @@ def apply(bundle):
     return receipt_list
 
 
-def verify(w3, r, sting_account, receipt_list, unsigned_adv_tx):
-    adv_tx_hash = receipt_list[0]['transactionHash']
-    victim_tx_hash = receipt_list[1]['transactionHash']
+def verify(w3, r, sting_account, adv_tx_hash, unsigned_adv_tx, victim_bundle):
     adv_tx = recover_tx(w3.eth.get_raw_transaction(adv_tx_hash))
-    victim_tx = recover_tx(w3.eth.get_raw_transaction(victim_tx_hash))
 
-    C, _ = compute_pedersen_commitment(victim_tx.r, r)
+    victim_hash = bytes_to_int(keccak(str_to_bytes(serialize_tx_list(victim_bundle))))
+    print(f'victim_hash {victim_hash}')
+    C, _ = compute_pedersen_commitment(victim_hash, r)
     tx = sign_tx(unsigned_adv_tx, w3, sting_account, k=C)
+    print(f'tx {tx}')
+    print(f'adv_tx {adv_tx}')
 
     assert(tx.v == adv_tx.v)
     assert(tx.r == adv_tx.r)
@@ -108,16 +112,16 @@ if __name__ == '__main__':
     target_public_key = get_public_key(target_key_path)
     s = generate_stinger(make_bundle, (w3), target_public_key)
 
-    l = leak_data(decrypt_bundle, s)
+    victim_bundle = leak_data(decrypt_bundle, s)
 
-    bundle, r, unsigned_adv_tx = make_evidence(w3, l)
+    new_bundle, r, unsigned_adv_tx = make_evidence(w3, victim_bundle)
 
-    receipt_list = apply(bundle)
+    receipt_list = apply(new_bundle)
 
     sting_account = get_account(w3, 'sting')
     refill_ether(w3, sting_account.address)
 
-    verify(w3, r, sting_account, receipt_list, unsigned_adv_tx)
+    verify(w3, r, sting_account, receipt_list[0]['transactionHash'], unsigned_adv_tx, victim_bundle)
 
 
 
