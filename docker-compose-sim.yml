@@ -2,70 +2,134 @@ version: '3.3'
 
 services:
 
-  eth:
-    image: sting-eth
-    build:
-      context: .
-      dockerfile: eth.Dockerfile
-    cap_add:
-      - NET_ADMIN
-    platform: "linux/amd64"
-    volumes:
-      - ./chain:/chain
-    command: ["bash", "chain/chain.sh"]
-
+#configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   builder:
-    image: sting-gramine-sim
+    image: flashbots-builder
     build:
-      context: .
-      dockerfile: gramine.Dockerfile
+      context: ./
+      dockerfile: builder.Dockerfile
       args:
-        DEBUG: ${DEBUG}
         SGX: 0
+    entrypoint: ./geth
+    command:
+      - --http
+      - --http.api=engine,eth,web3,net,debug,flashbots
+      - --http.addr=0.0.0.0
+      - --authrpc.vhosts=*
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.jwtsecret=/etc/jwt.hex
+      - --datadir=/data  
+      - --allow-insecure-unlock
+      - --unlock=0x123463a4b065722e99115d6c222f267d9cabb524
+      - --keystore=/etc/keystore
+      - --password=/etc/geth_password.txt
+      - --nodiscover
+      - --syncmode=full
+      - --verbosity=3
+      - --mine
+      - --builder
+      - --builder.local_relay=true
+      - --builder.secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+      - --builder.relay_secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+      - --builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda
+      - --builder.genesis_fork_version=0x20000089
+      - --builder.bellatrix_fork_version=0x20000091
+      - --builder.beacon_endpoints=http://beacon-chain:3500
+      - --miner.algotype=greedy
+      - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
+    ports:
+      - 28545:28545
+      - 8551:8551
+      - 8545:8545
     depends_on:
-      - eth
-    cap_add:
-      - NET_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    environment:
-      DEBUG: ${DEBUG}
-      SGX: 0
-    working_dir: /Sting-Flashbots/builder/src/
+      geth-genesis:
+        condition: service_completed_successfully
     volumes:
-      - ./builder/src:/Sting-Flashbots/builder/src
-      # - ./builder/input_data:/Sting-Flashbots/builder/input_data
-      # - ./builder/enclave_data:/Sting-Flashbots/builder/enclave_data
-      # - ./builder/output_data:/Sting-Flashbots/builder/output_data
-      - shared:/shared_data
-    command: sleep infinity
+      - ./chain/execution/keystore/:/etc/keystore
+      - ./chain/execution/geth_password.txt:/etc/geth_password.txt
+      - ./chain/execution/jwtsecret:/etc/jwt.hex
+      # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
+    environment:
+      - BUILDER_TX_SIGNING_KEY=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
 
-  relayer:
-    image: sting-gramine-sim
-    build:
-      context: .
-      dockerfile: gramine.Dockerfile
-      args:
-        DEBUG: ${DEBUG}
-        SGX: 0
-    depends_on:
-      - eth
-    cap_add:
-      - NET_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    environment:
-      DEBUG: ${DEBUG}
-      SGX: 0
-    working_dir: /Sting-Flashbots/relayer/src
+  geth-genesis:
+    image: "ethereum/client-go:latest"
+    command: --datadir=/genesis init /execution/genesis.json
     volumes:
-      - ./relayer/src:/Sting-Flashbots/relayer/src
-      # - ./relayer/input_data:/Sting-Flashbots/relayer/input_data
-      # - ./relayer/enclave_data:/Sting-Flashbots/relayer/enclave_data
-      # - ./relayer/output_data:/Sting-Flashbots/relayer/output_data
-      - shared:/shared_data
-    command: sleep infinity
+      - ./chain/execution/genesis.json:/execution/genesis.json
+      - genesis:/genesis
+
+  create-beacon-chain-genesis:
+    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
+    command:
+      - testnet
+      - generate-genesis
+      - --num-validators=64
+      - --output-ssz=/genesis/genesis.ssz
+      - --chain-config-file=/consensus/config.yml
+    volumes:
+      - ./chain/consensus:/consensus/
+      - genesis:/genesis/
+
+  beacon-chain:
+    image: "eth-pos-devnet_beacon-chain:latest"
+    command:
+      - --datadir=/beacondata
+      # No peers to sync with in this testnet, so setting to 0
+      - --min-sync-peers=0
+      - --genesis-state=/genesis/genesis.ssz
+      - --interop-eth1data-votes
+      - --bootstrap-node=
+      # The chain configuration file used for setting up Prysm
+      - --chain-config-file=/consensus/config.yml
+      # We specify the chain id used by our execution client
+      - --chain-id=32382
+      - --rpc-host=0.0.0.0
+      - --grpc-gateway-host=0.0.0.0
+      - --execution-endpoint=http://builder:8551
+      - --chain-id=32382
+      - --accept-terms-of-use
+      - --jwt-secret=/execution/jwtsecret
+      - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
+      - --http-mev-relay=http://builder:28545
+    depends_on:
+      builder:
+        condition: service_started
+      create-beacon-chain-genesis:
+        condition: service_completed_successfully
+    ports:
+      - 4000:4000
+      - 3500:3500
+      - 8080:8080
+    volumes:
+      - ./chain/consensus:/consensus
+      - ./chain/execution/jwtsecret:/execution/jwtsecret
+      - genesis:/genesis/
+      # - ./chain/consensus/beacondata:/beacondata
+
+  validator:
+    image: "gcr.io/prysmaticlabs/prysm/validator:latest"
+    command:
+      - --beacon-rpc-provider=beacon-chain:4000
+      - --datadir=/validatordata
+      - --accept-terms-of-use
+      - --interop-num-validators=64
+      - --interop-start-index=0
+      - --chain-config-file=/consensus/config.yml
+      - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
+      - --enable-builder
+    depends_on:
+      beacon-chain:
+        condition: service_started
+    volumes:
+      - ./chain/consensus:/consensus
+      # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
-  shared:
-
+  aesmd-socket:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "rw"
+  genesis:

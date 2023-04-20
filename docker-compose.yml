@@ -10,7 +10,8 @@ services:
       args:
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-        SGX: 1
+        SGX: $SGX
+        RA_TYPE: $RA_TYPE
     depends_on:
       aesmd:
         condition: service_started
@@ -18,6 +19,10 @@ services:
         condition: service_completed_successfully
     cap_add:
       - NET_ADMIN
+    ports:
+      - 28545:28545
+      - 8551:8551
+      - 8545:8545
     devices:
       - /dev/isgx
     security_opt:
@@ -25,7 +30,8 @@ services:
     environment:
       RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
       RA_CLIENT_SPID: ${RA_CLIENT_SPID}
-      SGX: 1
+      RA_TYPE: ${RA_TYPE}
+      SGX: ${SGX}
       DEBUG: ${DEBUG}
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     working_dir: /geth-sgx
