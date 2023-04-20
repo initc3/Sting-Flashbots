@@ -21,7 +21,7 @@ cp -r /Sting-Flashbots/chain/keystores/relayer/ /Sting-Flashbots/relayer/input_d
 $GRAMINE ./python ./enclave/gen_key.py
 
 # === SGX quote ===
-if [[ "$SGX" == 1 ]]; then
+if [[ "$SGX" == 1 ]];
 then
     $GRAMINE ./python ./enclave/sgx-report.py &> OUTPUT
     grep -q "Generated SGX report" OUTPUT && echo "[ Success SGX report ]"
@@ -32,7 +32,7 @@ fi
 
 cp /Sting-Flashbots/relayer/output_data/relayer_key.pem /shared_data/relayer_key.pem
 
-if [[ "$SGX" == 1 ]]; then
+if [[ "$SGX" == 1 ]];
 then
     cat OUTPUT
 fi 

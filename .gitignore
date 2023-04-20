@@ -13,3 +13,4 @@ relayer/*data/*
 *python.sig
 *python.token
 *OUTPUT
+.env
