@@ -2,6 +2,32 @@ version: '3.3'
 
 services:
 
+  # searcher:
+  #   image: sting-searcher
+  #   build:
+  #     context: ./
+  #     dockerfile: searcher.Dockerfile
+  #     args:
+  #       RA_CLIENT_SPID: $RA_CLIENT_SPID
+  #       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+  #       SGX: $SGX
+  #       RA_TYPE: $RA_TYPE
+  #   devices:
+  #     - /dev/isgx
+  #   # depends_on:
+  #   #   validator:
+  #   #     condition: service_started
+  #   environment:
+  #     RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
+  #     RA_CLIENT_SPID: ${RA_CLIENT_SPID}
+  #     SGX: ${SGX}
+  #     DEBUG: ${DEBUG}
+  #     ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+  #   working_dir: /Sting-Flashbots
+  #   volumes:
+  #     - aesmd-socket:/var/run/aesmd
+  #   command: python send_bundle.py
+
   builder:
     image: geth-sgx-gramine
     build:
@@ -40,6 +66,10 @@ services:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
+      - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      - data:/data
+      - cert:/cert
+      # - ./chain/consensus/data:/data
       # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
 
   aesmd:
@@ -57,10 +87,11 @@ services:
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
     image: "ethereum/client-go:latest"
-    command: --datadir=/genesis init /execution/genesis.json
+    command: --datadir=/data init /execution/genesis.json
     volumes:
       - ./chain/execution/genesis.json:/execution/genesis.json
       - genesis:/genesis
+      - data:/data
 
   create-beacon-chain-genesis:
     image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
@@ -136,3 +167,5 @@ volumes:
       device: "tmpfs"
       o: "rw"
   genesis:
+  data:
+  cert:

@@ -21,6 +21,7 @@ ENCLAVE_SIZE ?= 1024G
 
 GETH_BRANCH ?= main
 GETH_REPO ?= https://github.com/flashbots/builder
+GETH_COMMIT ?= 8caba1f96ff5adf5647356d231a3dcab8a74fbac
 
 MBEDTLS_PATH = https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.3.0.tar.gz
 
@@ -125,7 +126,6 @@ geth.args:
 			--authrpc.jwtsecret=/etc/jwt.hex \
 			--authrpc.vhosts=* \
 			--authrpc.addr=0.0.0.0 \
-			--override.shanghai 1677557088 \
 			--cache.trie.journal= \
 			--cache.trie.rejournal=0 \
 			--datadir.ancient=/data/ancient \
@@ -139,7 +139,7 @@ geth.args:
 			--verbosity=3 \
     		--mine \
 			--builder \
-			--builder.beacon_endpoints=http://beacon-chain:3500 \
+			--builder.beacon_endpoint=http://beacon-chain:3500 \
 			--builder.genesis_fork_version=0x20000089 \
 			--builder.bellatrix_fork_version=0x20000091 \
 			--builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda \
@@ -158,6 +158,7 @@ endif
 # Clone Geth fetch dependencies 
 $(SRCDIR)/Makefile:
 	git clone -b $(GETH_BRANCH) $(GETH_REPO) $(SRCDIR)
+	cd $(SRCDIR) && git fetch --all && git checkout $(GETH_COMMIT)
 	cd $(SRCDIR) && go mod download 
 
 # patch Geth

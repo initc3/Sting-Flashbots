@@ -28,7 +28,7 @@ loader.env.FAKE_PROPOSER = { passthrough = true }
 loader.env.RELAY_SECRET_KEY = { passthrough = true }
 loader.env.BUILDER_SECRET_KEY = { passthrough = true }
 loader.env.BUILDER_TX_SIGNING_KEY = { passthrough = true }
-loader.env.RATLS_CRT_PATH = "/tmp/tlscert.der"
+loader.env.RATLS_CRT_PATH = "/cert/tlscert.der"
 loader.env.RATLS_KEY_PATH = "/tmp/tlskey.der"
 
 loader.argv_src_file = "file:geth.args"
@@ -58,7 +58,8 @@ fs.mounts = [
   { path = "/usr", uri = "file:/usr" },
   { path = "/etc", uri = "file:/etc" },
   { type = "tmpfs", path = "/root/.ethereum" },
-  { path = "/data/", uri = "file:data/" },
+  { path = "/data/", uri = "file:/data/" },
+  { path = "/cert/", uri = "file:/cert/" },
   { type = "tmpfs", path = "/tmp" },
 ]
 
@@ -121,6 +122,7 @@ sgx.allowed_files = [
   "file:/etc/jwt.hex",
   "file:/etc/geth_password.txt",
   "file:/etc/keystore",
+  "file:/etc/genesis",
   "file:/data",
-  "file:data",
+  "file:/cert",
 ]

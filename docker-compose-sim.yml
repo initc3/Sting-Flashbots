@@ -3,14 +3,34 @@ version: '3.3'
 services:
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
+  searcher:
+    image: sting-searcher
+    build:
+      context: ./
+      dockerfile: searcher.Dockerfile
+      args:
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        SGX: $SGX
+        RA_TYPE: $RA_TYPE
+    # depends_on:
+    #   validator:
+    #     condition: service_started
+    environment:
+      RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
+      RA_CLIENT_SPID: ${RA_CLIENT_SPID}
+      SGX: ${SGX}
+      DEBUG: ${DEBUG}
+      ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+    working_dir: /Sting-Flashbots
+    command: python send_bundle.py
+    
   builder:
     image: flashbots-builder
     build:
       context: ./
-      dockerfile: builder.Dockerfile
-      args:
-        SGX: 0
-    entrypoint: ./geth
+      dockerfile: geth.Dockerfile
+    entrypoint: geth
     command:
       - --http
       - --http.api=engine,eth,web3,net,debug,flashbots
@@ -34,7 +54,7 @@ services:
       - --builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda
       - --builder.genesis_fork_version=0x20000089
       - --builder.bellatrix_fork_version=0x20000091
-      - --builder.beacon_endpoints=http://beacon-chain:3500
+      - --builder.beacon_endpoint=http://beacon-chain:3500
       - --miner.algotype=greedy
       - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
     ports:
@@ -48,16 +68,19 @@ services:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
+      - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      - data:/data
       # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
     environment:
       - BUILDER_TX_SIGNING_KEY=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
 
   geth-genesis:
     image: "ethereum/client-go:latest"
-    command: --datadir=/genesis init /execution/genesis.json
+    command: --datadir=/data init /execution/genesis.json
     volumes:
       - ./chain/execution/genesis.json:/execution/genesis.json
       - genesis:/genesis
+      - data:/data
 
   create-beacon-chain-genesis:
     image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
@@ -72,7 +95,15 @@ services:
       - genesis:/genesis/
 
   beacon-chain:
-    image: "eth-pos-devnet_beacon-chain:latest"
+    image: beacon-chain
+    build:
+      context: ./
+      dockerfile: beacon.Dockerfile
+      # args:
+      #   RA_CLIENT_SPID: $RA_CLIENT_SPID
+      #   RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+      #   SGX: $SGX
+      #   RA_TYPE: $RA_TYPE
     command:
       - --datadir=/beacondata
       # No peers to sync with in this testnet, so setting to 0
@@ -133,3 +164,4 @@ volumes:
       device: "tmpfs"
       o: "rw"
   genesis:
+  data:

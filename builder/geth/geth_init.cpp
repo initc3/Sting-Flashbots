@@ -75,7 +75,7 @@ int create_cert() {
 
 		// make sure cert and key paths are set
 		if (!getenv("RATLS_CRT_PATH")) {
-			setenv("RATLS_CRT_PATH", "/tmp/tlscert.der", 0);
+			setenv("RATLS_CRT_PATH", "/cert/tlscert.der", 0);
 		}
 		if (!getenv("RATLS_KEY_PATH")) {
 			setenv("RATLS_KEY_PATH", "/tmp/tlskey.der", 0);
@@ -161,11 +161,6 @@ int main(int argc, char **argv)
 			exit(errno);
 		}
 	}
-	// std::cout << log_id << "runnning " << getenv("GETH_BIN") << " args:" << std::endl;
-	// for(int i=1; i<argc; i++)
-    // {
-    //     std::cout << log_id << argv[i] << std::endl;
-    // }
 	execve(getenv("GETH_BIN"), argv, environ);
 	std::cout << log_id << "execve failed: " << std::strerror(errno) << std::endl;
 	exit(1);
