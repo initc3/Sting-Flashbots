@@ -3,27 +3,27 @@ version: '3.3'
 services:
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
-  # searcher:
-  #   image: sting-searcher
-  #   build:
-  #     context: ./
-  #     dockerfile: searcher.Dockerfile
-  #     args:
-  #       RA_CLIENT_SPID: $RA_CLIENT_SPID
-  #       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-  #       SGX: $SGX
-  #       RA_TYPE: $RA_TYPE
-  #   # depends_on:
-  #   #   validator:
-  #   #     condition: service_started
-  #   environment:
-  #     RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
-  #     RA_CLIENT_SPID: ${RA_CLIENT_SPID}
-  #     SGX: ${SGX}
-  #     DEBUG: ${DEBUG}
-  #     ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
-  #   working_dir: /Sting-Flashbots
-  #   command: python send_bundle.py
+  searcher:
+    image: sting-searcher
+    build:
+      context: ./
+      dockerfile: searcher.Dockerfile
+      args:
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        SGX: $SGX
+        RA_TYPE: $RA_TYPE
+    # depends_on:
+    #   validator:
+    #     condition: service_started
+    environment:
+      RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
+      RA_CLIENT_SPID: ${RA_CLIENT_SPID}
+      SGX: ${SGX}
+      DEBUG: ${DEBUG}
+      ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+    working_dir: /Sting-Flashbots
+    command: python send_bundle.py
     
   builder:
     image: flashbots-builder
@@ -118,7 +118,6 @@ services:
       - --rpc-host=0.0.0.0
       - --grpc-gateway-host=0.0.0.0
       - --execution-endpoint=http://builder:8551
-      - --chain-id=32382
       - --accept-terms-of-use
       - --jwt-secret=/execution/jwtsecret
       - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
