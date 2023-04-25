@@ -13,15 +13,17 @@ import socket
 
 GAS_LIMIT = 30000000
 CHAIN_ID = 32382
+ether_unit = 10**18
+
 admin: LocalAccount = Account.from_key("0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622")
 #os.environ.get("ETH_SIGNER_KEY"))
 sender: LocalAccount = Account.from_key("0x741c58d0a4d9a76279a30538d647000797306885431b34469ecb749396d4ff52")
 receiver: LocalAccount = Account.from_key("0x30481460b2af32f533ba27e32cae4af4c67a96c1856dba6be719ad90d9699814")
 
 # w3 = Web3(HTTPProvider('https://goerli.infura.io/v3/6a82d2519efb4d748c02552e02e369c1'))
-w3 = Web3(HTTPProvider(f"http://{socket.gethostbyname('builder')}:8545"))
+# w3 = Web3(HTTPProvider(f"http://{socket.gethostbyname('builder')}:8545"))
 # w3 = Web3(HTTPProvider(f"http://builder:8545"))
-# w3 = Web3(HTTPProvider(f"http://localhost:8545"))
+w3 = Web3(HTTPProvider(f"http://localhost:8545"))
 
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)
 block = w3.eth.get_block('latest')
@@ -34,7 +36,7 @@ w3.middleware_onion.add(construct_sign_and_send_raw_middleware(sender))
 w3.middleware_onion.add(construct_sign_and_send_raw_middleware(receiver))
 print(f'balance of admin {admin.address} is {w3.eth.get_balance(admin.address)}')
 print(f'balance of sender {sender.address} is {w3.eth.get_balance(sender.address)}')
-refill_ether(w3, admin, sender.address)
+# refill_ether(w3, admin, sender.address)
 # print(f'balance of sender {sender.address} is {w3.eth.get_balance(sender.address)}')
 
 
@@ -59,10 +61,10 @@ flashbot(w3, admin)
 nonce = w3.eth.get_transaction_count(sender.address)
 tx1 = {
     "to": receiver.address,
-    "value": Web3.toWei(0.001, "ether"),
+    "value": 10 * ether_unit,
     "gas": 21000,
-    "maxFeePerGas": Web3.toWei(200, "gwei"),
-    "maxPriorityFeePerGas": Web3.toWei(50, "gwei"),
+    "maxFeePerGas": Web3.to_wei(200, "gwei"),
+    "maxPriorityFeePerGas": Web3.to_wei(50, "gwei"),
     "nonce": nonce,
     "chainId": CHAIN_ID,
     "type": 2,
@@ -71,10 +73,10 @@ tx1_signed = sender.sign_transaction(tx1)
 
 tx2 = {
     "to": receiver.address,
-    "value": Web3.toWei(0.001, "ether"),
+    "value": 10 * ether_unit,
     "gas": 21000,
-    "maxFeePerGas": Web3.toWei(200, "gwei"),
-    "maxPriorityFeePerGas": Web3.toWei(50, "gwei"),
+    "maxFeePerGas": Web3.to_wei(200, "gwei"),
+    "maxPriorityFeePerGas": Web3.to_wei(50, "gwei"),
     "nonce": nonce + 1,
     "chainId": CHAIN_ID,
     "type": 2,
@@ -95,7 +97,7 @@ while True:
         print("Simulation successful.")
     except Exception as e:
         print("Simulation error:", e)
-        break
+        raise e
 
     # send bundle targeting next block
     print(f"Sending bundle targeting block {block+1}")
@@ -106,17 +108,19 @@ while True:
         target_block_number=block + 1,
         opts={"replacementUuid": replacement_uuid},
     )
-    print("bundleHash", w3.toHex(send_result.bundle_hash()))
+    print("bundleHash", w3.to_hex(send_result.bundle_hash()))
 
-    stats_v1 = w3.flashbots.get_bundle_stats(
-        w3.toHex(send_result.bundle_hash()), block
-    )
-    print("bundleStats v1", stats_v1)
+    # stats_v1 = w3.flashbots.get_bundle_stats(
+    #     w3.to_hex(send_result.bundle_hash()), block
+    # )
 
-    stats_v2 = w3.flashbots.get_bundle_stats_v2(
-        w3.toHex(send_result.bundle_hash()), block
-    )
-    print("bundleStats v2", stats_v2)
+    # print("bundleStats v1", stats_v1)
+
+    # stats_v2 = w3.flashbots.get_bundle_stats_v2(
+    #     w3.to_hex(send_result.bundle_hash()), block
+    # )
+    # print("bundleStats v2", stats_v2)
+
 
     send_result.wait()
     try:

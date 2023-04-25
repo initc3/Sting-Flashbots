@@ -9,7 +9,10 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from eth_account.datastructures import SignedTransaction
 from hexbytes import HexBytes
+from eth_account import Account
 
+CHAIN_ID = 32382
+GAS_LIMIT = 5000000
 
 
 contract_addr_dict = {
@@ -73,12 +76,12 @@ def instantiate_contract(contract_name, w3):
     return w3.eth.contract(address=contract_addr_dict[contract_name], abi=abi)
 
 def get_account(w3, account_name):
-    path = f'/Sting-Flashbots/chain/keystores/{account_name}'
+    path = f'/home/nerla/code/Sting-Flashbots/chain/keystores/{account_name}'
     for filename in os.listdir(path):
         with open(f'{path}/{filename}', 'r') as keyfile:
             encrypted_key = keyfile.read()
             private_key = w3.eth.account.decrypt(encrypted_key, '')
-            account = w3.eth.account.privateKeyToAccount(private_key)
+            account = Account.from_key(private_key)
             return account
 
 def get_balance(w3, addr):
@@ -86,18 +89,21 @@ def get_balance(w3, addr):
     print(f'balance of {addr} is {balance}')
     return balance
 
-def transfer_ether(w3, sender_addr, receiver_addr, amt):
-    w3.eth.defaultAccount = sender_addr
-    tx_hash = w3.eth.send_transaction({
+def transfer_ether(w3, sender_account, receiver_addr, amt, chain_id=CHAIN_ID):
+    tx = {
         'to': receiver_addr,
-        'from': sender_addr,
-        'value': amt
-    })
-    wait_for_receipt(tx_hash, w3)
+        'from': sender_account.address,
+        'value': amt,
+        "gasPrice": w3.eth.gas_price*10,
+        'gas': GAS_LIMIT,
+        'nonce': w3.eth.get_transaction_count(sender_account.address),
+        'chainId': chain_id,
+    }
+    return tx
 
 
 def refill_ether(w3, admin_account, receiver_addr):
-    # admin_account = get_account(w3, f'admin')
+    admin_account = get_account(w3, f'admin')
 
     amt = 100 * ether_unit
     balance = get_balance(w3, receiver_addr)
@@ -105,7 +111,9 @@ def refill_ether(w3, admin_account, receiver_addr):
     print(f'refilling {amt}...')
 
     if amt > 0:
-        transfer_ether(w3, admin_account.address, receiver_addr, amt)
+        tx = transfer_ether(w3, admin_account, receiver_addr, amt)
+        signed_tx = sign_tx(tx, w3, admin_account)
+        return send_tx(signed_tx, w3)
 
     get_balance(w3, receiver_addr)
 
@@ -121,7 +129,8 @@ def build_tx(func_to_call, w3, account_addr, value=0, nonce=0):
 
 
 def sign_tx(tx, w3, account):
-    return w3.eth.account.sign_transaction(tx, account.privateKey)
+    print(account.key)
+    return w3.eth.account.sign_transaction(tx, account.key)
 
 
 def send_tx(signed_tx, w3):
