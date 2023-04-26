@@ -76,7 +76,7 @@ def instantiate_contract(contract_name, w3):
     return w3.eth.contract(address=contract_addr_dict[contract_name], abi=abi)
 
 def get_account(w3, account_name):
-    path = f'/home/nerla/code/Sting-Flashbots/chain/keystores/{account_name}'
+    path = f'/Sting-Flashbots/keystores/{account_name}'
     for filename in os.listdir(path):
         with open(f'{path}/{filename}', 'r') as keyfile:
             encrypted_key = keyfile.read()
@@ -102,7 +102,7 @@ def transfer_ether(w3, sender_account, receiver_addr, amt, chain_id=CHAIN_ID):
     return tx
 
 
-def refill_ether(w3, admin_account, receiver_addr):
+def refill_ether(w3, receiver_addr):
     admin_account = get_account(w3, f'admin')
 
     amt = 100 * ether_unit
@@ -129,7 +129,6 @@ def build_tx(func_to_call, w3, account_addr, value=0, nonce=0):
 
 
 def sign_tx(tx, w3, account):
-    print(account.key)
     return w3.eth.account.sign_transaction(tx, account.key)
 
 

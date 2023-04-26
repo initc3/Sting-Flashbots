@@ -22,8 +22,9 @@ services:
       SGX: ${SGX}
       DEBUG: ${DEBUG}
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+    volumes:
+      - ./chain/keystores:/Sting-Flashbots/keystores
     working_dir: /Sting-Flashbots
-    command: python send_bundle.py
     
   builder:
     image: flashbots-builder
@@ -50,7 +51,7 @@ services:
       - --password=/etc/geth_password.txt
       - --nodiscover
       - --syncmode=full
-      - --verbosity=3
+      - --verbosity=4
       - --mine
       - --builder
       - --builder.local_relay=true
@@ -62,6 +63,7 @@ services:
       - --builder.beacon_endpoint=http://beacon-chain:3500
       - --miner.algotype=greedy
       - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
+      - --rpc.allow-unprotected-txs
     ports:
       - 28545:28545
       - 8551:8551

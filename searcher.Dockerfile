@@ -10,6 +10,7 @@ RUN python3.10 -m venv $VENV_PATH
 
 RUN pip3 install  \
     web3==5.31.4
+# flashbots==v1.1.0
 
 ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
@@ -22,7 +23,9 @@ WORKDIR /
 COPY requirements.txt requirements.txt 
 RUN $VENV_PATH/bin/pip install -r requirements.txt 
 
-COPY ./searcher /Sting-Flashbots
+COPY ./searcher/simple.py /Sting-Flashbots/simple.py
+COPY ./searcher/utils.py /Sting-Flashbots/utils.py
+COPY ./searcher/flashbots /Sting-Flashbots/flashbots
 
 WORKDIR /Sting-Flashbots
-CMD python send_bundle.py 
+CMD python simple.py 
