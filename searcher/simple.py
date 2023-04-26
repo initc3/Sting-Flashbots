@@ -30,7 +30,7 @@ print("block", block)
 while block <= 25:
     time.sleep(60)
     block = w3.eth.block_number
-    print("block", block)
+    print("waiting for pos at block 26.. block=", block)
 
 w3.middleware_onion.add(construct_sign_and_send_raw_middleware(ETH_ACCOUNT_FROM))
 w3.middleware_onion.add(construct_sign_and_send_raw_middleware(ETH_ACCOUNT_TO))
