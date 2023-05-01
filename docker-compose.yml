@@ -46,6 +46,7 @@ services:
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         SGX: $SGX
         RA_TYPE: $RA_TYPE
+        GETH_COMMIT: 8caba1f96ff5adf5647356d231a3dcab8a74fbac
     depends_on:
       aesmd:
         condition: service_started
@@ -114,7 +115,12 @@ services:
       - genesis:/genesis/
 
   beacon-chain:
-    image: "eth-pos-devnet_beacon-chain:latest"
+    image: beacon-chain
+    build:
+      context: ./
+      dockerfile: beacon.Dockerfile
+      args:
+        COMMIT: 3d6d0a12dd189abcd2cfbba1c3d56505a1dd595c
     command:
       - --datadir=/beacondata
       # No peers to sync with in this testnet, so setting to 0
@@ -129,7 +135,6 @@ services:
       - --rpc-host=0.0.0.0
       - --grpc-gateway-host=0.0.0.0
       - --execution-endpoint=http://builder:8551
-      - --chain-id=32382
       - --accept-terms-of-use
       - --jwt-secret=/execution/jwtsecret
       - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
@@ -146,7 +151,7 @@ services:
     volumes:
       - ./chain/consensus:/consensus
       - ./chain/execution/jwtsecret:/execution/jwtsecret
-      - genesis:/genesis/
+      - genesis:/genesis
       # - ./chain/consensus/beacondata:/beacondata
 
   validator:

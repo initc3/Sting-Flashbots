@@ -119,33 +119,32 @@ geth.args:
 		./geth_init \
 			--http \
 			--http.api=engine,eth,web3,net,debug,flashbots \
-			--http.corsdomain=* \
 			--http.addr=0.0.0.0 \
 			--ws \
 			--ws.api=engine,eth,web3,net,debug \
-			--authrpc.jwtsecret=/etc/jwt.hex \
 			--authrpc.vhosts=* \
 			--authrpc.addr=0.0.0.0 \
-			--cache.trie.journal= \
+			--authrpc.jwtsecret=/etc/jwt.hex \
+			--cache.trie.journal="" \
 			--cache.trie.rejournal=0 \
-			--datadir.ancient=/data/ancient \
 			--datadir=/data \
+			--datadir.ancient=/data/ancient \
     		--allow-insecure-unlock \
     		--unlock=0x123463a4b065722e99115d6c222f267d9cabb524 \
 			--keystore=/etc/keystore \
     		--password=/etc/geth_password.txt \
     		--nodiscover \
     		--syncmode=full \
-			--verbosity=3 \
+			--verbosity=4 \
     		--mine \
 			--builder \
-			--builder.beacon_endpoint=http://beacon-chain:3500 \
-			--builder.genesis_fork_version=0x20000089 \
-			--builder.bellatrix_fork_version=0x20000091 \
-			--builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda \
       		--builder.local_relay=true \
 			--builder.secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
 			--builder.relay_secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
+			--builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda \
+			--builder.beacon_endpoint=http://beacon-chain:3500 \
+			--builder.genesis_fork_version=0x20000089 \
+			--builder.bellatrix_fork_version=0x20000091 \
 			--miner.algotype=greedy \
 			--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
 		> $@

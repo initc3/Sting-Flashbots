@@ -12,7 +12,8 @@ RUN apk add --no-cache gcc musl-dev linux-headers git
 RUN git clone https://github.com/flashbots/builder.git /go-ethereum
 
 WORKDIR /go-ethereum
-RUN git checkout 8caba1f96ff5adf5647356d231a3dcab8a74fbac
+ARG GETH_COMMIT
+RUN git checkout $GETH_COMMIT
 RUN go mod download
 RUN go run build/ci.go install -static ./cmd/geth
 

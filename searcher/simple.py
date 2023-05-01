@@ -21,17 +21,23 @@ ETH_ACCOUNT_FROM: LocalAccount = Account.from_key("0x741c58d0a4d9a76279a30538d64
 ETH_ACCOUNT_TO: LocalAccount = Account.from_key("0x30481460b2af32f533ba27e32cae4af4c67a96c1856dba6be719ad90d9699814")
 print("Connecting to RPC")
 # Setup w3 and flashbots
-endpoint = f"http://{socket.gethostbyname('builder')}:8545"
-w3 = Web3(HTTPProvider(endpoint))
+while True:
+    try:
+        endpoint = f"http://{socket.gethostbyname('builder')}:8545"
+        w3 = Web3(HTTPProvider(endpoint))
+        break
+    except:
+        pass
 
 block = w3.eth.block_number
 print("block", block)
-
+c=0
 while block <= 25:
-    time.sleep(60)
+    time.sleep(10)
+    c+=10
     block = w3.eth.block_number
     print("waiting for pos at block 26.. block=", block)
-
+print("total time", c)
 w3.middleware_onion.add(construct_sign_and_send_raw_middleware(ETH_ACCOUNT_FROM))
 w3.middleware_onion.add(construct_sign_and_send_raw_middleware(ETH_ACCOUNT_TO))
 
@@ -54,30 +60,31 @@ print(
 flashbot(w3, ETH_ACCOUNT_FROM, endpoint)
 
 # Setting up a transaction with 1 in gasPrice where we are trying to send
-print("Sending request")
-params: TxParams = {
-    "from": ETH_ACCOUNT_FROM.address,
-    "to": ETH_ACCOUNT_TO.address,
-    "value": w3.toWei("1.0", "gwei"),
-    "gasPrice": w3.toWei("1.0", "gwei"),
-    "nonce": w3.eth.get_transaction_count(ETH_ACCOUNT_FROM.address),
-}
+# print("Sending request")
+# params: TxParams = {
+#     "from": ETH_ACCOUNT_FROM.address,
+#     "to": ETH_ACCOUNT_TO.address,
+#     "value": w3.toWei("1.0", "gwei"),
+#     "gasPrice": w3.toWei("1.0", "gwei"),
+#     "nonce": w3.eth.get_transaction_count(ETH_ACCOUNT_FROM.address),
+# }
 
-try:
-    tx = w3.eth.send_transaction(
-        params,
-    )
-    print("Request sent! Waiting for receipt")
-except ValueError as e:
-    # Skipping if TX already is added and pending
-    if "replacement transaction underpriced" in e.args[0]["message"]:
-        print("Have TX in pool we can use for the example")
-    else:
-        raise
+# try:
+#     tx = w3.eth.send_transaction(
+#         params,
+#     )
+#     print("Request sent! Waiting for receipt")
+# except ValueError as e:
+#     # Skipping if TX already is added and pending
+#     if "replacement transaction underpriced" in e.args[0]["message"]:
+#         print("Have TX in pool we can use for the example")
+#     else:
+#         raise
 
 
 print("Setting up flashbots request")
 nonce = w3.eth.get_transaction_count(ETH_ACCOUNT_FROM.address)
+print("nonce", nonce)
 bribe = w3.toWei("0.01", "ether")
 gasPrice = w3.eth.gas_price*10
 gasLimit = 25000
@@ -90,7 +97,7 @@ signed_tx: TxParams = {
     "gas": gasLimit,
 }
 
-signed_transaction = ETH_ACCOUNT_TO.sign_transaction(signed_tx)
+signed_transaction = ETH_ACCOUNT_FROM.sign_transaction(signed_tx)
 
 bundle = [
     #  some transaction

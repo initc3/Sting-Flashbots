@@ -22,9 +22,8 @@ RUN bazel version
 RUN mkdir -p /workspace
 
 WORKDIR /workspace
-
-RUN git clone https://github.com/flashbots/prysm.git . && git checkout 3d6d0a12dd189abcd2cfbba1c3d56505a1dd595c
-#&& git checkout cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
+ARG COMMIT
+RUN git clone https://github.com/flashbots/prysm.git . && git checkout $COMMIT
 RUN bazel build //cmd/beacon-chain:beacon-chain --config=release
 
 ENTRYPOINT ["bazel","run","//cmd/beacon-chain:beacon-chain","--config=release","--"]

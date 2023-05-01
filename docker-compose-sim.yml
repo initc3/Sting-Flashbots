@@ -31,6 +31,8 @@ services:
     build:
       context: ./
       dockerfile: geth.Dockerfile
+      args:
+        GETH_COMMIT: 8caba1f96ff5adf5647356d231a3dcab8a74fbac
     entrypoint: geth
     command:
       - --http
@@ -63,7 +65,6 @@ services:
       - --builder.beacon_endpoint=http://beacon-chain:3500
       - --miner.algotype=greedy
       - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
-      - --rpc.allow-unprotected-txs
     ports:
       - 28545:28545
       - 8551:8551
