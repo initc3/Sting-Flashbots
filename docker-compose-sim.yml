@@ -88,7 +88,7 @@ services:
         condition: service_completed_successfully
     volumes:
       - genesis:/genesis
-      # - ./chain/execution/genesis-new.json:/genesis/genesis.json
+      # - ./chain/execution/genesis.json:/genesis/genesis.json
       - data:/data
 
   create-beacon-chain-genesis:
@@ -103,8 +103,8 @@ services:
       - --geth-genesis-json-in=/execution/genesis.json
       - --geth-genesis-json-out=/genesis/genesis.json
     volumes:
-      - ./chain/consensus/config-new.yml:/consensus/config.yml
-      - ./chain/execution/genesis-new.json:/execution/genesis.json
+      - ./chain/consensus/config.yml:/consensus/config.yml
+      - ./chain/execution/genesis.json:/execution/genesis.json
       # - ./chain/execution/:/execution/
       - genesis:/genesis/
 
@@ -143,10 +143,10 @@ services:
       - 3500:3500
       - 8080:8080
     volumes:
-      - ./chain/consensus/config-new.yml:/consensus/config.yml
+      - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
       - genesis:/genesis/
-      # - ./chain/execution/genesis-new.json:/execution/genesis.json
+      # - ./chain/execution/genesis.json:/execution/genesis.json
       # - ./chain/consensus/beacondata:/beacondata
 
   validator:
@@ -164,7 +164,7 @@ services:
       beacon-chain:
         condition: service_started
     volumes:
-      - ./chain/consensus/config-new.yml:/consensus/config.yml
+      - ./chain/consensus/config.yml:/consensus/config.yml
       # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
