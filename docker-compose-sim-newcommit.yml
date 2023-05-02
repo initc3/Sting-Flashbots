@@ -2,7 +2,6 @@ version: '3.3'
 
 services:
 
-#configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   searcher:
     image: sting-searcher
     build:
@@ -24,32 +23,28 @@ services:
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - ./chain/keystores:/Sting-Flashbots/keystores
+      - ./searcher/simple.py:/Sting-Flashbots/simple.py
+      - ./searcher/utils.py:/Sting-Flashbots/utils.py
     working_dir: /Sting-Flashbots
     
   builder:
-    image: flashbots-builder
+    image: flashbots-builder:newcommit
     build:
       context: ./
       dockerfile: geth.Dockerfile
       args:
-        GETH_COMMIT: 8caba1f96ff5adf5647356d231a3dcab8a74fbac
-        MAKEFILE_NAME: Makefile
+        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
     entrypoint: geth
     command:
       - --http
       - --http.api=engine,eth,web3,net,debug,flashbots
       - --http.addr=0.0.0.0
-      - --ws
-      - --ws.api=engine,eth,web3,net,debug
       - --authrpc.vhosts=*
       - --authrpc.addr=0.0.0.0
       - --authrpc.jwtsecret=/etc/jwt.hex
-      - --cache.trie.journal=""
-      - --cache.trie.rejournal=0
       - --datadir=/data  
-      - --datadir.ancient=/data/ancient
       - --allow-insecure-unlock
-      - --unlock=0x123463a4b065722e99115d6c222f267d9cabb524
+      - --unlock=0x123463a4B065722E99115D6c222f267d9cABb524
       - --keystore=/etc/keystore
       - --password=/etc/geth_password.txt
       - --nodiscover
@@ -63,7 +58,7 @@ services:
       - --builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda
       - --builder.genesis_fork_version=0x20000089
       - --builder.bellatrix_fork_version=0x20000091
-      - --builder.beacon_endpoint=http://beacon-chain:3500
+      - --builder.beacon_endpoints=http://beacon-chain:3500
       - --miner.algotype=greedy
       - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
     ports:
@@ -79,16 +74,20 @@ services:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
-      - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      - genesis:/etc/genesis/
       - data:/data
+      # - ./chain/consensus/data:/data
       # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
-
+#configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
     image: "ethereum/client-go:latest"
-    command: --datadir=/data init /execution/genesis.json
+    command: --datadir=/data init /genesis/genesis.json
+    depends_on:
+      create-beacon-chain-genesis:
+        condition: service_completed_successfully
     volumes:
-      - ./chain/execution/genesis.json:/execution/genesis.json
       - genesis:/genesis
+      # - ./chain/execution/genesis-new.json:/genesis/genesis.json
       - data:/data
 
   create-beacon-chain-genesis:
@@ -96,18 +95,25 @@ services:
     command:
       - testnet
       - generate-genesis
+      - --fork=bellatrix
       - --num-validators=64
       - --output-ssz=/genesis/genesis.ssz
       - --chain-config-file=/consensus/config.yml
+      - --geth-genesis-json-in=/execution/genesis.json
+      - --geth-genesis-json-out=/genesis/genesis.json
     volumes:
-      - ./chain/consensus:/consensus/
+      - ./chain/consensus/config-new.yml:/consensus/config.yml
+      - ./chain/execution/genesis-new.json:/execution/genesis.json
+      - ./chain/execution/:/execution/
       - genesis:/genesis/
 
   beacon-chain:
-    image: beacon-chain
+    image: beacon-chain:newcommit
     build:
       context: ./
       dockerfile: beacon.Dockerfile
+      args:
+        COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
     command:
       - --datadir=/beacondata
       # No peers to sync with in this testnet, so setting to 0
@@ -136,9 +142,10 @@ services:
       - 3500:3500
       - 8080:8080
     volumes:
-      - ./chain/consensus:/consensus
+      - ./chain/consensus/config-new.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
       - genesis:/genesis/
+      # - ./chain/execution/genesis-new.json:/execution/genesis.json
       # - ./chain/consensus/beacondata:/beacondata
 
   validator:
@@ -156,7 +163,7 @@ services:
       beacon-chain:
         condition: service_started
     volumes:
-      - ./chain/consensus:/consensus
+      - ./chain/consensus/config-new.yml:/consensus/config.yml
       # - ./chain/consensus/validatordata:/validatordata
 
 volumes:

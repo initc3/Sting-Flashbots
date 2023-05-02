@@ -25,11 +25,11 @@ while True:
     try:
         endpoint = f"http://{socket.gethostbyname('builder')}:8545"
         w3 = Web3(HTTPProvider(endpoint))
+        block = w3.eth.block_number
         break
     except:
         pass
 
-block = w3.eth.block_number
 print("block", block)
 c=0
 while block <= 25:

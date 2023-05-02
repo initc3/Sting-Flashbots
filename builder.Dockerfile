@@ -16,8 +16,9 @@ RUN git clone https://github.com/flashbots/geth-sgx-gramine.git /geth-sgx/ && \
 # RUN gramine-sgx-gen-private-key -f
 
 WORKDIR /geth-sgx/
+ARG MAKEFILE_NAME
 ADD builder/geth/geth.manifest.template /geth-sgx/
-ADD builder/geth/Makefile /geth-sgx/
+ADD builder/geth/$MAKEFILE_NAME /geth-sgx/Makefile
 ADD builder/geth/geth_init.cpp /geth-sgx/
 
 ARG RA_CLIENT_SPID
