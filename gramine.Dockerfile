@@ -20,12 +20,16 @@ COPY requirements.txt requirements.txt
 
 RUN $VENV_PATH/bin/pip install -r requirements.txt 
 
+ARG RA_TYPE=none
+ENV RA_TYPE=${RA_TYPE}
 ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
 ARG DEBUG=1
 ENV DEBUG=$DEBUG
 ARG SGX=0
 ENV SGX=$SGX
+#ARG SEALING_KEY
+#ENV SEALING_KEY=${SEALING_KEY}
 
 COPY ./ /Sting-Flashbots
 WORKDIR /Sting-Flashbots
@@ -38,7 +42,7 @@ RUN mkdir -p input_data output_data enclave_data
 RUN cp /Sting-Flashbots/chain/build/contracts/Honeypot.json input_data/
 RUN cp -r /Sting-Flashbots/chain/keystores/sting/ input_data/sting/
 WORKDIR /Sting-Flashbots/relayer/src/
-RUN make SGX=$SGX RA_CLIENT_LINKABLE=0 DEBUG=1 RA_TYPE=epid RA_CLIENT_SPID=${RA_CLIENT_SPID}
+RUN make SGX=$SGX RA_CLIENT_LINKABLE=0 DEBUG=1 RA_TYPE=${RA_TYPE} RA_CLIENT_SPID=${RA_CLIENT_SPID}
 
 # Setup Relayer
 WORKDIR /Sting-Flashbots/relayer/
@@ -46,6 +50,6 @@ RUN mkdir -p input_data output_data enclave_data
 RUN cp /Sting-Flashbots/chain/build/contracts/Honeypot.json input_data/
 RUN cp -r /Sting-Flashbots/chain/keystores/relayer/ input_data/relayer/
 WORKDIR /Sting-Flashbots/relayer/src/
-RUN make SGX=$SGX RA_CLIENT_LINKABLE=0 DEBUG=1 RA_TYPE=epid RA_CLIENT_SPID=${RA_CLIENT_SPID}
+RUN make SGX=$SGX RA_CLIENT_LINKABLE=0 DEBUG=1 RA_TYPE=${RA_TYPE} RA_CLIENT_SPID=${RA_CLIENT_SPID}
 
 WORKDIR /Sting-Flashbots

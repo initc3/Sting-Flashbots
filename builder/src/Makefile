@@ -6,6 +6,13 @@ else
 GRAMINE_LOG_LEVEL = error
 endif
 
+ifeq ($(SGX), 0)
+SEALING_FILETYPE=chroot
+SEALING_KEY=default
+else
+SEALING_FILETYPE=encrypted
+SEALING_KEY=_sgx_mrenclave
+endif
 
 PYTHON ?= python3.10
 VENV_PATH ?= ${HOME}/.venvs/sting
@@ -35,6 +42,8 @@ python.manifest: python.manifest.template
 		-Dpython_stdlib=${PY_STLIB} \
 		-Ddebug=${DEBUG} \
 		-Dvenvpath=$(VENV_PATH) \
+		-Dsealing_key=$(SEALING_KEY) \
+		-Dsealing_filetype=$(SEALING_FILETYPE) \
 		$< >$@
 
 # Make on Ubuntu <= 20.04 doesn't support "Rules with Grouped Targets" (`&:`),

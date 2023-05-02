@@ -1,14 +1,38 @@
+# Sting-Flashbots
+
+## Prerequisites
+
 ### Set Intel IAS SPID
 
 ```
 export RA_CLIENT_SPID=<spid>
 ```
 
+or add it in a `.env` file, at the root of this repository, e.g.:
+
+```env
+# .env file
+RA_CLIENT_SPID=0123456789abcdefghijklmnopqrstuv
+```
+
+> **Note**: To run in simulation mode, substitute add `--file docker-compose-sim.yml`
+to the `docker compose` commands., e.g.:
+> ```console
+> docker compose --file docker-compose-sim.yml build
+> ```
+
 ### Build docker image
 
 ```
 docker compose -f docker-compose-builder-relayer.yml build 
 ```
+
+## Run demo
+> **Note**: To run in simulation mode, substitute add `--file docker-compose-sim.yml`
+to the `docker compose` commands., e.g.:
+> ```console
+> docker compose --file docker-compose-sim.yml build
+> ```
 
 ### Create docker containers for blockchain network, builder, and relayer
 
