@@ -21,7 +21,7 @@ ENCLAVE_SIZE ?= 1024G
 
 GETH_BRANCH ?= main
 GETH_REPO ?= https://github.com/flashbots/builder
-GETH_COMMIT ?= 8caba1f96ff5adf5647356d231a3dcab8a74fbac
+GETH_COMMIT ?= 481f1c3c23b51aa39822b3ba40cfafc653a451b8
 
 MBEDTLS_PATH = https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.3.0.tar.gz
 
@@ -120,18 +120,13 @@ geth.args:
 			--http \
 			--http.api=engine,eth,web3,net,debug,flashbots \
 			--http.addr=0.0.0.0 \
-			--ws \
-			--ws.api=engine,eth,web3,net,debug \
 			--authrpc.vhosts=* \
 			--authrpc.addr=0.0.0.0 \
 			--authrpc.jwtsecret=/etc/jwt.hex \
-			--cache.trie.journal="" \
-			--cache.trie.rejournal=0 \
 			--datadir=/data \
-			--datadir.ancient=/data/ancient \
     		--allow-insecure-unlock \
     		--unlock=0x123463a4b065722e99115d6c222f267d9cabb524 \
-			--keystore=/etc/keystore \
+      		--keystore=/etc/keystore \
     		--password=/etc/geth_password.txt \
     		--nodiscover \
     		--syncmode=full \
@@ -142,11 +137,11 @@ geth.args:
 			--builder.secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
 			--builder.relay_secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
 			--builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda \
-			--builder.beacon_endpoint=http://beacon-chain:3500 \
 			--builder.genesis_fork_version=0x20000089 \
 			--builder.bellatrix_fork_version=0x20000091 \
+			--builder.beacon_endpoints=http://beacon-chain:3500 \
 			--miner.algotype=greedy \
-			--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
+      		--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
 		> $@
 endif
 

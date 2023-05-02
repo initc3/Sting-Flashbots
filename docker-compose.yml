@@ -46,18 +46,18 @@ services:
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         SGX: $SGX
         RA_TYPE: $RA_TYPE
-        GETH_COMMIT: 8caba1f96ff5adf5647356d231a3dcab8a74fbac
-    depends_on:
-      aesmd:
-        condition: service_started
-      geth-genesis:
-        condition: service_completed_successfully
+        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
     cap_add:
       - NET_ADMIN
     ports:
       - 28545:28545
       - 8551:8551
       - 8545:8545
+    depends_on:
+      aesmd:
+        condition: service_started
+      geth-genesis:
+        condition: service_completed_successfully
     devices:
       - /dev/isgx
     security_opt:
@@ -69,13 +69,13 @@ services:
       SGX: ${SGX}
       DEBUG: ${DEBUG}
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
-    working_dir: /geth-sgx
     volumes:
       - aesmd-socket:/var/run/aesmd
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
-      - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      # - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      - genesis:/etc/genesis/
       - data:/data
       - cert:/cert
       # - ./chain/consensus/data:/data
@@ -96,9 +96,12 @@ services:
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
     image: "ethereum/client-go:latest"
-    command: --datadir=/data init /execution/genesis.json
+    command: --datadir=/data init /genesis/genesis.json
+    depends_on:
+      create-beacon-chain-genesis:
+        condition: service_completed_successfully
     volumes:
-      - ./chain/execution/genesis.json:/execution/genesis.json
+      # - ./chain/execution/genesis.json:/genesis/genesis.json
       - genesis:/genesis
       - data:/data
 
@@ -107,11 +110,16 @@ services:
     command:
       - testnet
       - generate-genesis
+      - --fork=bellatrix
       - --num-validators=64
       - --output-ssz=/genesis/genesis.ssz
       - --chain-config-file=/consensus/config.yml
+      - --geth-genesis-json-in=/execution/genesis.json
+      - --geth-genesis-json-out=/genesis/genesis.json
     volumes:
-      - ./chain/consensus:/consensus/
+      - ./chain/consensus/config.yml:/consensus/config.yml
+      - ./chain/execution/genesis.json:/execution/genesis.json
+      - ./chain/execution/:/execution/
       - genesis:/genesis/
 
   beacon-chain:
@@ -120,7 +128,7 @@ services:
       context: ./
       dockerfile: beacon.Dockerfile
       args:
-        COMMIT: 3d6d0a12dd189abcd2cfbba1c3d56505a1dd595c
+        COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
     command:
       - --datadir=/beacondata
       # No peers to sync with in this testnet, so setting to 0
@@ -149,8 +157,9 @@ services:
       - 3500:3500
       - 8080:8080
     volumes:
-      - ./chain/consensus:/consensus
+      - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
+      # - ./chain/execution/genesis.json:/execution/genesis.json
       - genesis:/genesis
       # - ./chain/consensus/beacondata:/beacondata
 
@@ -169,7 +178,7 @@ services:
       beacon-chain:
         condition: service_started
     volumes:
-      - ./chain/consensus:/consensus
+      - ./chain/consensus/config.yml:/consensus/config.yml
       # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
