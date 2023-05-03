@@ -13,4 +13,9 @@ relayer/*data/*
 *python.sig
 *python.token
 *OUTPUT
+chain/consensus/genesis.ssz
+chain/execution/geth.ipc
+chain/execution/geth/
+chain/consensus/validatordata/
+chain/consensus/beacondata/
 .env

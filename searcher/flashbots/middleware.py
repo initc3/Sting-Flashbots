@@ -8,13 +8,10 @@ from .provider import FlashbotProvider
 FLASHBOTS_METHODS = [
     "eth_sendBundle",
     "eth_callBundle",
-    "eth_cancelBundle",
     "eth_sendPrivateTransaction",
     "eth_cancelPrivateTransaction",
     "flashbots_getBundleStats",
     "flashbots_getUserStats",
-    "flashbots_getBundleStatsV2",
-    "flashbots_getUserStatsV2",
 ]
 
 

@@ -1,0 +1,71 @@
+version: '3.3'
+
+services:
+
+  eth:
+    image: sting-eth
+    build:
+      context: .
+      dockerfile: eth.Dockerfile
+    cap_add:
+      - NET_ADMIN
+    platform: "linux/amd64"
+    volumes:
+      - ./chain:/chain
+    command: ["bash", "chain/chain.sh"]
+
+  builder:
+    image: sting-gramine-sim
+    build:
+      context: .
+      dockerfile: gramine.Dockerfile
+      args:
+        DEBUG: ${DEBUG}
+        SGX: 0
+    depends_on:
+      - eth
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      DEBUG: ${DEBUG}
+      SGX: 0
+    working_dir: /Sting-Flashbots/builder/src/
+    volumes:
+      - ./builder/src:/Sting-Flashbots/builder/src
+      # - ./builder/input_data:/Sting-Flashbots/builder/input_data
+      # - ./builder/enclave_data:/Sting-Flashbots/builder/enclave_data
+      # - ./builder/output_data:/Sting-Flashbots/builder/output_data
+      - shared:/shared_data
+    command: sleep infinity
+
+  relayer:
+    image: sting-gramine-sim
+    build:
+      context: .
+      dockerfile: gramine.Dockerfile
+      args:
+        DEBUG: ${DEBUG}
+        SGX: 0
+    depends_on:
+      - eth
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    environment:
+      DEBUG: ${DEBUG}
+      SGX: 0
+    working_dir: /Sting-Flashbots/relayer/src
+    volumes:
+      - ./relayer/src:/Sting-Flashbots/relayer/src
+      # - ./relayer/input_data:/Sting-Flashbots/relayer/input_data
+      # - ./relayer/enclave_data:/Sting-Flashbots/relayer/enclave_data
+      # - ./relayer/output_data:/Sting-Flashbots/relayer/output_data
+      - shared:/shared_data
+    command: sleep infinity
+
+volumes:
+  shared:
+
