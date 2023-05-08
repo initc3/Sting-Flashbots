@@ -26,14 +26,14 @@ services:
       - ./searcher/simple.py:/Sting-Flashbots/simple.py
       - ./searcher/utils.py:/Sting-Flashbots/utils.py
     working_dir: /Sting-Flashbots
-    
+
   builder:
-    image: flashbots-builder
-    build:
-      context: ./
-      dockerfile: geth.Dockerfile
-      args:
-        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+    image: ghcr.io/initc3/flashbots-builder:481f1c3c2
+    #build:
+    #  context: ./
+    #  dockerfile: geth.Dockerfile
+    #  args:
+    #    GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
     entrypoint: geth
     command:
       - --http
@@ -109,12 +109,12 @@ services:
       - genesis:/genesis/
 
   beacon-chain:
-    image: beacon-chain
-    build:
-      context: ./
-      dockerfile: beacon.Dockerfile
-      args:
-        COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
+    image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
+    #build:
+    #  context: ./
+    #  dockerfile: beacon.Dockerfile
+    #  args:
+    #    COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
     command:
       - --datadir=/beacondata
       # No peers to sync with in this testnet, so setting to 0
