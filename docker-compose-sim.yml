@@ -23,9 +23,13 @@ services:
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - ./chain/keystores:/Sting-Flashbots/keystores
-      - ./searcher/simple.py:/Sting-Flashbots/simple.py
-      - ./searcher/utils.py:/Sting-Flashbots/utils.py
-    working_dir: /Sting-Flashbots
+      - ./chain/keystores:/Sting-Flashbots/searcher/input_data/keystores
+      - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/flashbots:/Sting-Flashbots/searcher/src/flashbots
+      - ./lib:/Sting-Flashbots/searcher/src/enclave/lib
+      - ./searcher/src/simple.py:/Sting-Flashbots/searcher/src/simple.py
+      - ./searcher/src/utils.py:/Sting-Flashbots/searcher/src/utils.py
+      - shared:/shared
     
   builder:
     image: flashbots-builder
@@ -176,3 +180,4 @@ volumes:
       o: "rw"
   genesis:
   data:
+  shared:

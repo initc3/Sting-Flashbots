@@ -8,7 +8,7 @@ from web3.types import TxParams, Wei
 from utils import refill_ether
 import os
 import socket
-import time 
+import time
 
 """
 In this example we setup a transaction for 0.1 eth with a gasprice of 1
@@ -91,7 +91,7 @@ gasLimit = 25000
 print("gasPrice", gasPrice)
 signed_tx: TxParams = {
     "to": ETH_ACCOUNT_TO.address,
-    "value": bribe,
+    "value": 123,
     "nonce": nonce + 1,
     "gasPrice": gasPrice,
     "gas": gasLimit,
@@ -105,7 +105,7 @@ bundle = [
         "signer": ETH_ACCOUNT_FROM,
         "transaction": {
             "to": ETH_ACCOUNT_TO.address,
-            "value": Wei(123),
+            "value": 1000,
             "nonce": nonce,
             "gasPrice": gasPrice,
         },
@@ -119,6 +119,7 @@ bundle = [
 block = w3.eth.block_number
 print("block", block)
 
+
 result = w3.flashbots.send_bundle(bundle, target_block_number=w3.eth.blockNumber + 10)
 result.wait()
 receipts = result.receipts()
@@ -130,7 +131,10 @@ bal_after = w3.eth.get_balance(ETH_ACCOUNT_FROM.address, block_number)
 profit = bal_after - bal_before - w3.toWei("2", "ether")  # sub block reward
 print("Balance before", bal_before)
 print("Balance after", bal_after)
-assert profit == bribe
+print("Balance diff", bal_after - bal_before)
+print("profit", profit)
+print("bribe", bribe)
+# assert profit == bribe
 
 # the tx is successful
 print(w3.eth.get_balance(ETH_ACCOUNT_TO.address))

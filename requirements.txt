@@ -4,3 +4,4 @@ eth-utils==1.9.5
 protobuf==3.19.5
 pycryptodome==3.17
 web3==5.31.4
+flashbots==v1.1.0
