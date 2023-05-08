@@ -1,4 +1,5 @@
-FROM ghcr.io/initc3/gramine:c04bbae
+ARG GRAMINE_IMG_TAG=dcap-595ba4d
+FROM ghcr.io/initc3/gramine:${GRAMINE_IMG_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 

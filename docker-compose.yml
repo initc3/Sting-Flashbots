@@ -12,8 +12,11 @@ services:
   #       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
   #       SGX: $SGX
   #       RA_TYPE: $RA_TYPE
-  #   devices:
-  #     - /dev/isgx
+  #  	# NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
+  #  	# see README for more details
+	#		extends:
+  #  	  file: sgx-driver.yml
+  #  	  service: ${SGX_DRIVER}-enclave-devices
   #   # depends_on:
   #   #   validator:
   #   #     condition: service_started
@@ -47,6 +50,7 @@ services:
         SGX: $SGX
         RA_TYPE: $RA_TYPE
         GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+        GRAMINE_IMG_TAG: ${GRAMINE_IMG_TAG}
     cap_add:
       - NET_ADMIN
     ports:
@@ -58,8 +62,11 @@ services:
         condition: service_started
       geth-genesis:
         condition: service_completed_successfully
-    devices:
-      - /dev/isgx
+    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
+    # see README for more details
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-enclave-devices
     security_opt:
       - seccomp:unconfined
     environment:
@@ -82,16 +89,14 @@ services:
       # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
 
   aesmd:
-    image: initc3/linux-sgx:2.19
-    devices:
-      - /dev/isgx
+    image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
     volumes:
       - aesmd-socket:/var/run/aesmd
-    user: aesmd
-    working_dir: /opt/intel/sgx-aesm-service/aesm
-    environment:
-      LD_LIBRARY_PATH: /opt/intel/sgx-aesm-service/aesm
-    command: ./aesm_service --no-daemon
+    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
+    # see README for more details
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-aesmd-devices
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:

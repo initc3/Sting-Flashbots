@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  # out-of-tree driver device configs
+  oot-aesmd-devices:
+    devices:
+      - /dev/isgx
+
+  oot-enclave-devices:
+    devices:
+      - /dev/isgx
+
+  # in-kernel driver device configs
+  inkernel-aesmd-devices:
+    devices:
+      - /dev/sgx_enclave
+      - /dev/sgx_provision
+
+  inkernel-enclave-devices:
+    devices:
+      - /dev/sgx_enclave
+
