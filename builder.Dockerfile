@@ -28,6 +28,7 @@ WORKDIR /geth-sgx/
 ADD builder/geth/geth.manifest.template /geth-sgx/
 ADD builder/geth/Makefile /geth-sgx/
 ADD builder/geth/geth_init.cpp /geth-sgx/
+ADD builder/geth/txpool.go /geth-sgx/go-ethereum/core/txpool/txpool.go
 
 ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID

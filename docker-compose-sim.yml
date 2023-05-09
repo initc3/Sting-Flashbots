@@ -2,6 +2,18 @@ version: '3.9'
 
 services:
 
+  aesmd:
+    image: initc3/linux-sgx:2.19
+    devices:
+      - /dev/isgx
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+    user: aesmd
+    working_dir: /opt/intel/sgx-aesm-service/aesm
+    environment:
+      LD_LIBRARY_PATH: /opt/intel/sgx-aesm-service/aesm
+    command: ./aesm_service --no-daemon
+
   searcher:
     image: sting-searcher
     build:
@@ -12,9 +24,13 @@ services:
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         SGX: $SGX
         RA_TYPE: $RA_TYPE
-    # depends_on:
-    #   validator:
-    #     condition: service_started
+    depends_on:
+      # validator:
+      #   condition: service_started
+      aesmd:
+        condition: service_started      
+    devices:
+      - /dev/isgx
     environment:
       RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
       RA_CLIENT_SPID: ${RA_CLIENT_SPID}
@@ -22,10 +38,14 @@ services:
       DEBUG: ${DEBUG}
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
+      - aesmd-socket:/var/run/aesmd
       - ./chain/keystores:/Sting-Flashbots/keystores
-      - ./searcher/simple.py:/Sting-Flashbots/simple.py
-      - ./searcher/utils.py:/Sting-Flashbots/utils.py
-    working_dir: /Sting-Flashbots
+      # - ./chain/keystores:/Sting-Flashbots/searcher/input_data/keystores
+      - ./searcher/src:/Sting-Flashbots/searcher/src/
+      - shared:/shared
+    working_dir: /Sting-Flashbots/searcher/src
+    command: python simple.py
+
 
   builder:
     image: ghcr.io/initc3/flashbots-builder:481f1c3c2
@@ -69,19 +89,22 @@ services:
       geth-genesis:
         condition: service_completed_successfully
     environment:
+      SS_DIR: "/shared/"
+      SS_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
       - genesis:/etc/genesis/
+      - shared:/shared
       - data:/data
       # - ./chain/consensus/data:/data
       # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
-    image: "ethereum/client-go:latest"
+    image: "ethereum/client-go:v1.11.6"
     command: --datadir=/data init /genesis/genesis.json
     depends_on:
       create-beacon-chain-genesis:
@@ -92,7 +115,7 @@ services:
       - data:/data
 
   create-beacon-chain-genesis:
-    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
+    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:HEAD-5b8084"
     command:
       - testnet
       - generate-genesis
@@ -150,7 +173,7 @@ services:
       # - ./chain/consensus/beacondata:/beacondata
 
   validator:
-    image: "gcr.io/prysmaticlabs/prysm/validator:latest"
+    image: "gcr.io/prysmaticlabs/prysm/validator:HEAD-e4e8a0"
     command:
       - --beacon-rpc-provider=beacon-chain:4000
       - --datadir=/validatordata
@@ -176,3 +199,4 @@ volumes:
       o: "rw"
   genesis:
   data:
+  shared:

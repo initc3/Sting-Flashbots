@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y python3-venv
 RUN python3.10 -m venv $VENV_PATH
 
 RUN pip3 install  \
-    web3==5.31.4
-# flashbots==v1.1.0
+    web3==5.31.4 \
+    flashbots==v1.1.1
 
 ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
@@ -23,9 +23,19 @@ WORKDIR /
 COPY requirements.txt requirements.txt 
 RUN $VENV_PATH/bin/pip install -r requirements.txt 
 
-COPY ./searcher/simple.py /Sting-Flashbots/simple.py
-COPY ./searcher/utils.py /Sting-Flashbots/utils.py
-COPY ./searcher/flashbots /Sting-Flashbots/flashbots
 
-WORKDIR /Sting-Flashbots
-CMD python simple.py 
+COPY ./searcher/src/enclave/lib/ecdsa/account.py /usr/local/lib/python3.10/site-packages/eth_account/account.py
+COPY ./searcher/src/enclave/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-packages/eth_account/_utils/signing.py
+COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py /usr/local/lib/python3.10/site-packages/eth_keys/datatypes.py
+COPY ./searcher/src/enclave/lib/ecdsa/main.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/main.py
+COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
+
+# ADD /Sting-Flashbots/chain/contracts/HoneyPot.json /Sting-Flashbots/searcher/input_data/
+
+ADD ./searcher/ /Sting-Flashbots/searcher
+
+WORKDIR /Sting-Flashbots/searcher
+RUN mkdir -p input_data output_data enclave_data
+
+WORKDIR /Sting-Flashbots/searcher/src
+RUN make SGX=$SGX RA_CLIENT_LINKABLE=0 DEBUG=1 RA_TYPE=epid RA_CLIENT_SPID=${RA_CLIENT_SPID}

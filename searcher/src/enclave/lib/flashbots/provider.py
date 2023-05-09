@@ -13,7 +13,7 @@ from web3 import Web3
 
 def get_default_endpoint() -> URI:
     return URI(
-        os.environ.get("FLASHBOTS_HTTP_PROVIDER_URI", "https://relay.flashbots.net")
+        os.environ.get("FLASHBOTS_HTTP_PROVIDER_URI", "http://localhost:8545")
     )
 
 
@@ -41,12 +41,17 @@ class FlashbotProvider(HTTPProvider):
             text=Web3.keccak(text=request_data.decode("utf-8")).hex()
         )
         signed_message = Account.sign_message(
-            message, private_key=self.signature_account.privateKey.hex()
+            message, private_key=self.signature_account.key.hex()
         )
 
         headers = self.get_request_headers() | {
             "X-Flashbots-Signature": f"{self.signature_account.address}:{signed_message.signature.hex()}"
         }
+
+        if ("goerli" in self.endpoint_uri) and (method == "eth_sendPrivateTransaction"):
+            raise NotImplementedError(
+                "eth_sendPrivateTransaction is not supported on Goerli Endpoint"
+            )
 
         raw_response = make_post_request(
             self.endpoint_uri, request_data, headers=headers
