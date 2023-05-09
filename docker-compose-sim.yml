@@ -2,33 +2,14 @@ version: '3.9'
 
 services:
 
-  aesmd:
-    image: initc3/linux-sgx:2.19
-    devices:
-      - /dev/isgx
-    volumes:
-      - aesmd-socket:/var/run/aesmd
-    user: aesmd
-    working_dir: /opt/intel/sgx-aesm-service/aesm
-    environment:
-      LD_LIBRARY_PATH: /opt/intel/sgx-aesm-service/aesm
-    command: ./aesm_service --no-daemon
-
   searcher:
     image: sting-searcher
     build:
       context: ./
       dockerfile: searcher.Dockerfile
       args:
-        RA_CLIENT_SPID: $RA_CLIENT_SPID
-        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         SGX: $SGX
-        RA_TYPE: $RA_TYPE
-    depends_on:
-      # validator:
-      #   condition: service_started
-      aesmd:
-        condition: service_started      
+        RA_TYPE: $RA_TYPE  
     devices:
       - /dev/isgx
     environment:
@@ -38,7 +19,6 @@ services:
       DEBUG: ${DEBUG}
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
-      - aesmd-socket:/var/run/aesmd
       - ./chain/keystores:/Sting-Flashbots/keystores
       # - ./chain/keystores:/Sting-Flashbots/searcher/input_data/keystores
       - ./searcher/src:/Sting-Flashbots/searcher/src/
@@ -191,12 +171,6 @@ services:
       # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
-  aesmd-socket:
-    driver: local
-    driver_opts:
-      type: "tmpfs"
-      device: "tmpfs"
-      o: "rw"
   genesis:
   data:
   shared:
