@@ -14,9 +14,6 @@ RUN git clone https://github.com/flashbots/builder.git /go-ethereum
 WORKDIR /go-ethereum
 ARG GETH_COMMIT
 RUN git checkout $GETH_COMMIT
-ADD go-ethereum-new/miner/worker.go /go-ethereum/miner/worker.go
-ADD go-ethereum-new/les/api_backend.go /go-ethereum/les/api_backend.go
-ADD go-ethereum-new/internal/ethapi/api.go /go-ethereum/internal/ethapi/api.go
 ADD builder/geth/txpool.go /go-ethereum/core/txpool/txpool.go
 
 RUN go mod download
