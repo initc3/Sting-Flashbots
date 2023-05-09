@@ -1,9 +1,17 @@
 ARG GRAMINE_IMG_TAG=dcap-595ba4d
 FROM ghcr.io/initc3/gramine:${GRAMINE_IMG_TAG}
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y libssl-dev gnupg software-properties-common build-essential ca-certificates git
+RUN apt-get update && apt-get install -y \
+                libssl-dev \
+                gnupg \
+                software-properties-common \
+                build-essential \
+                ca-certificates \
+                git \
+    && rm -rf /var/lib/apt/lists/*
+
 
 #install golang
 RUN wget https://go.dev/dl/go1.20.3.linux-amd64.tar.gz
