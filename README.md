@@ -20,26 +20,7 @@ bash chain/compile.sh
 bash chain/chain.sh
 ```
 
-### Deploy Honeypot contract and setup puzzle
+### Run demo
 ```
-python3 -m src.builder.sting.setup_bounty
-```
-
-### Create bounty claim tx and wrap in an encrypted block
-```
-python3 -m src.builder.sting.claim_bounty
-```
-
-### Honest relayer deliver the block picked
-```
-python3 -m src.relayer.honest
-```
-
-
-### Test with malicious relayer steal the preimage and replace the bounty claim tx
-```
-bash chain/chain.sh
-python3 -m src.builder.sting.setup_bounty
-python3 -m src.builder.sting.claim_bounty
-python3 -m src.relayer.malicious
+python3 -m src.apps.searcher_builder.main
 ```

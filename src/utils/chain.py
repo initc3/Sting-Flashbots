@@ -6,7 +6,7 @@ from web3.middleware import geth_poa_middleware
 
 local_url = 'http://127.0.0.1:8545'
 ether_unit = 10**18
-GAS_LIMIT = 1000000
+GAS_LIMIT = 8000000
 local_net_chain_id = 123
 
 
@@ -86,11 +86,15 @@ def sign_tx(tx, w3, account, k=0):
 
 def send_tx(signed_tx, w3):
     w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    return wait_for_receipt(signed_tx.hash, w3)
+    return get_receipt(signed_tx.hash, w3)
 
 
-def wait_for_receipt(tx_hash, w3):
-    return w3.eth.wait_for_transaction_receipt(tx_hash)
+def get_receipt(tx_hash, web3):
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+    if receipt['status'] != 1:
+        print(receipt)
+        raise Exception("Transaction failed!!!")
+    return receipt
 
 
 def transact(func_to_call, w3, account, value=0, k=0):
