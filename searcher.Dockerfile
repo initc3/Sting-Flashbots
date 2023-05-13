@@ -12,15 +12,6 @@ RUN pip3 install  \
     web3==5.31.4 \
     pyopenssl==23.1.1
 
-ARG RA_TYPE=dcap
-ENV RA_TYPE=$RA_TYPE
-ARG RA_CLIENT_SPID
-ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
-ARG DEBUG=1
-ENV DEBUG=$DEBUG
-ARG SGX=1
-ENV SGX=$SGX
-
 WORKDIR /
 COPY requirements.txt requirements.txt 
 RUN pip install -r requirements.txt 
@@ -41,10 +32,25 @@ COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-pa
 
 # ADD /Sting-Flashbots/chain/contracts/HoneyPot.json /Sting-Flashbots/searcher/input_data/
 
+
+ARG RA_TYPE=dcap
+ENV RA_TYPE=$RA_TYPE
+ARG RA_CLIENT_SPID
+ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
+ARG RA_CLIENT_LINKABLE=0
+ENV RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE
+
+ARG DEBUG=1
+ENV DEBUG=$DEBUG
+ARG SGX=0
+ENV SGX=$SGX
+
 ADD ./searcher/ /Sting-Flashbots/searcher
 
 WORKDIR /Sting-Flashbots/searcher
 RUN mkdir -p input_data output_data enclave_data
 
 WORKDIR /Sting-Flashbots/searcher/src
-RUN make SGX=$SGX RA_CLIENT_LINKABLE=0 DEBUG=1 RA_TYPE=epid RA_CLIENT_SPID=${RA_CLIENT_SPID}
+RUN make SGX=$SGX RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE DEBUG=$DEBUG RA_TYPE=$RA_TYPE RA_CLIENT_SPID=$RA_CLIENT_SPID
+
+CMD [ "./run.sh" ]

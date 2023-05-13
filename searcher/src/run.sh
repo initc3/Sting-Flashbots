@@ -4,38 +4,53 @@ set -e
 set -x
 
 if [[ "$SGX" == 1 ]]; then
-    GRAMINE=gramine-sgx
+    GRAMINE="gramine-sgx ./python"
+elif [[ "$SGX" == -1 ]]; then
+    GRAMINE="python"
 else
-    GRAMINE=gramine-direct
+    GRAMINE="gramine-direct ./python"
 fi
 
 INPUT_PATH=/Sting-Flashbots/searcher/input_data
 
 mkdir -p "${INPUT_PATH}/leak/"
 
-while [ -z "$(ls -A /cert )" ]
-do  
-    sleep 2
-done
+if [[ "$SGX" != "-1" ]]; then
+    echo "Waiting for builder cert..."
+
+    if [ -z "$(ls -A /cert )" ]; then 
+        sleep 350
+    fi
+    set +x
+    while [ -z "$(ls -A /cert )" ]
+    do  
+        sleep 2
+    done
+    set -x
+
+    cp /cert/tlscert.der "${INPUT_PATH}/tlscert.der"
+fi 
+
 rm -rf /shared/*
 
-cp /cert/tlscert.der "${INPUT_PATH}/tlscert.der"
 
 cd /Sting-Flashbots/searcher/src/
 
-$GRAMINE ./python ./enclave/create_stinger.py 
+${GRAMINE} enclave/create_stinger.py
 
-# set +x
+set +x
 while [ -z "$(ls -A /shared )" ]
 do  
     sleep 2
 done
-# set -x
+set -x
 
 mv /shared/* "${INPUT_PATH}/leak/"
-$GRAMINE ./python ./enclave/make_evidence.py 
-$GRAMINE ./python ./enclave/verify_evidence.py 
-# $GRAMINE ./python ./enclave/sgx-quote.py 
-# $GRAMINE ./python ./enclave/sgx-report.py 
+$GRAMINE ./enclave/make_evidence.py 
+$GRAMINE ./enclave/verify_evidence.py 
+# $GRAMINE ./enclave/sgx-quote.py 
+# $GRAMINE ./enclave/sgx-report.py 
+
+rm -rf "${INPUT_PATH}/leak/*"
 
 echo "done"

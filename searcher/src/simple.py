@@ -2,7 +2,7 @@ from eth_account.account import Account
 from eth_account.signers.local import LocalAccount
 from web3.middleware import construct_sign_and_send_raw_middleware
 
-from flashbots import flashbot
+from enclave.flashbots import flashbot
 from web3 import Web3, HTTPProvider
 from web3.types import TxParams, Wei
 from utils import refill_ether

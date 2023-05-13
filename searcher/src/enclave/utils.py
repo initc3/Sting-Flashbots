@@ -2,6 +2,7 @@ import socket
 import os 
 import random
 import time
+import requests
 import rlp
 from rlp.sedes import Binary, big_endian_int, binary
 from hexbytes import HexBytes
@@ -25,16 +26,20 @@ from ra_tls import get_ra_tls_session
 
 HOST = socket.gethostbyname('builder')
 PORT = 8545
-endpoint = f"https://{HOST}:{PORT}"
+if int(os.environ.get("TLS", 1)) == 1:
+    TLS = True
+    endpoint = f"https://{HOST}:{PORT}"
+else:
+    TLS = False
+    endpoint = f"http://{HOST}:{PORT}"
 ADMIN_ACCOUNT: LocalAccount = Account.from_key(os.environ.get("ADMIN_PRIVATE_KEY","0xf380884ad465b73845ca785d7e125e4cc831a8267ed1be5da6299ea6094d177c"))
 ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
 CHAIN_ID = 32382
 GAS_LIMIT = 25000
-SEED = 777
-random.seed(SEED)
+
 print(f"ETH_ACCOUNT_SIGNATURE {ETH_ACCOUNT_SIGNATURE.address}")
 
-if os.environ.get("INSIDE_SGX", 0) == "1":
+if int(os.environ.get("INSIDE_SGX", 0)) == 1:
     data_dir = "/data"
     input_dir = "/input"
 else:
@@ -48,13 +53,26 @@ verify_data_path = f'{data_dir}/verify_data_path.json'
 
 
 def get_web3():
-    s = get_ra_tls_session(HOST, PORT, cert_path)
-    w3 = Web3(HTTPProvider(endpoint, session=s))
+    while True:
+        try:
+            if TLS:
+                s = get_ra_tls_session(HOST, PORT, cert_path)
+                w3 = Web3(HTTPProvider(endpoint, session=s))
+            else:
+                w3 = Web3(HTTPProvider(endpoint))
+            block = w3.eth.block_number
+            print(f'current block {block}')
+            break
+        except requests.exceptions.HTTPError as e:
+            time.sleep(5)
+            print(f'waiting to connect to builder...', TLS)
+            raise e
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     flashbot(w3, ETH_ACCOUNT_SIGNATURE, endpoint)
-    while w3.eth.block_number < 26:
+    while block < 26:
+        print(f'waiting for block number {block} > 25...')
         time.sleep(5)
-        print(f'waiting for block {w3.eth.block_number} > 25')
+        block = w3.eth.block_number
     return w3
 
 def get_balance(w3, addr):

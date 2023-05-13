@@ -1,105 +1,84 @@
 version: '3.9'
 
 services:
-
   searcher:
     image: sting-searcher
     build:
       context: ./
       dockerfile: searcher.Dockerfile
       args:
-        SGX: $SGX
+        SGX: 0 
         DEBUG: $DEBUG
-        RA_TYPE: $RA_TYPE
-        RA_CLIENT_SPID: $RA_CLIENT_SPID
-        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-    depends_on:
-      aesmd:
-        condition: service_started
-    extends:
-      file: sgx-driver.yml
-      service: ${SGX_DRIVER}-enclave-devices
+    devices:
+      - /dev/isgx
     environment:
-      # all of should be for builder's configuration
-      RA_TYPE: $RA_TYPE
-      RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
-      RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
-      RA_TLS_MRENCLAVE: "77fc74f2579ccecce9a797d5b13d93cc6564b9fc3df1a03910a429be3a5186e4"
-      RA_TLS_MRSIGNER: any
-      RA_TLS_ISV_SVN: any
-      RA_TLS_ISV_PROD_ID: any
-      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
-      RA_CLIENT_SPID: $RA_CLIENT_SPID
-      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-      TLS: 1
-      SGX: $SGX
-      DEBUG: $DEBUG
+      TLS: 0
+      SGX: -1
+      DEBUG: ${DEBUG}
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       # - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
       # - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
       - shared:/shared
-      - cert:/cert/
     working_dir: /Sting-Flashbots/searcher/src
     command: ./run.sh
 
+
   builder:
-    # image: ghcr.io/initc3/geth-sgx-builder:481f1c3c2
-    image: geth-sgx-builder:local
+    # image: ghcr.io/initc3/flashbots-builder:481f1c3c2
+    image: flashbots-builder:local
     build:
-      context: ./
-      dockerfile: builder.Dockerfile
-      args:
-        RA_CLIENT_SPID: $RA_CLIENT_SPID
-        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-        SGX: $SGX
-        RA_TYPE: $RA_TYPE
-        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
-        GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+     context: ./
+     dockerfile: geth.Dockerfile
+     args:
+       GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+    entrypoint: geth
+    command:
+      - --http
+      - --http.api=engine,eth,web3,net,debug,flashbots
+      - --http.addr=0.0.0.0
+      - --authrpc.vhosts=*
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.jwtsecret=/etc/jwt.hex
+      - --datadir=/data  
+      - --allow-insecure-unlock
+      - --unlock=0x123463a4B065722E99115D6c222f267d9cABb524
+      - --keystore=/etc/keystore
+      - --password=/etc/geth_password.txt
+      - --nodiscover
+      - --syncmode=full
+      - --verbosity=4
+      - --mine
+      - --builder
+      - --builder.local_relay=true
+      - --builder.secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+      - --builder.relay_secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622
+      - --builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda
+      - --builder.genesis_fork_version=0x20000089
+      - --builder.bellatrix_fork_version=0x20000091
+      - --builder.beacon_endpoints=http://beacon-chain:3500
+      - --miner.algotype=greedy
+      - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
     ports:
       - 28545:28545
       - 8551:8551
       - 8545:8545
     depends_on:
-      aesmd:
-        condition: service_started
       geth-genesis:
         condition: service_completed_successfully
-    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
-    # see README for more details
-    extends:
-      file: sgx-driver.yml
-      service: ${SGX_DRIVER}-enclave-devices
     environment:
       SS_DIR: "/shared/"
       SS_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
-      RA_CLIENT_SPID: $RA_CLIENT_SPID
-      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
-      SGX: ${SGX}
-      DEBUG: ${DEBUG}
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
-      # - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      # - ./chain/execution/genesis-out.json:/etc/genesis.json
       - genesis:/etc/genesis/
       - shared:/shared
       - data:/data
-      - cert:/cert
       # - ./chain/consensus/data:/data
-      # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
-
-  aesmd:
-    image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
-    volumes:
-      - aesmd-socket:/var/run/aesmd
-    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
-    # see README for more details
-    extends:
-      file: sgx-driver.yml
-      service: ${SGX_DRIVER}-aesmd-devices
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
@@ -109,7 +88,7 @@ services:
       create-beacon-chain-genesis:
         condition: service_completed_successfully
     volumes:
-      # - ./chain/execution/genesis.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
       - genesis:/genesis
       - data:/data
 
@@ -127,7 +106,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
-      # - ./chain/execution/:/execution/
+      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
       - genesis:/genesis/
 
   beacon-chain:
@@ -168,7 +147,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
-      # - ./chain/execution/genesis.json:/execution/genesis.json
+      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
       - genesis:/genesis/
       # - ./chain/consensus/beacondata:/beacondata
 
@@ -191,13 +170,6 @@ services:
       # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
-  aesmd-socket:
-    driver: local
-    driver_opts:
-      type: "tmpfs"
-      device: "tmpfs"
-      o: "rw"
   genesis:
   data:
   shared:
-  cert:
