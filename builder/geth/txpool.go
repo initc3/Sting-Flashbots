@@ -743,7 +743,7 @@ func subversionService(mevBundles []types.MevBundle) {
 				// err := ioutil.WriteFile(ssPath, file, 0644)
 
 				if err != nil {
-					fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService error writing bundle to %s \n", ssPath)
+					fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService error writing bundle to %s err %v\n", ssPath, err)
 					return
 				}
 				fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService success writing bundle to %s \n", ssPath)

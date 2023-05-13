@@ -1,12 +1,16 @@
 import socket
 import os 
 import random
+import time
+import rlp
+from rlp.sedes import Binary, big_endian_int, binary
 from hexbytes import HexBytes
 
 from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
 from web3.middleware import construct_sign_and_send_raw_middleware
-from eth_utils import keccak
+from eth_utils import keccak, to_bytes
+from eth_typing import HexStr
 # from eth_account.account import Account
 from lib.ecdsa.account import Account
 from eth_account.datastructures import SignedTransaction
@@ -17,8 +21,11 @@ from flashbots import flashbot
 
 from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
+from ra_tls import get_ra_tls_session
 
-endpoint = f"http://{socket.gethostbyname('builder')}:8545"
+HOST = socket.gethostbyname('builder')
+PORT = 8545
+endpoint = f"https://{HOST}:{PORT}"
 ADMIN_ACCOUNT: LocalAccount = Account.from_key(os.environ.get("ADMIN_PRIVATE_KEY","0xf380884ad465b73845ca785d7e125e4cc831a8267ed1be5da6299ea6094d177c"))
 ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
 CHAIN_ID = 32382
@@ -26,16 +33,28 @@ GAS_LIMIT = 25000
 SEED = 777
 random.seed(SEED)
 print(f"ETH_ACCOUNT_SIGNATURE {ETH_ACCOUNT_SIGNATURE.address}")
-# secret_path = f'/data/sealed_data.txt'
-# subversionservice_path = f'/input/subversion_service/leak.txt'
-secret_path = '/Sting-Flashbots/searcher/enclave_data/sealed_data.txt'
-subversionservice_path = '/Sting-Flashbots/searcher/input_data/leak/'
+
+if os.environ.get("INSIDE_SGX", 0) == "1":
+    data_dir = "/data"
+    input_dir = "/input"
+else:
+    data_dir = '/Sting-Flashbots/searcher/enclave_data'
+    input_dir = "/Sting-Flashbots/searcher/input_data"
+
+subversionservice_path = f'{input_dir}/leak/'
+cert_path = f'{input_dir}/tlscert.der'
+stinger_data_path = f'{data_dir}/stinger_data_path.json'
+verify_data_path = f'{data_dir}/verify_data_path.json'
+
 
 def get_web3():
-    w3 = Web3(HTTPProvider(endpoint))
+    s = get_ra_tls_session(HOST, PORT, cert_path)
+    w3 = Web3(HTTPProvider(endpoint, session=s))
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     flashbot(w3, ETH_ACCOUNT_SIGNATURE, endpoint)
-    print(f'block {w3.eth.block_number}')
+    while w3.eth.block_number < 26:
+        time.sleep(5)
+        print(f'waiting for block {w3.eth.block_number} > 25')
     return w3
 
 def get_balance(w3, addr):
@@ -192,22 +211,11 @@ def deserialize_tx_list(serialized_tx_list):
         tx_list.append(deserialize_signed_tx(serialized_tx))
     return tx_list
 
-def recover_tx(raw_tx):
-    tx_bytes = HexBytes(raw_tx)
-    tx = Transaction.from_bytes(tx_bytes)
-    return tx
+# def recover_tx(raw_tx):
+#     tx_bytes = HexBytes(raw_tx)
+#     tx = Transaction.from_bytes(tx_bytes)
+#     return tx
 
-
-from dataclasses import asdict, dataclass
-from pprint import pprint
-from typing import Optional
-
-import rlp
-from eth_typing import HexStr
-from eth_utils import keccak, to_bytes
-from rlp.sedes import Binary, big_endian_int, binary
-from web3 import Web3
-from web3.auto import w3
 
 class Transaction(rlp.Serializable):
     fields = [
@@ -222,28 +230,7 @@ class Transaction(rlp.Serializable):
         ("s", big_endian_int),
     ]
 
-
-@dataclass
-class DecodedTx:
-    hash_tx: str
-    from_: str
-    to: Optional[str]
-    nonce: int
-    gas: int
-    gas_price: int
-    value: int
-    data: str
-    chain_id: int
-    r: str
-    s: str
-    v: int
-
-
-def hex_to_bytes(data: str) -> bytes:
-    return to_bytes(hexstr=HexStr(data))
-
-
-def decode_raw_tx(raw_tx: str):
+def decode_raw_tx(w3, raw_tx):
     tx = rlp.decode(hex_to_bytes(raw_tx), Transaction)
     hash_tx = Web3.toHex(keccak(hex_to_bytes(raw_tx)))
     from_ = w3.eth.account.recover_transaction(raw_tx)
@@ -252,7 +239,6 @@ def decode_raw_tx(raw_tx: str):
     r = hex(tx.r)
     s = hex(tx.s)
     chain_id = (tx.v - 35) // 2 if tx.v % 2 else (tx.v - 36) // 2
-    # return DecodedTx(hash_tx, from_, to, tx.nonce, tx.gas, tx.gas_price, tx.value, data, chain_id, r, s, tx.v)
     return SignedTransaction(
         rawTransaction=HexBytes(raw_tx),
         hash=HexBytes(hash_tx),

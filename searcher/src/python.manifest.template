@@ -6,10 +6,21 @@ libos.entrypoint = "{{ entrypoint }}"
 loader.log_level = "{{ log_level }}"
 
 loader.env.LD_LIBRARY_PATH = "/lib:/lib:{{ arch_libdir }}:/usr{{ arch_libdir }}"
+loader.env.INSIDE_SGX = "1"
+loader.env.RA_TYPE = { passthrough = true }
+loader.env.RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE = { passthrough = true }
+loader.env.RA_TLS_ALLOW_OUTDATED_TCB_INSECURE = { passthrough = true }
+loader.env.RA_TLS_MRENCLAVE = { passthrough = true }
+loader.env.RA_TLS_MRSIGNER = { passthrough = true }
+loader.env.RA_TLS_ISV_SVN = { passthrough = true }
+loader.env.RA_TLS_ISV_PROD_ID = { passthrough = true }
+loader.env.RA_TLS_EPID_API_KEY = { passthrough = true }
+
 
 loader.insecure__use_cmdline_argv = true
 
 sys.enable_sigterm_injection = true
+
 
 fs.mounts = [
   { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
@@ -22,7 +33,7 @@ fs.mounts = [
   { path = "/usr/local/lib/python3.10", uri = "file:/usr/local/lib/python3.10/"},
   { path = "/usr/local/lib/python3.10/site-packages", uri = "file:{{ venvpath }}/lib/python3.10/site-packages/"},
 
-  { path = "/etc/hosts", uri = "file:helper-files/hosts" },
+  { path = "/etc/", uri = "file:/etc" },
 
   { type = "tmpfs", path = "/tmp" },
 
@@ -35,8 +46,8 @@ fs.mounts = [
 sys.stack.size = "2M"
 sys.enable_extra_runtime_domain_names_conf = true
 
-# sgx.debug = {{ 'true' if debug == '1' else 'false' }}
-sgx.debug = true
+sgx.debug = {{ 'true' if debug == '1' else 'false' }}
+# sgx.debug = true
 
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
 sgx.nonpie_binary = true
@@ -67,5 +78,14 @@ sgx.trusted_files = [
 
 sgx.allowed_files = [
   "file:/Sting-Flashbots/searcher/output_data",
-  "file:/Sting-Flashbots/searcher/input_data"
+  "file:/Sting-Flashbots/searcher/input_data",
+  "file:/etc/nsswitch.conf",
+  "file:/etc/host.conf",
+  "file:/etc/ethers",
+  "file:/etc/hosts",
+  "file:/etc/group",
+  "file:/etc/passwd",
+  "file:/etc/gai.conf",
+  "file:/etc/ssl/certs/ca-certificates.crt",
+  "file:/etc/sgx_default_qcnl.conf",
 ]

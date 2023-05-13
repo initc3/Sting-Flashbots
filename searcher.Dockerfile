@@ -10,8 +10,10 @@ RUN python3.10 -m venv $VENV_PATH
 
 RUN pip3 install  \
     web3==5.31.4 \
-    flashbots==v1.1.1
+    pyopenssl==23.1.1
 
+ARG RA_TYPE=dcap
+ENV RA_TYPE=$RA_TYPE
 ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
 ARG DEBUG=1
@@ -21,6 +23,7 @@ ENV SGX=$SGX
 
 WORKDIR /
 COPY requirements.txt requirements.txt 
+RUN pip install -r requirements.txt 
 RUN $VENV_PATH/bin/pip install -r requirements.txt 
 
 
@@ -29,6 +32,12 @@ COPY ./searcher/src/enclave/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-
 COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py /usr/local/lib/python3.10/site-packages/eth_keys/datatypes.py
 COPY ./searcher/src/enclave/lib/ecdsa/main.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/main.py
 COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
+
+COPY ./searcher/src/enclave/lib/ecdsa/account.py $VENV_PATH/lib/python3.10/site-packages/eth_account/account.py
+COPY ./searcher/src/enclave/lib/ecdsa/signing.py $VENV_PATH/lib/python3.10/site-packages/eth_account/_utils/signing.py
+COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/datatypes.py
+COPY ./searcher/src/enclave/lib/ecdsa/main.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/main.py
+COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
 
 # ADD /Sting-Flashbots/chain/contracts/HoneyPot.json /Sting-Flashbots/searcher/input_data/
 

@@ -2,42 +2,47 @@ version: '3.9'
 
 services:
 
-  # searcher:
-  #   image: sting-searcher
-  #   build:
-  #     context: ./
-  #     dockerfile: searcher.Dockerfile
-  #     args:
-  #       RA_CLIENT_SPID: $RA_CLIENT_SPID
-  #       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-  #       SGX: $SGX
-  #       RA_TYPE: $RA_TYPE
-  #  	# NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
-  #  	# see README for more details
-	#		extends:
-  #  	  file: sgx-driver.yml
-  #  	  service: ${SGX_DRIVER}-enclave-devices
-  #   # depends_on:
-  #   #   validator:
-  #   #     condition: service_started
-  #   environment:
-  #     RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
-  #     RA_CLIENT_SPID: ${RA_CLIENT_SPID}
-  #     SGX: ${SGX}
-  #     DEBUG: ${DEBUG}
-  #     ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
-  #   working_dir: /Sting-Flashbots
-  #   volumes:
-  #     - aesmd-socket:/var/run/aesmd
-  #      - ./:/Sting-Flashbots
-  #      - ./lib/ecdsa/account.py:/usr/local/lib/python3.9/site-packages/eth_account/account.py
-  #      - ./lib/ecdsa/signing.py:/usr/local/lib/python3.9/site-packages/eth_account/_utils/signing.py
-  #      - ./lib/ecdsa/datatypes.py:/usr/local/lib/python3.9/site-packages/eth_keys/datatypes.py
-  #      - ./lib/ecdsa/main.py:/usr/local/lib/python3.9/site-packages/eth_keys/backends/native/main.py
-  #      - ./lib/ecdsa/ecdsa.py:/usr/local/lib/python3.9/site-packages/eth_keys/backends/native/ecdsa.py
-  #    platform: "linux/amd64"
-  #    command: tail -F anything
-  #    command: python send_bundle.py
+  searcher:
+    image: sting-searcher
+    build:
+      context: ./
+      dockerfile: searcher.Dockerfile
+      args:
+        SGX: $SGX
+        DEBUG: $DEBUG
+        RA_TYPE: $RA_TYPE
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+    depends_on:
+      aesmd:
+        condition: service_started
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-enclave-devices
+    environment:
+      # all of should be for builder values
+      RA_TYPE: $RA_TYPE
+      RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
+      RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
+      RA_TLS_MRENCLAVE: "77fc74f2579ccecce9a797d5b13d93cc6564b9fc3df1a03910a429be3a5186e4"
+      RA_TLS_MRSIGNER: any
+      RA_TLS_ISV_SVN: any
+      RA_TLS_ISV_PROD_ID: any
+      RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
+      RA_CLIENT_SPID: ${RA_CLIENT_SPID}
+      SGX: ${SGX}
+      DEBUG: ${DEBUG}
+      ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+      # - ./chain/keystores:/Sting-Flashbots/keystores
+      # - ./chain/keystores:/Sting-Flashbots/searcher/input_data/keystores
+      # - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      # - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
+      - shared:/shared
+      - cert:/cert/
+    working_dir: /Sting-Flashbots/searcher/src
+    command: ./run.sh
 
   builder:
     image: geth-sgx-gramine
@@ -51,8 +56,6 @@ services:
         RA_TYPE: $RA_TYPE
         GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
         GRAMINE_IMG_TAG: ${GRAMINE_IMG_TAG}
-    cap_add:
-      - NET_ADMIN
     ports:
       - 28545:28545
       - 8551:8551
@@ -67,9 +70,9 @@ services:
     extends:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
-    security_opt:
-      - seccomp:unconfined
     environment:
+      SS_DIR: "/shared/"
+      SS_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
       RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
       RA_CLIENT_SPID: ${RA_CLIENT_SPID}
       RA_TYPE: ${RA_TYPE}
@@ -83,6 +86,7 @@ services:
       - ./chain/execution/jwtsecret:/etc/jwt.hex
       # - ./chain/execution/genesis.json:/etc/genesis/genesis.json
       - genesis:/etc/genesis/
+      - shared:/shared
       - data:/data
       - cert:/cert
       # - ./chain/consensus/data:/data
@@ -100,7 +104,7 @@ services:
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
-    image: "ethereum/client-go:latest"
+    image: "ethereum/client-go:v1.11.6"
     command: --datadir=/data init /genesis/genesis.json
     depends_on:
       create-beacon-chain-genesis:
@@ -111,7 +115,7 @@ services:
       - data:/data
 
   create-beacon-chain-genesis:
-    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
+    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:HEAD-5b8084"
     command:
       - testnet
       - generate-genesis
@@ -124,13 +128,13 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
-      - ./chain/execution/:/execution/
+      # - ./chain/execution/:/execution/
       - genesis:/genesis/
 
   beacon-chain:
     image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
-    #image: flashbots-prysm:local
-    #build:
+    # image: flashbots-prysm:local
+    # build:
     #  context: ./
     #  dockerfile: beacon.Dockerfile
     #  args:
@@ -166,11 +170,11 @@ services:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
       # - ./chain/execution/genesis.json:/execution/genesis.json
-      - genesis:/genesis
+      - genesis:/genesis/
       # - ./chain/consensus/beacondata:/beacondata
 
   validator:
-    image: "gcr.io/prysmaticlabs/prysm/validator:latest"
+    image: "gcr.io/prysmaticlabs/prysm/validator:HEAD-e4e8a0"
     command:
       - --beacon-rpc-provider=beacon-chain:4000
       - --datadir=/validatordata
@@ -196,4 +200,5 @@ volumes:
       o: "rw"
   genesis:
   data:
+  shared:
   cert:

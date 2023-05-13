@@ -9,6 +9,15 @@ from utils import refill_ether
 import os
 import socket
 import time 
+import ssl
+from enclave.ra_tls import get_ra_tls_session
+# from enclave.utils import convert_der_pem
+def convert_der_pem(cert_der_path, cert_pem_path):
+    with open(cert_der_path, "rb") as f:
+        der = f.read()
+    pem = ssl.DER_cert_to_PEM_cert(der)
+    with open(cert_pem_path, "w") as f:
+        f.write(pem)
 
 """
 In this example we setup a transaction for 0.1 eth with a gasprice of 1
@@ -17,19 +26,23 @@ From here we will use Flashbots to pass a bundle with the needed content
 ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key("0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8")
 ETH_ACCOUNT_FROM: LocalAccount = Account.from_key("0x741c58d0a4d9a76279a30538d647000797306885431b34469ecb749396d4ff52")
 ETH_ACCOUNT_TO: LocalAccount = Account.from_key("0x30481460b2af32f533ba27e32cae4af4c67a96c1856dba6be719ad90d9699814")
+c=0
 print("Connecting to RPC")
 # Setup w3 and flashbots
 while True:
     try:
-        endpoint = f"http://{socket.gethostbyname('builder')}:8545"
-        w3 = Web3(HTTPProvider(endpoint))
+        endpoint = f"https://{socket.gethostbyname('builder')}:8545"
+        s = get_ra_tls_session(socket.gethostbyname('builder'), 8545, "/cert/tlscert.der")
+        w3 = Web3(HTTPProvider(endpoint, session=s))
         block = w3.eth.block_number
         break
-    except:
+    except Exception as e:
+        print(e)
+        time.sleep(5)
+        c+=5
         pass
-
+print("total time", c)
 print("block", block)
-c=0
 while block <= 25:
     time.sleep(10)
     c+=10
@@ -133,3 +146,4 @@ print("Balance after", bal_after)
 
 # the tx is successful
 print(w3.eth.get_balance(ETH_ACCOUNT_TO.address))
+
