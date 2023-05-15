@@ -36,6 +36,7 @@ services:
       DEBUG: $DEBUG
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
+      - aesmd-socket:/var/run/aesmd
       # - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
       # - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
       - shared:/shared
@@ -80,6 +81,7 @@ services:
       DEBUG: $DEBUG
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
+      - aesmd-socket:/var/run/aesmd
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex

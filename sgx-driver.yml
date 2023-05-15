@@ -5,26 +5,18 @@ services:
   oot-aesmd-devices:
     devices:
       - /dev/isgx
-    volumes:
-      - aesmd-socket:/var/run/aesmd
       
   oot-enclave-devices:
     devices:
       - /dev/isgx
-    volumes:
-      - aesmd-socket:/var/run/aesmd
 
   # in-kernel driver device configs
   inkernel-aesmd-devices:
     devices:
       - /dev/sgx_enclave
       - /dev/sgx_provision
-    volumes:
-      - aesmd-socket:/var/run/aesmd
 
   inkernel-enclave-devices:
     devices:
       - /dev/sgx_enclave
-    volumes:
-      - aesmd-socket:/var/run/aesmd
 
