@@ -36,7 +36,7 @@ rm -rf /shared/*
 
 cd /Sting-Flashbots/searcher/src/
 
-${GRAMINE} enclave/create_stinger.py
+$GRAMINE enclave/create_stinger.py
 
 set +x
 while [ -z "$(ls -A /shared )" ]
@@ -48,8 +48,17 @@ set -x
 mv /shared/* "${INPUT_PATH}/leak/"
 $GRAMINE ./enclave/make_evidence.py 
 $GRAMINE ./enclave/verify_evidence.py 
-# $GRAMINE ./enclave/sgx-quote.py 
-# $GRAMINE ./enclave/sgx-report.py 
+
+# === SGX quote ===
+if [[ "$SGX" == 1 ]]; then
+    $GRAMINE ./enclave/sgx-report.py &> OUTPUT
+    grep -q "Generated SGX report" OUTPUT && echo "[ Success SGX report ]"
+    $GRAMINE ./enclave/sgx-quote.py &>> OUTPUT
+    grep -q "Extracted SGX quote" OUTPUT && echo "[ Success SGX quote ]"
+    make SGX=$SGX check
+    cat OUTPUT
+fi
+
 
 rm -rf "${INPUT_PATH}/leak/*"
 

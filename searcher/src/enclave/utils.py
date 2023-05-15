@@ -52,6 +52,7 @@ subversionservice_path = f'{input_dir}/leak/'
 cert_path = f'{input_dir}/tlscert.der'
 stinger_data_path = f'{data_dir}/stinger_data_path.json'
 verify_data_path = f'{data_dir}/verify_data_path.json'
+verify_info_path = f'{data_dir}/verify_info_path.json'
 
 
 def get_web3():

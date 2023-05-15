@@ -22,8 +22,8 @@ def verify_evidence(w3):
     print(f'verify_evidence leak_data_hash {leak_data_hash}')
 
     C = compute_pedersen_commitment(leak_data_hash, r)
-    adv_tx_computed = sign_tx(w3, unsigned_adv_tx, sender, k=C)
     print(f'make_evidence use commitment {C} as k in signature')
+    adv_tx_computed = sign_tx(w3, unsigned_adv_tx, sender, k=C)
     print(f'verify_evidence adv_tx_computed {adv_tx_computed}')
     assert(adv_tx_computed.hash in target_block['transactions'])
     adv_tx_block = w3.eth.get_transaction(adv_tx_computed.hash)
@@ -32,6 +32,9 @@ def verify_evidence(w3):
     assert(adv_tx_block.v == adv_tx_computed.v)
     assert(adv_tx_block.r.hex() == hex(adv_tx_computed.r))
     assert(adv_tx_block.s.hex() == hex(adv_tx_computed.s))
+    print("target block hash", target_block["hash"].hex())
+    with open(verify_info_path, "wb") as f:
+        f.write(bytes(target_block["hash"]))
 
 if __name__ == '__main__':
     w3 = get_web3()
