@@ -3,26 +3,20 @@ import random
 
 from cytoolz import dissoc
 from eth_account._utils.legacy_transactions import serializable_unsigned_transaction_from_dict
-from eth_account._utils.signing import to_bytes32, to_eth_v, to_standard_signature_bytes, to_standard_v
-from eth_utils import keccak, to_bytes
-from hexbytes import HexBytes
-
-from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
-from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
+from eth_account._utils.signing import to_bytes32, to_eth_v, to_standard_v
+from eth_utils import to_bytes
+from lib.commitment.secp256k1 import uint256_from_str
+from lib.mkp.proveth import generate_proof_blob_from_jsonrpc_using_number
 from prev_demo.utils import parse_contract
 from src.SF.SF_Application.SF_Application import generate_stinger
 from src.SF.Subversion_Service.Subversion_Service import leak_data
 from src.utils.asym_enc import get_public_key, target_key_path, asym_decrypt
-from src.utils.chain import get_web3, get_account, refill_ether, get_address, transfer_ether, sign_tx, ether_unit, \
-    send_tx, transact
-from src.utils.general import int_to_bytes, str_to_bytes, bytes_to_str, bytes_to_int, hex_to_bytes
+from src.utils.chain import get_web3, get_account, get_address, transfer_ether, sign_tx, ether_unit, \
+    send_tx, transact, local_url
+from src.utils.general import int_to_bytes, str_to_bytes, bytes_to_str, bytes_to_int
 from src.utils.tx import serialize_tx_list, deserialize_tx_list, recover_tx
 
 seed = 7
-
-Hx = Fq(0xbc4f48d7a8651dc97ae415f0b47a52ef1a2702098202392b88bc925f6e89ee17)
-Hy = Fq(0x361b27b55c10f94ec0630b4c7d28f963221a0031632092bf585825823f6e27df)
-H = Point(curve, Hx, Hy)
 
 commitment_opening_location = f'src/apps/searcher_builder'
 
@@ -34,7 +28,6 @@ def sample():
 
 def create_tx(w3, name, k=0):
     sender_account = get_account(w3, name)
-    refill_ether(w3, sender_account.address)
 
     receiver_addr = get_address(w3, 'receiver')
 
@@ -61,18 +54,6 @@ def make_bundle(w3):
 def decrypt_bundle(encrypted_bundle, private_key):
     bundle = deserialize_tx_list(bytes_to_str(asym_decrypt(encrypted_bundle, private_key)))
     return bundle
-
-
-
-# def make_pedersen_commitment(x, rnd_bytes=os.urandom):
-#     r = uint256_from_str(rnd_bytes(32))
-#     C = x * G + r * H
-#     return bytes_to_int(hex_to_bytes(ser(C))), r
-#
-#
-# def compute_pedersen_commitment(x, r):
-#     C = x * G + r * H
-#     return bytes_to_int(hex_to_bytes(ser(C))), r
 
 
 def make_commitment(x, rnd_bytes=os.urandom):
@@ -137,7 +118,6 @@ if __name__ == '__main__':
     w3 = get_web3()
 
     sting_account = get_account(w3, 'sting')
-    refill_ether(w3, sting_account.address)
 
     mr_enclave = bytes()
     bounty = int(0.5 * ether_unit)
@@ -157,6 +137,15 @@ if __name__ == '__main__':
     new_bundle, r, unsigned_adv_tx = make_evidence(w3, victim_bundle)
 
     receipt_list = apply(new_bundle)
+    victim_tx_receipt = receipt_list[-1]
+    print('victim_tx_receipt', victim_tx_receipt)
+    block_number = victim_tx_receipt['blockNumber']
+    tx_index = victim_tx_receipt['transactionIndex']
+    print('block_number', block_number)
+    print('tx_index', tx_index)
+    proof_blob = generate_proof_blob_from_jsonrpc_using_number(local_url, block_number, tx_index)
+    print('proof_blob', proof_blob)
+    exit(0)
 
     verify(w3, r, sting_account, receipt_list[0]['transactionHash'], unsigned_adv_tx, victim_bundle)
 

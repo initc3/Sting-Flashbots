@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-//https://github.com/witnet/elliptic-curve-solidity
+// Source: https://github.com/witnet/elliptic-curve-solidity
 
 pragma solidity >=0.5.3 <0.7.0;
 
