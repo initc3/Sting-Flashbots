@@ -5,9 +5,9 @@ from utils import *
 def make_evidence(w3):
     stinger_data = json.load(open(stinger_data_path))
     target_block= stinger_data["target_block"]
-    ss_files = os.listdir(subversionservice_path)
+    subv_files = os.listdir(subversionservice_path)
     leaked_txs = []
-    for file in ss_files:
+    for file in subv_files:
         tx_filepath = os.path.join(subversionservice_path, file)
         with open(tx_filepath, "rb") as f:
             buff = f.read()

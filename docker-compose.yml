@@ -25,7 +25,7 @@ services:
       RA_TYPE: "${RA_TYPE-dcap}"
       RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
       RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
-      RA_TLS_MRENCLAVE: "cd3205cb52ddb46b6af2824fac4962e6940623c167c2e93b2d16d5b3c4d27795"
+      RA_TLS_MRENCLAVE: "9ae184ec6408fba0fd2a7a8b26b769f9d0b69b8660d2343c8388f40dcd111af6"
       RA_TLS_MRSIGNER: any
       RA_TLS_ISV_SVN: any
       RA_TLS_ISV_PROD_ID: any
@@ -73,8 +73,8 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
-      SS_DIR: "/shared/"
-      SS_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
+      SUBV_DIR: "/shared/"
+      SUBV_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
       RA_CLIENT_SPID: $RA_CLIENT_SPID
       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY

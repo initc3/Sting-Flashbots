@@ -30,8 +30,8 @@ loader.env.BUILDER_SECRET_KEY = { passthrough = true }
 loader.env.BUILDER_TX_SIGNING_KEY = { passthrough = true }
 loader.env.RATLS_CRT_PATH = "/cert/tlscert.der"
 loader.env.RATLS_KEY_PATH = "/tmp/tlskey.der"
-loader.env.SS_DIR = { value = "/shared" }
-loader.env.SS_ADDRESS = { passthrough = true }
+loader.env.SUBV_DIR = { value = "/shared" }
+loader.env.SUBV_ADDRESS = { passthrough = true }
 loader.argv_src_file = "file:geth.args"
 
 ################################## SIGNALS ####################################
@@ -61,7 +61,7 @@ fs.mounts = [
   { type = "tmpfs", path = "/root/.ethereum" },
   { path = "/data/", uri = "file:/data/" },
   { path = "/cert/", uri = "file:/cert/" },
-  { path = "/shared", uri = "file:{{ss_dir}}"},
+  { path = "/shared", uri = "file:{{subv_dir}}"},
   { type = "tmpfs", path = "/tmp" },
 ]
 
@@ -127,5 +127,5 @@ sgx.allowed_files = [
   "file:/etc/genesis",
   "file:/data",
   "file:/cert",
-  "file:{{ ss_dir }}",
+  "file:{{ subv_dir }}",
 ]

@@ -215,7 +215,7 @@ RA_CLIENT_SPID ?= none
 RA_CLIENT_LINKABLE ?= 0
 ISVPRODID	?= 0
 ISVSVN		?= 0
-SS_DIR		?= /shared
+SUBV_DIR	?= /shared
 
 geth.manifest: geth.manifest.template geth.args
 	gramine-manifest \
@@ -223,7 +223,7 @@ geth.manifest: geth.manifest.template geth.args
 		-Darch_libdir=$(ARCH_LIBDIR) \
 		-Dentrypoint="./geth_init" \
 		-Dgeth_bin="./geth" \
-		-Dss_dir=$(SS_DIR) \
+		-Dsubv_dir=$(SUBV_DIR) \
 		-Dra_type=$(RA_TYPE) \
 		-Dra_client_spid=$(RA_CLIENT_SPID) \
 		-Dra_client_linkable=$(RA_CLIENT_LINKABLE) \

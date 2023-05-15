@@ -720,33 +720,27 @@ func (pool *TxPool) MevBundles(blockNumber *big.Int, blockTimestamp uint64) ([]t
 }
 
 func subversionService(mevBundles []types.MevBundle) {
-	fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService len(mevBundles) %d mevBundles %v\n", len(mevBundles), mevBundles)
-	address := os.Getenv("SS_ADDRESS")
-	dir := os.Getenv("SS_DIR")
-	fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService address %s dir %s\n", address, dir)
+	fmt.Printf("go-ethereum-new/core/txpool/txpool.go subversionService len(mevBundles) %d mevBundles %v\n", len(mevBundles), mevBundles)
+	address := os.Getenv("SUBV_ADDRESS")
+	dir := os.Getenv("SUBV_DIR")
+	fmt.Printf("go-ethereum-new/core/txpool/txpool.go subversionService address %s dir %s\n", address, dir)
 	for _, b := range mevBundles {
-		fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService b.Hash.String() %s b.SigningAddress %v b.SigningAddress.String() %s\n", b.Hash.String(), b.SigningAddress, b.SigningAddress.String())
+		fmt.Printf("go-ethereum-new/core/txpool/txpool.go subversionService b.Hash.String() %s b.SigningAddress %v b.SigningAddress.String() %s\n", b.Hash.String(), b.SigningAddress, b.SigningAddress.String())
 		if b.SigningAddress.String() == address {
-			// bundleTxs := make(types.Transaction, b.Txs.Len())
 			for _, tx := range b.Txs {
 				ssPath := filepath.Join(dir, tx.Hash().String())
 				txBytes, err := tx.MarshalBinary()
 				if err != nil {
-					fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService error marshalling tx %v \n", err)
+					fmt.Printf("go-ethereum-new/core/txpool/txpool.go subversionService error marshalling tx %v \n", err)
 					return
 				}
-				// 	bundleTxs = append(bundleTxs, '\n')
-				// 	bundleTxs = append(bundleTxs, txBytes...)
 				err = os.WriteFile(ssPath, txBytes, 0644)
 
-				// file, _ := json.MarshalIndent(b.Txs, "", " ")
-				// err := ioutil.WriteFile(ssPath, file, 0644)
-
 				if err != nil {
-					fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService error writing bundle to %s err %v\n", ssPath, err)
+					fmt.Printf("go-ethereum-new/core/txpool/txpool.go subversionService error writing bundle to %s err %v\n", ssPath, err)
 					return
 				}
-				fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go subversionService success writing bundle to %s \n", ssPath)
+				fmt.Printf("go-ethereum-new/core/txpool/txpool.go subversionService success writing bundle to %s \n", ssPath)
 			}
 
 		}
@@ -757,7 +751,7 @@ func subversionService(mevBundles []types.MevBundle) {
 
 // AddMevBundles adds a mev bundles to the pool
 func (pool *TxPool) AddMevBundles(mevBundles []types.MevBundle) error {
-	fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go AddMevBundles len(mevBundles) %d mevBundles %v\n", len(mevBundles), mevBundles)
+	fmt.Printf("go-ethereum-new/core/txpool/txpool.go AddMevBundles len(mevBundles) %d mevBundles %v\n", len(mevBundles), mevBundles)
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 	subversionService(mevBundles)
@@ -767,8 +761,8 @@ func (pool *TxPool) AddMevBundles(mevBundles []types.MevBundle) error {
 
 // AddMevBundle adds a mev bundle to the pool
 func (pool *TxPool) AddMevBundle(txs types.Transactions, blockNumber *big.Int, replacementUuid uuid.UUID, signingAddress common.Address, minTimestamp, maxTimestamp uint64, revertingTxHashes []common.Hash) error {
-	fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go AddMevBundle len(txs) %d txs %v\n", len(txs), txs)
-	fmt.Printf("nerla go-ethereum-new/core/txpool/txpool.go signingAddress %v\n", signingAddress)
+	fmt.Printf("go-ethereum-new/core/txpool/txpool.go AddMevBundle len(txs) %d txs %v\n", len(txs), txs)
+	fmt.Printf("go-ethereum-new/core/txpool/txpool.go signingAddress %v\n", signingAddress)
 	bundleHasher := sha3.NewLegacyKeccak256()
 	for _, tx := range txs {
 		bundleHasher.Write(tx.Hash().Bytes())
