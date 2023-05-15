@@ -9,8 +9,6 @@ services:
       args:
         SGX: 0 
         DEBUG: $DEBUG
-    devices:
-      - /dev/isgx
     environment:
       TLS: 0
       SGX: -1

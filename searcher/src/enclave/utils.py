@@ -24,7 +24,12 @@ from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
 from ra_tls import get_ra_tls_session
 
-HOST = socket.gethostbyname('builder')
+while True:
+    try:
+        HOST = socket.gethostbyname('builder')
+        break
+    except socket.gaierror:
+        time.sleep(5)
 PORT = 8545
 if int(os.environ.get("TLS", 1)) == 1:
     TLS = True
