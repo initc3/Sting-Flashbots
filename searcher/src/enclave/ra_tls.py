@@ -1,9 +1,7 @@
 import ctypes
-import errno
 import os
 import select 
 import socket
-import sys
 import ssl
 import requests
 import warnings
@@ -24,7 +22,7 @@ PORT = None
 CONNECTION = None
 SOCKET = None
 
-if os.environ.get("INSIDE_SGX", 0) == "1":
+if int(os.environ.get("INSIDE_SGX", 0)) == 1:
     lib_path = "/lib"
 else:
     lib_path = "/usr/src/gramine/build/tools/sgx/ra-tls"
@@ -61,7 +59,7 @@ def verify_callback(connection, x509, errnum, depth, ok):
     ra_tls_result = ra_tls_verify_callback_results(0,0,_U(epid(),dcap(),misc()))
     ra_tls_result_p = ctypes.pointer(ra_tls_result)
     ret = VERIFY_LIB.ra_tls_verify_callback_extended_der(CERT_DER, len(CERT_DER), ra_tls_result_p)
-    print("ra_tls_verify_callback ret", ret)
+    print("ra_tls_verify_callback returns mbedtls error code:", hex(-ret))
     return ret == 0
 
 def convert_der_pem(cert_der_path, cert_pem_path):

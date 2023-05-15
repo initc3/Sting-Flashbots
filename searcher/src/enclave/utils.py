@@ -2,7 +2,6 @@ import socket
 import os 
 import random
 import time
-import requests
 import rlp
 from rlp.sedes import Binary, big_endian_int, binary
 from hexbytes import HexBytes
@@ -11,7 +10,6 @@ from web3 import Web3, HTTPProvider
 from web3.middleware import geth_poa_middleware
 from web3.middleware import construct_sign_and_send_raw_middleware
 from eth_utils import keccak, to_bytes
-from eth_typing import HexStr
 # from eth_account.account import Account
 from lib.ecdsa.account import Account
 from eth_account.datastructures import SignedTransaction
@@ -83,22 +81,6 @@ def get_web3():
 def get_balance(w3, addr):
     balance = w3.eth.get_balance(addr)
     return balance
-
-def get_account(w3, account_name):
-    try:
-        path = f'/input/keystores/{account_name}'
-        filename = os.listdir(path)[0]
-        keyfile = open(f'{path}/{filename}', 'r')
-        encrypted_key = keyfile.read()
-    except:
-        path = f'/Sting-Flashbots/keystores/{account_name}'
-        filename = os.listdir(path)[0]
-        keyfile = open(f'{path}/{filename}', 'r')
-        encrypted_key = keyfile.read()
-
-    private_key = w3.eth.account.decrypt(encrypted_key, '')
-    account = Account.from_key(private_key)
-    return account
 
 def setup_new_account(w3):
     new_account = w3.eth.account.create()
@@ -200,45 +182,6 @@ def str_to_bytes(st):
 
 def hex_to_bytes(hx):
     return bytes.fromhex(hx)
-
-def deserialize_signed_tx(st):
-    data = eval(st)
-    return SignedTransaction(
-        rawTransaction=HexBytes(data['rawTransaction']),
-        hash=HexBytes(data['hash']),
-        r=data['r'],
-        s=data['s'],
-        v=data['v'],
-    )
-
-def serialize_signed_tx(signed_tx):
-    print(signed_tx)
-    return str({
-        'rawTransaction': signed_tx.rawTransaction.hex(),
-        'hash': signed_tx.hash.hex(),
-        'r': signed_tx.r,
-        's': signed_tx.s,
-        'v': signed_tx.v,
-    })
-
-def serialize_tx_list(tx_list):
-    serialized_tx_list = list()
-    for tx in tx_list:
-        serialized_tx_list.append(serialize_signed_tx(tx))
-    return bytes(str(serialized_tx_list), 'utf-8')
-
-def deserialize_tx_list(serialized_tx_list):
-    serialized_tx_list = eval(serialized_tx_list)
-    tx_list = list()
-    for serialized_tx in serialized_tx_list:
-        tx_list.append(deserialize_signed_tx(serialized_tx))
-    return tx_list
-
-# def recover_tx(raw_tx):
-#     tx_bytes = HexBytes(raw_tx)
-#     tx = Transaction.from_bytes(tx_bytes)
-#     return tx
-
 
 class Transaction(rlp.Serializable):
     fields = [
