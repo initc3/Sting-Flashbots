@@ -14,6 +14,7 @@ services:
       SGX: -1
       DEBUG: ${DEBUG}
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+      GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     volumes:
       - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
       - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh

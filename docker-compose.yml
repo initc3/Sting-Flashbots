@@ -13,6 +13,7 @@ services:
         RA_TYPE: "${RA_TYPE-dcap}"
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     depends_on:
       aesmd:
         condition: service_started
