@@ -27,11 +27,11 @@ if int(os.environ.get("INSIDE_SGX", 0)) == 1:
 else:
     lib_path = "/usr/src/gramine/build/tools/sgx/ra-tls"
 
-SO_PATH = {
-    "epid": f"{lib_path}/libra_tls_verify_epid.so",
-    "dcap": f"{lib_path}/libra_tls_verify_dcap.so"
-}
-VERIFY_LIB = ctypes.CDLL(SO_PATH[os.environ.get("RA_TYPE", "epid")])
+RA_TYPE = os.environ.get("RA_TYPE", "dcap")
+
+SO_PATH =  f"{lib_path}/libra_tls_verify_{RA_TYPE}.so",
+
+VERIFY_LIB = ctypes.CDLL(SO_PATH)
 CERT_DER = None
 
 
