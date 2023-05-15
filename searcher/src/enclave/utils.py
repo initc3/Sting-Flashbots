@@ -22,7 +22,6 @@ from flashbots import flashbot
 
 from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
-from ra_tls import get_ra_tls_session
 
 while True:
     try:
@@ -61,6 +60,7 @@ def get_web3():
     while True:
         try:
             if TLS:
+                from ra_tls import get_ra_tls_session
                 s = get_ra_tls_session(HOST, PORT, cert_path)
                 w3 = Web3(HTTPProvider(endpoint, session=s))
             else:
@@ -68,9 +68,9 @@ def get_web3():
             block = w3.eth.block_number
             print(f'current block {block}')
             break
-        except requests.exceptions.HTTPError as e:
+        except Exception as e:
             time.sleep(5)
-            print(f'waiting to connect to builder...', TLS)
+            print(f'waiting to connect to builder...', e)
             raise e
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     flashbot(w3, ETH_ACCOUNT_SIGNATURE, endpoint)
