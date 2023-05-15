@@ -40,6 +40,6 @@ ARG SGX=1
 ENV SGX=$SGX
 
 RUN make TLS=1 ENCLAVE_SIZE=4G LOCALNET=1
-
-CMD gramine-sgx ./geth
+CMD ./run.sh
+# CMD gramine-sgx ./geth
 # RUN gramine-sgx-sigstruct-view geth.sig

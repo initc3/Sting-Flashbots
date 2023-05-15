@@ -76,8 +76,8 @@ services:
       RA_CLIENT_SPID: $RA_CLIENT_SPID
       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
-      SGX: ${SGX}
-      DEBUG: ${DEBUG}
+      SGX: $SGX
+      DEBUG: $DEBUG
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - ./chain/execution/keystore/:/etc/keystore

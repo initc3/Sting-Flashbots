@@ -63,4 +63,3 @@ clean: reset
 .PHONY: reset
 reset:
 	$(RM) -r /Sting-Flashbots/searcher/enclave_data/* /Sting-Flashbots/searcher/output_data/* /Sting-Flashbots/searcher/input_data/*
-# $(RM) -r /shared-data/*

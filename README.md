@@ -41,24 +41,27 @@ GRAMINE_IMG_TAG=dcap-f160357
 
 ### Running in SGX mode versus Simulation mode
 
-> **Note**: To run in simulation mode, substitute add `--file docker-compose-sim.yml`
-to the `docker compose` commands., e.g.:
-> ```console
-> docker compose --file docker-compose-sim.yml build
-> ```
+#### To run in simulation mode, set in `.env` or environment 
+
+```
+SGX=0
+```
+
+#### To run without SGX use `docker-compose-nosgx.yml` file
+
+Add `--file docker-compose-nosgx.yml` to the `docker compose` commands., e.g.:
+```
+docker compose --file docker-compose-nosgx.yml build
+```
+
 
 ### Build docker image
 
 ```
-docker compose -f docker-compose-builder-relayer.yml build 
+docker compose build 
 ```
 
 ## Run demo
-> **Note**: To run in simulation mode, substitute add `--file docker-compose-sim.yml`
-to the `docker compose` commands., e.g.:
-> ```console
-> docker compose --file docker-compose-sim.yml build
-> ```
 
 ### Create docker containers for blockchain network, builder, and relayer
 
@@ -66,21 +69,14 @@ to the `docker compose` commands., e.g.:
 docker compose up -d
 ```
 
-### Enter Searcher container
+### Look at Searcher container logs
 
 ```
-docker compose run --rm searcher bash
+docker compose logs -f searcher 
 ```
 
-
-### Run Demo
-
-* generate stinger bundle
-* leak data from subversion service
-* make evidence bundle
-* verify evidence
+### Stop containers and delete volumes
 
 ```
-./run.sh
+docker compose down -v
 ```
-
