@@ -8,9 +8,9 @@ services:
       context: ./
       dockerfile: searcher.Dockerfile
       args:
-        SGX: $SGX
-        DEBUG: $DEBUG
-        RA_TYPE: $RA_TYPE
+        SGX: "${SGX-1}"
+        DEBUG: "${DEBUG-1}"
+        RA_TYPE: "${RA_TYPE-dcap}"
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
     depends_on:
@@ -21,7 +21,7 @@ services:
       service: ${SGX_DRIVER}-enclave-devices
     environment:
       # all of should be for builder's configuration
-      RA_TYPE: $RA_TYPE
+      RA_TYPE: "${RA_TYPE-dcap}"
       RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
       RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
       RA_TLS_MRENCLAVE: "77fc74f2579ccecce9a797d5b13d93cc6564b9fc3df1a03910a429be3a5186e4"
@@ -32,8 +32,8 @@ services:
       RA_CLIENT_SPID: $RA_CLIENT_SPID
       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       TLS: 1
-      SGX: $SGX
-      DEBUG: $DEBUG
+      SGX: "${SGX-1}"
+      DEBUG: "${DEBUG-1}"
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - aesmd-socket:/var/run/aesmd
@@ -53,8 +53,8 @@ services:
       args:
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-        SGX: $SGX
-        RA_TYPE: $RA_TYPE
+        SGX: "${SGX-1}"
+        RA_TYPE: "${RA_TYPE-dcap}"
         GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
         GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     ports:
@@ -77,8 +77,10 @@ services:
       RA_CLIENT_SPID: $RA_CLIENT_SPID
       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
-      SGX: $SGX
-      DEBUG: $DEBUG
+      SGX: "${SGX-1}"
+      DEBUG: "${DEBUG-1}"
+      RELAY_SECRET_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+      BUILDER_SECRET_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - aesmd-socket:/var/run/aesmd
@@ -91,7 +93,6 @@ services:
       - data:/data
       - cert:/cert
       # - ./chain/consensus/data:/data
-      # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
 
   aesmd:
     image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
@@ -129,7 +130,6 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
-      # - ./chain/execution/:/execution/
       - genesis:/genesis/
 
   beacon-chain:

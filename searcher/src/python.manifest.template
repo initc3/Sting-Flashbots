@@ -70,8 +70,6 @@ sgx.trusted_files = [
   "file:/usr/local/lib/libpython3.10.so.1.0",
   "file:{{ venvpath }}/",
 
-  "file:helper-files/",
-
   "file:enclave/",
 
 ]

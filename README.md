@@ -6,6 +6,8 @@
 
 ```
 export RA_CLIENT_SPID=<spid>
+export RA_TYPE=<dcap or epid>
+export RA_CLIENT_LINKABLE=<0 or 1>
 ```
 
 or add it in a `.env` file, at the root of this repository, e.g.:
@@ -13,6 +15,8 @@ or add it in a `.env` file, at the root of this repository, e.g.:
 ```env
 # .env file
 RA_CLIENT_SPID=0123456789abcdefghijklmnopqrstuv
+RA_TYPE=dcap
+RA_CLIENT_LINKABLE=0
 ```
 
 ### Set SGX driver environment variables
@@ -39,15 +43,15 @@ SGX_DRIVER=inkernel
 GRAMINE_IMG_TAG=dcap-f160357
 ```
 
-### Running in SGX mode versus Simulation mode
+### Running in SGX Simulation mode or without SGX
 
-#### To run in simulation mode, set in `.env` or environment 
+**To run in simulation mode, set in `.env` or environment**
 
 ```
 SGX=0
 ```
 
-#### To run without SGX use `docker-compose-nosgx.yml` file
+**To run without SGX use `docker-compose-nosgx.yml` file**
 
 Add `--file docker-compose-nosgx.yml` to the `docker compose` commands., e.g.:
 ```
