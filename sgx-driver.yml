@@ -5,7 +5,7 @@ services:
   oot-aesmd-devices:
     devices:
       - /dev/isgx
-
+      
   oot-enclave-devices:
     devices:
       - /dev/isgx

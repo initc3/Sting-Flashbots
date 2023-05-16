@@ -1,39 +1,36 @@
 version: '3.9'
 
 services:
-
   searcher:
     image: sting-searcher
     build:
       context: ./
       dockerfile: searcher.Dockerfile
       args:
-        RA_CLIENT_SPID: $RA_CLIENT_SPID
-        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-        SGX: $SGX
-        RA_TYPE: $RA_TYPE
-    # depends_on:
-    #   validator:
-    #     condition: service_started
+        SGX: 0 
+        DEBUG: $DEBUG
     environment:
-      RA_TLS_EPID_API_KEY: ${RA_TLS_EPID_API_KEY}
-      RA_CLIENT_SPID: ${RA_CLIENT_SPID}
-      SGX: ${SGX}
+      TLS: 0
+      SGX: -1
       DEBUG: ${DEBUG}
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+      GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     volumes:
-      - ./chain/keystores:/Sting-Flashbots/keystores
-      - ./searcher/simple.py:/Sting-Flashbots/simple.py
-      - ./searcher/utils.py:/Sting-Flashbots/utils.py
-    working_dir: /Sting-Flashbots
+      - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
+      - shared:/shared
+    working_dir: /Sting-Flashbots/searcher/src
+    command: ./run.sh
+
 
   builder:
-    image: ghcr.io/initc3/flashbots-builder:481f1c3c2
-    #build:
-    #  context: ./
-    #  dockerfile: geth.Dockerfile
-    #  args:
-    #    GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+    # image: ghcr.io/initc3/flashbots-builder:481f1c3c2
+    image: flashbots-builder:local
+    build:
+     context: ./
+     dockerfile: geth.Dockerfile
+     args:
+       GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
     entrypoint: geth
     command:
       - --http
@@ -69,30 +66,33 @@ services:
       geth-genesis:
         condition: service_completed_successfully
     environment:
+      SUBV_DIR: "/shared/"
+      SUBV_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
       BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
+      # - ./chain/execution/genesis-out.json:/etc/genesis.json
       - genesis:/etc/genesis/
+      - shared:/shared
       - data:/data
       # - ./chain/consensus/data:/data
-      # - ./go-ethereum/cmd/geth:/geth-sgx/go-ethereum/cmd/geth
 
 #configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
   geth-genesis:
-    image: "ethereum/client-go:latest"
+    image: "ethereum/client-go:v1.11.6"
     command: --datadir=/data init /genesis/genesis.json
     depends_on:
       create-beacon-chain-genesis:
         condition: service_completed_successfully
     volumes:
+      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
       - genesis:/genesis
-      # - ./chain/execution/genesis.json:/genesis/genesis.json
       - data:/data
 
   create-beacon-chain-genesis:
-    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:latest"
+    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:HEAD-5b8084"
     command:
       - testnet
       - generate-genesis
@@ -105,12 +105,13 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
-      # - ./chain/execution/:/execution/
+      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
       - genesis:/genesis/
 
   beacon-chain:
     image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
-    #build:
+    # image: flashbots-prysm:local
+    # build:
     #  context: ./
     #  dockerfile: beacon.Dockerfile
     #  args:
@@ -145,12 +146,12 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
+      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
       - genesis:/genesis/
-      # - ./chain/execution/genesis.json:/execution/genesis.json
       # - ./chain/consensus/beacondata:/beacondata
 
   validator:
-    image: "gcr.io/prysmaticlabs/prysm/validator:latest"
+    image: "gcr.io/prysmaticlabs/prysm/validator:HEAD-e4e8a0"
     command:
       - --beacon-rpc-provider=beacon-chain:4000
       - --datadir=/validatordata
@@ -168,11 +169,6 @@ services:
       # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
-  aesmd-socket:
-    driver: local
-    driver_opts:
-      type: "tmpfs"
-      device: "tmpfs"
-      o: "rw"
   genesis:
   data:
+  shared:

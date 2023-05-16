@@ -10,10 +10,12 @@ from Crypto.Random import get_random_bytes
 from eth_account.datastructures import SignedTransaction
 from hexbytes import HexBytes
 from eth_account import Account
+from eth_account.signers.local import LocalAccount
 
 CHAIN_ID = 32382
 GAS_LIMIT = 5000000
 
+ADMIN_ACCOUNT: LocalAccount = Account.from_key(os.environ.get("ADMIN_PRIVATE_KEY","0xf380884ad465b73845ca785d7e125e4cc831a8267ed1be5da6299ea6094d177c"))
 
 contract_addr_dict = {
     'Honeypot': '0x2ACe51b358Aa73b3D85C1962e8D2A9cD8e6349c7',
@@ -103,16 +105,14 @@ def transfer_ether(w3, sender_account, receiver_addr, amt, chain_id=CHAIN_ID):
 
 
 def refill_ether(w3, receiver_addr):
-    admin_account = get_account(w3, f'admin')
-
     amt = 100 * ether_unit
     balance = get_balance(w3, receiver_addr)
     amt -= balance
     print(f'refilling {amt}...')
 
     if amt > 0:
-        tx = transfer_ether(w3, admin_account, receiver_addr, amt)
-        signed_tx = sign_tx(tx, w3, admin_account)
+        tx = transfer_ether(w3, ADMIN_ACCOUNT, receiver_addr, amt)
+        signed_tx = sign_tx(tx, w3, ADMIN_ACCOUNT)
         return send_tx(signed_tx, w3)
 
     get_balance(w3, receiver_addr)

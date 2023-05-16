@@ -153,6 +153,7 @@ endif
 $(SRCDIR)/Makefile:
 	git clone -b $(GETH_BRANCH) $(GETH_REPO) $(SRCDIR)
 	cd $(SRCDIR) && git fetch --all && git checkout $(GETH_COMMIT)
+	cp txpool.go $(SRCDIR)/core/txpool/txpool.go
 	cd $(SRCDIR) && go mod download 
 
 # patch Geth
@@ -214,6 +215,7 @@ RA_CLIENT_SPID ?= none
 RA_CLIENT_LINKABLE ?= 0
 ISVPRODID	?= 0
 ISVSVN		?= 0
+SUBV_DIR	?= /shared
 
 geth.manifest: geth.manifest.template geth.args
 	gramine-manifest \
@@ -221,6 +223,7 @@ geth.manifest: geth.manifest.template geth.args
 		-Darch_libdir=$(ARCH_LIBDIR) \
 		-Dentrypoint="./geth_init" \
 		-Dgeth_bin="./geth" \
+		-Dsubv_dir=$(SUBV_DIR) \
 		-Dra_type=$(RA_TYPE) \
 		-Dra_client_spid=$(RA_CLIENT_SPID) \
 		-Dra_client_linkable=$(RA_CLIENT_LINKABLE) \

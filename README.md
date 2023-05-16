@@ -6,6 +6,8 @@
 
 ```
 export RA_CLIENT_SPID=<spid>
+export RA_TYPE=<dcap or epid>
+export RA_CLIENT_LINKABLE=<0 or 1>
 ```
 
 or add it in a `.env` file, at the root of this repository, e.g.:
@@ -13,6 +15,8 @@ or add it in a `.env` file, at the root of this repository, e.g.:
 ```env
 # .env file
 RA_CLIENT_SPID=0123456789abcdefghijklmnopqrstuv
+RA_TYPE=dcap
+RA_CLIENT_LINKABLE=0
 ```
 
 ### Set SGX driver environment variables
@@ -39,79 +43,44 @@ SGX_DRIVER=inkernel
 GRAMINE_IMG_TAG=dcap-f160357
 ```
 
-### Running in SGX mode versus Simulation mode
+### Running in SGX Simulation mode or without SGX
 
-> **Note**: To run in simulation mode, substitute add `--file docker-compose-sim.yml`
-to the `docker compose` commands., e.g.:
-> ```console
-> docker compose --file docker-compose-sim.yml build
-> ```
+**To run in simulation mode, set in `.env` or environment**
+
+```
+SGX=0
+```
+
+**To run without SGX use `docker-compose-nosgx.yml` file**
+
+Add `--file docker-compose-nosgx.yml` to the `docker compose` commands., e.g.:
+```
+docker compose --file docker-compose-nosgx.yml build
+```
+
 
 ### Build docker image
 
 ```
-docker compose -f docker-compose-builder-relayer.yml build 
+docker compose build 
 ```
 
 ## Run demo
-> **Note**: To run in simulation mode, substitute add `--file docker-compose-sim.yml`
-to the `docker compose` commands., e.g.:
-> ```console
-> docker compose --file docker-compose-sim.yml build
-> ```
 
 ### Create docker containers for blockchain network, builder, and relayer
 
 ```
-docker compose -f docker-compose-builder-relayer.yml up -d
+docker compose up -d
 ```
 
-### Enter Relayer container
+### Look at Searcher container logs
 
 ```
-docker compose -f docker-compose-builder-relayer.yml exec relayer bash
+docker compose logs -f searcher 
 ```
 
-### Enter Builder container in *seperate terminal*
+### Stop containers and delete volumes
 
 ```
-docker compose -f docker-compose-builder-relayer.yml exec builder bash
-```
-
-
-### Generate the relayer public/private key and SGX quote & report
-```
-./setup.sh
-```
-
-
-### Deploy Honeypot contract and setup puzzle
-
-* Create puzzle
-* Setup Honeypot contract
-* Claim Bounty
-
-```
-./run.sh
-```
-
-### Honest relayer delivers the block picked
-
-```
-./honest.sh
-```
-
-
-### Malicious relayer steal the preimage and replace the bounty claim tx
-
-*Address of the HoneyPot contract is hardcoded and you can only claim the bounty once so restart the network and rerun the protocol the other relayer*
-```
-docker compose -f docker-compose-builder-relayer.yml exec eth ./chain/chain.sh
-docker compose -f docker-compose-builder-relayer.yml exec relayer ./setup.sh
-docker compose -f docker-compose-builder-relayer.yml exec builder ./run.sh
-```
-
-
-```
-docker compose -f docker-compose-builder-relayer.yml exec relayer ./malicious.sh
+docker compose down -v
 ```

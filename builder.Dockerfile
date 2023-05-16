@@ -28,17 +28,19 @@ WORKDIR /geth-sgx/
 ADD builder/geth/geth.manifest.template /geth-sgx/
 ADD builder/geth/Makefile /geth-sgx/
 ADD builder/geth/geth_init.cpp /geth-sgx/
+ADD builder/geth/txpool.go txpool.go
+ADD builder/geth/run.sh ./run.sh
 
 ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
-ARG RA_CLIENT_LINKABLE
+ARG RA_CLIENT_LINKABLE=0
 ENV RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE
 ARG RA_TYPE=epid
 ENV RA_TYPE=$RA_TYPE
 ARG SGX=1
 ENV SGX=$SGX
 
-RUN make SGX=$SGX TLS=1 ENCLAVE_SIZE=4G LOCALNET=1 RA_TYPE=$RA_TYPE
-
-CMD RELAY_SECRET_KEY=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 BUILDER_SECRET_KEY=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 BUILDER_TX_SIGNING_KEY=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 gramine-sgx ./geth
+RUN make TLS=1 ENCLAVE_SIZE=4G LOCALNET=1
+CMD ./run.sh
+# CMD gramine-sgx ./geth
 # RUN gramine-sgx-sigstruct-view geth.sig

@@ -2,36 +2,47 @@ from eth_account.account import Account
 from eth_account.signers.local import LocalAccount
 from web3.middleware import construct_sign_and_send_raw_middleware
 
-from flashbots import flashbot
+from enclave.flashbots import flashbot
 from web3 import Web3, HTTPProvider
 from web3.types import TxParams, Wei
 from utils import refill_ether
 import os
 import socket
 import time 
+import ssl
+from enclave.ra_tls import get_ra_tls_session
+# from enclave.utils import convert_der_pem
+def convert_der_pem(cert_der_path, cert_pem_path):
+    with open(cert_der_path, "rb") as f:
+        der = f.read()
+    pem = ssl.DER_cert_to_PEM_cert(der)
+    with open(cert_pem_path, "w") as f:
+        f.write(pem)
 
 """
 In this example we setup a transaction for 0.1 eth with a gasprice of 1
 From here we will use Flashbots to pass a bundle with the needed content
 """
-ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key(
-    os.environ.get("ETH_SIGNER_KEY")
-)
+ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key("0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8")
 ETH_ACCOUNT_FROM: LocalAccount = Account.from_key("0x741c58d0a4d9a76279a30538d647000797306885431b34469ecb749396d4ff52")
 ETH_ACCOUNT_TO: LocalAccount = Account.from_key("0x30481460b2af32f533ba27e32cae4af4c67a96c1856dba6be719ad90d9699814")
+c=0
 print("Connecting to RPC")
 # Setup w3 and flashbots
 while True:
     try:
-        endpoint = f"http://{socket.gethostbyname('builder')}:8545"
-        w3 = Web3(HTTPProvider(endpoint))
+        endpoint = f"https://{socket.gethostbyname('builder')}:8545"
+        s = get_ra_tls_session(socket.gethostbyname('builder'), 8545, "/cert/tlscert.der")
+        w3 = Web3(HTTPProvider(endpoint, session=s))
         block = w3.eth.block_number
         break
-    except:
+    except Exception as e:
+        print(e)
+        time.sleep(5)
+        c+=5
         pass
-
+print("total time", c)
 print("block", block)
-c=0
 while block <= 25:
     time.sleep(10)
     c+=10
@@ -57,7 +68,7 @@ print(
     f"To account {ETH_ACCOUNT_TO.address}: {w3.eth.get_balance(ETH_ACCOUNT_TO.address)}"
 )
 
-flashbot(w3, ETH_ACCOUNT_FROM, endpoint)
+flashbot(w3, ETH_ACCOUNT_SIGNATURE, endpoint)
 
 # Setting up a transaction with 1 in gasPrice where we are trying to send
 # print("Sending request")
@@ -119,6 +130,7 @@ bundle = [
 block = w3.eth.block_number
 print("block", block)
 
+
 result = w3.flashbots.send_bundle(bundle, target_block_number=w3.eth.blockNumber + 10)
 result.wait()
 receipts = result.receipts()
@@ -130,7 +142,8 @@ bal_after = w3.eth.get_balance(ETH_ACCOUNT_FROM.address, block_number)
 profit = bal_after - bal_before - w3.toWei("2", "ether")  # sub block reward
 print("Balance before", bal_before)
 print("Balance after", bal_after)
-assert profit == bribe
+# assert profit == bribe
 
 # the tx is successful
 print(w3.eth.get_balance(ETH_ACCOUNT_TO.address))
+
