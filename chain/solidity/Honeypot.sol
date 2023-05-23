@@ -40,7 +40,7 @@ contract Honeypot {
         }
     }
 
-    function collectBounty(address enclave_address, bytes memory proof, bytes memory sig) public {
+    function collectBounty(address enclave_address, bytes calldata proof, bytes calldata sig) public {
         require(claimed == false, "bounty already claimed");
         bool found_address = false;
         for (uint i = 0; i < approved_enclaves.length; i++) {
@@ -49,7 +49,7 @@ contract Honeypot {
             }
         }
         require(found_address, "enclave_address not approved");
-        // verify_proof(proof);
+        verify_proof(proof);
         bytes32 hash = hash_data(proof);
         address signer = recover(hash, sig);
         require(signer == enclave_address, "proof must be signed by enclave_address");
@@ -58,7 +58,14 @@ contract Honeypot {
         emit BountyClaimed(msg.sender);
     }
 
-    function hash_data(bytes memory data) internal returns (bytes32) {
+    function verify_proof(bytes calldata proof) internal view {
+        uint proof_blocknum = bytes2Uint(proof[32:]);
+        bytes32 proof_blockhash = bytes32(proof[:32]);
+        require(proof_blocknum < block.number, "proof blocknum is too low");
+        require(blockhash(proof_blocknum) == proof_blockhash, "proof block hash incorrect");
+    }
+
+    function hash_data(bytes memory data) internal pure returns (bytes32) {
         bytes memory eth_prefix = '\x19Ethereum Signed Message:\n';
         bytes memory packed = abi.encodePacked(eth_prefix,uint2str(data.length),data);
         return keccak256(packed);
@@ -111,5 +118,13 @@ contract Honeypot {
             j /= 10;
         }
         str = string(bstr);
+    }
+
+    function bytes2Uint(bytes memory b) internal pure returns (uint256){
+        uint256 number;
+        for(uint i=0;i<b.length;i++){
+            number = number + uint(uint8(b[i]))*(2**(8*(b.length-(i+1))));
+        }
+        return number;
     }
 }

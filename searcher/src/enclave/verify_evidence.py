@@ -36,7 +36,7 @@ def verify_evidence(w3):
     with open(verify_info_path, "wb") as f:
         f.write(bytes(target_block["hash"]))
 
-    proof = b"proof"
+    proof = bytes(target_block["hash"]) + target_block_num.to_bytes(32, 'big')
     secret_key = open(secret_key_path, "rb").read()
     sig = sign_eth_data(w3, secret_key, proof)
     print("sig",sig)

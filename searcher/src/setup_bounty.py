@@ -16,7 +16,7 @@ import solcx
 from solcx import compile_source
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
-BOUNTY_AMT = 100000000000000
+BOUNTY_AMT = 150000000000000
 
 try:
     contract_address = open("contract_address").read()
@@ -102,6 +102,8 @@ def collect_bounty(w3):
     balance_before = w3.eth.get_balance(informant_account.address)
     send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
     balance_after = w3.eth.get_balance(informant_account.address)
+    print("profit", balance_after - balance_before)
+    assert contract.functions.claimed().call({"from": informant_account.address})
     assert balance_after > balance_before
 
 def get_account(w3, secret_key):
