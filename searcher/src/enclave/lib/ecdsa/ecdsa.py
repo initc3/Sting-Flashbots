@@ -112,7 +112,7 @@ def ecdsa_raw_sign(msg_hash: bytes,
     if k == 0:
         k = deterministic_generate_k(msg_hash, private_key_bytes)
 
-    print(f'!!!! k used in signature: {k}')
+    # print(f'!!!! k used in signature: {k}')
 
     r, y = fast_multiply(G, k)
     s_raw = inv(k, N) * (z + r * big_endian_to_int(private_key_bytes)) % N

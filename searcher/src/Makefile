@@ -1,6 +1,6 @@
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
 
-ifeq ($(DEBUG),1)
+ifeq ($(DEBUG),2)
 GRAMINE_LOG_LEVEL = debug
 else
 GRAMINE_LOG_LEVEL = error

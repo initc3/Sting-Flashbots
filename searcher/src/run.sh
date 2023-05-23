@@ -12,6 +12,7 @@ else
 fi
 
 INPUT_PATH=/Sting-Flashbots/searcher/input_data
+OUTPUT_PATH=/Sting-Flashbots/searcher/output_data
 
 mkdir -p "${INPUT_PATH}/leak/"
 
@@ -36,6 +37,21 @@ rm -rf /shared/*
 
 cd /Sting-Flashbots/searcher/src/
 
+# === SGX quote ===
+if [[ "$SGX" == 1 ]]; then
+    $GRAMINE ./enclave/sgx-report.py &> OUTPUT
+    grep -q "Generated SGX report" OUTPUT && echo "[ Success SGX report ]"
+    $GRAMINE ./enclave/sgx-quote.py &>> OUTPUT
+    grep -q "Extracted SGX quote" OUTPUT && echo "[ Success SGX quote ]"
+    cat OUTPUT
+    gramine-sgx-ias-request report --msb --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path "new_report" --sig-path ias.sig
+fi
+
+python setup_bounty.py setup_bounty_contract
+python setup_bounty.py submit_enclave
+python setup_bounty.py approve_enclave
+
+
 $GRAMINE enclave/create_stinger.py
 
 set +x
@@ -49,15 +65,6 @@ mv /shared/* "${INPUT_PATH}/leak/"
 $GRAMINE ./enclave/make_evidence.py 
 $GRAMINE ./enclave/verify_evidence.py 
 
-# === SGX quote ===
-if [[ "$SGX" == 1 ]]; then
-    $GRAMINE ./enclave/sgx-report.py &> OUTPUT
-    grep -q "Generated SGX report" OUTPUT && echo "[ Success SGX report ]"
-    $GRAMINE ./enclave/sgx-quote.py &>> OUTPUT
-    grep -q "Extracted SGX quote" OUTPUT && echo "[ Success SGX quote ]"
-    make SGX=$SGX check
-    cat OUTPUT
-fi
 
 
 rm -rf "${INPUT_PATH}/leak/*"

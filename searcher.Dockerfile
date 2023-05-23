@@ -9,15 +9,13 @@ RUN apt-get update && apt-get install -y python3-venv
 
 RUN python3.10 -m venv $VENV_PATH
 
-RUN pip3 install  \
-    web3==5.31.4 \
-    pyopenssl==23.1.1
-
 WORKDIR /
 COPY requirements.txt requirements.txt 
 RUN pip install -r requirements.txt 
 RUN $VENV_PATH/bin/pip install -r requirements.txt 
 
+RUN pip install git+https://github.com/initc3/auditee.git
+RUN $VENV_PATH/bin/pip install git+https://github.com/initc3/auditee.git
 
 COPY ./searcher/src/enclave/lib/ecdsa/account.py /usr/local/lib/python3.10/site-packages/eth_account/account.py
 COPY ./searcher/src/enclave/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-packages/eth_account/_utils/signing.py
