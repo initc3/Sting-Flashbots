@@ -19,3 +19,4 @@ chain/execution/geth/
 chain/consensus/validatordata/
 chain/consensus/beacondata/
 .env
+node_modules

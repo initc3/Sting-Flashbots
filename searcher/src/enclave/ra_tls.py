@@ -29,7 +29,7 @@ else:
 
 RA_TYPE = os.environ.get("RA_TYPE", "dcap")
 
-SO_PATH =  f"{lib_path}/libra_tls_verify_{RA_TYPE}.so",
+SO_PATH =  f"{lib_path}/libra_tls_verify_{RA_TYPE}.so"
 
 VERIFY_LIB = ctypes.CDLL(SO_PATH)
 CERT_DER = None
@@ -253,4 +253,3 @@ class MySSLConnection(SSL.Connection):
         stream.seek(0) 
 
         return stream         
-
