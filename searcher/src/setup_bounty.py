@@ -16,7 +16,7 @@ import solcx
 from solcx import compile_source
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
-BOUNTY_AMT = 1000
+BOUNTY_AMT = 100000000000000
 
 try:
     contract_address = open("contract_address").read()
@@ -24,19 +24,16 @@ except Exception as e:
     pass 
 
 def setup_bounty_contract(w3):
-    bounty_admin = Account.from_key(os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
-    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(bounty_admin))
-    print(f'bounty_admin {bounty_admin.address} balance: {w3.eth.get_balance(bounty_admin.address)}')
+    bounty_admin = get_account(w3, os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
+    # print(f'bounty_admin {bounty_admin.address} balance: {w3.eth.get_balance(bounty_admin.address)}')
     contract_address, contract, contract_id = deploy_contract(w3, bounty_admin.address, SOLIDITY_SOURCE)
     with open("contract_address", "w") as f:
         f.write(contract_address)
 
 def submit_enclave(w3):
-    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
-    contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
-    informant_account = Account.from_key(os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
-    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(informant_account))
-    print(f'informant_account {informant_account.address} balance: {w3.eth.get_balance(informant_account.address)}')
+    contract = get_contract(w3)
+    informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
+    # print(f'informant_account {informant_account.address} balance: {w3.eth.get_balance(informant_account.address)}')
     report = open("ias.report").read()
     report_json = json.loads(report)
     quote = base64.b64decode(report_json["isvEnclaveQuoteBody"])
@@ -44,13 +41,13 @@ def submit_enclave(w3):
         ias_sig_b64 = f.read()
     ias_sig = base64.b64decode(ias_sig_b64)
     enclave_address = Web3.toChecksumAddress(quote[368:388].hex())
-    print("enclave_address", enclave_address)
+    # print("enclave_address", enclave_address)
+    open("enclave_address", "w").write(enclave_address)
     # print("sgx report", bytes(json.dumps(report), 'utf-8'))
     send_tx(w3, contract.functions.setupEnclave(enclave_address, bytes(report, 'utf-8'), ias_sig), informant_account.address)
 
 def approve_enclave(w3):
-    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
-    contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
+    contract = get_contract(w3)
     bounty_admin = Account.from_key(os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(bounty_admin))
     print(f'bounty_admin {bounty_admin.address} balance: {w3.eth.get_balance(bounty_admin.address)}')
@@ -95,6 +92,27 @@ def approve_enclave(w3):
         exit(res.returncode)
     send_tx(w3, contract.functions.approveEnclave(enclave_address), bounty_admin.address)
 
+def collect_bounty(w3):
+    informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
+    proof = open("/Sting-Flashbots/searcher/output_data/proof", "rb").read()
+    sig = open("/Sting-Flashbots/searcher/output_data/proof.sig", "rb").read()
+    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
+    contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
+    enclave_address = open("enclave_address").read()
+    balance_before = w3.eth.get_balance(informant_account.address)
+    send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
+    balance_after = w3.eth.get_balance(informant_account.address)
+    assert balance_after > balance_before
+
+def get_account(w3, secret_key):
+    account = Account.from_key(secret_key)
+    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
+    return account   
+
+def get_contract(w3):
+    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
+    return w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
+
 def compile_source_file(contract_paths):
     base_path, contract_source_path, allowed = contract_paths
     with open(os.path.join(base_path, contract_source_path), 'r') as f:
@@ -137,7 +155,6 @@ def get_web3():
                 endpoint = f"http://{HOST}:{PORT}"
                 w3 = Web3(HTTPProvider(endpoint))
             block = w3.eth.block_number
-            print(f'current block {block}')
             break
         except Exception as e:
             time.sleep(5)

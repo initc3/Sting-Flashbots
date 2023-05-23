@@ -31,10 +31,18 @@ def verify_evidence(w3):
 
     assert(adv_tx_block.v == adv_tx_computed.v)
     assert(adv_tx_block.r.hex() == hex(adv_tx_computed.r))
-    assert(adv_tx_block.s.hex() == hex(adv_tx_computed.s))
+    assert(int(adv_tx_block.s.hex(), 16) == int(hex(adv_tx_computed.s), 16))
     print("target block hash", target_block["hash"].hex())
     with open(verify_info_path, "wb") as f:
         f.write(bytes(target_block["hash"]))
+
+    proof = b"proof"
+    secret_key = open(secret_key_path, "rb").read()
+    sig = sign_eth_data(w3, secret_key, proof)
+    print("sig",sig)
+    print("proof",proof)
+    open(os.path.join(output_dir, "proof"), "wb").write(proof)
+    open(os.path.join(output_dir, "proof.sig"), "wb").write(sig)
 
 if __name__ == '__main__':
     w3 = get_web3()

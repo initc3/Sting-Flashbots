@@ -66,7 +66,7 @@ $GRAMINE ./enclave/make_evidence.py
 $GRAMINE ./enclave/verify_evidence.py 
 
 
-# python setup_bounty.py collect_bounty
+python setup_bounty.py collect_bounty
 
 rm -rf "${INPUT_PATH}/leak/*"
 

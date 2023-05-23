@@ -14,6 +14,7 @@ from eth_utils import keccak, to_bytes
 from eth_account.datastructures import SignedTransaction
 from eth_account.signers.local import LocalAccount
 from eth_account._utils.legacy_transactions import Transaction
+from eth_account.messages import encode_defunct
 
 from flashbots import flashbot
 from lib.ecdsa.account import Account
@@ -211,3 +212,8 @@ def decode_raw_tx(w3, raw_tx):
         s=s,
         v=tx.v,
     )
+
+def sign_eth_data(w3, private_key, data):
+    data = encode_defunct(primitive=data)
+    res = w3.eth.account.sign_message(data, private_key)
+    return res.signature
