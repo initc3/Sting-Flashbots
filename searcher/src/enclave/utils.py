@@ -34,7 +34,7 @@ else:
     TLS = False
     endpoint = f"http://{HOST}:{PORT}"
 ADMIN_ACCOUNT: LocalAccount = Account.from_key(os.environ.get("ADMIN_PRIVATE_KEY","0xf380884ad465b73845ca785d7e125e4cc831a8267ed1be5da6299ea6094d177c"))
-ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
+SEARCHER_KEY: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
 CHAIN_ID = 32382
 GAS_LIMIT = 25000
 
@@ -64,14 +64,13 @@ def get_web3():
             else:
                 w3 = Web3(HTTPProvider(endpoint))
             block = w3.eth.block_number
-            print(f'current block {block}')
             break
         except Exception as e:
             time.sleep(5)
             print(f'waiting to connect to builder...', e)
             raise e
     w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    flashbot(w3, ETH_ACCOUNT_SIGNATURE, endpoint)
+    flashbot(w3, SEARCHER_KEY, endpoint)
     while block < 26:
         print(f'waiting for block number {block} > 25...')
         time.sleep(5)
@@ -150,7 +149,7 @@ def send_bundle(w3, bundle, block=None, wait=True):
     if block is None:
         block = w3.eth.blockNumber + 5
     print(f"sending bundle {bundle} for block {block}")
-    result = w3.flashbots.send_bundle(bundle, target_block_number=block, opts={"signingAddress": ETH_ACCOUNT_SIGNATURE.address})
+    result = w3.flashbots.send_bundle(bundle, target_block_number=block, opts={"signingAddress": SEARCHER_KEY.address})
     if wait:
         result.wait()
         receipts = result.receipts()

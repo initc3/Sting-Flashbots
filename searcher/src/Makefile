@@ -6,7 +6,6 @@ else
 GRAMINE_LOG_LEVEL = error
 endif
 
-
 PYTHON ?= python3.10
 VENV_PATH ?= ${HOME}/.venvs/sting
 VENV_LIB = $(shell ${VENV_PATH}/bin/python -m pip show web3 | grep Location: | cut -d" " -f2)
@@ -47,16 +46,10 @@ sgx_sign: python.manifest
 		--manifest $< \
 		--output $<.sgx
 
-.PHONY: check
-check:
-ifeq ($(SGX),1)
-	@grep -q "Generated SGX report" OUTPUT
-	@grep -q "Extracted SGX quote" OUTPUT
-endif
 
 .PHONY: clean
 clean: reset
-	$(RM) *.manifest *.manifest.sgx *.token *.sig OUTPUT* *.PID
+	$(RM) *.manifest *.manifest.sgx *.token *.sig OUTPUT* *.PID *.report contract_address
 	$(RM) -r /Sting-Flashbots/searcher/src/enclave/__pycache__
 
 

@@ -22,8 +22,13 @@ RUN go run build/ci.go install -static ./cmd/geth
 # Pull Geth into a second stage deploy alpine container
 FROM alpine:latest
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates jq
 COPY --from=builder /go-ethereum/build/bin/geth /usr/local/bin/
+
+HEALTHCHECK --interval=5s --start-period=360s \
+        CMD curl -s -X POST http://localhost:8545 -H "Content-Type: application/json" \
+        -d "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1,\"jsonrpc\":\"2.0\"}" | \
+        jq .result | xargs printf "%d" | xargs test 25 -lt
 
 EXPOSE 8545 8546 30303 30303/udp
 ENTRYPOINT ["geth"]

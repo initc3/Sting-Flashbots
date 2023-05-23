@@ -21,7 +21,7 @@ if os.path.isfile(secret_key_path):
         signing_key = f.read()
     signing_address = Account.from_key(signing_key).address
 else:
-    signing_account = setup_new_account(get_web3()) #TODO auto web3
+    signing_account = setup_new_account(get_web3())
     signing_address = signing_account.address
     with open(secret_key_path, "wb") as f:
         f.write(bytes(signing_account.privateKey))

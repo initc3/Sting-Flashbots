@@ -8,15 +8,17 @@ services:
       dockerfile: searcher.Dockerfile
       args:
         SGX: 0 
-        DEBUG: $DEBUG
+        DEBUG: "${DEBUG-1}"
     environment:
       TLS: 0
       SGX: -1
-      DEBUG: ${DEBUG}
+      DEBUG: "${DEBUG-1}"
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
       GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     volumes:
+      - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
       - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
       - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
       - shared:/shared
     working_dir: /Sting-Flashbots/searcher/src
@@ -73,7 +75,7 @@ services:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
-      # - ./chain/execution/genesis-out.json:/etc/genesis.json
+      # - ./chain/execution/genesis-out/genesis.json:/etc/genesis.json
       - genesis:/etc/genesis/
       - shared:/shared
       - data:/data
@@ -87,7 +89,7 @@ services:
       create-beacon-chain-genesis:
         condition: service_completed_successfully
     volumes:
-      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis
       - data:/data
 
@@ -105,7 +107,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
-      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis/
 
   beacon-chain:
@@ -146,7 +148,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
-      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis/
       # - ./chain/consensus/beacondata:/beacondata
 
