@@ -44,7 +44,7 @@ if [[ "$SGX" == 1 ]]; then
     $GRAMINE ./enclave/sgx-quote.py &>> OUTPUT
     grep -q "Extracted SGX quote" OUTPUT && echo "[ Success SGX quote ]"
     cat OUTPUT
-    gramine-sgx-ias-request report --msb --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig -v
+    gramine-sgx-ias-request report --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig
 fi
 
 python setup_bounty.py setup_bounty_contract
