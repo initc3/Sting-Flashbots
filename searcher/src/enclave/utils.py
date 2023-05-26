@@ -12,13 +12,13 @@ from web3.middleware import geth_poa_middleware
 from web3.middleware import construct_sign_and_send_raw_middleware
 from eth_utils import keccak, to_bytes
 # from eth_account.account import Account
-from lib.ecdsa.account import Account
 from eth_account.datastructures import SignedTransaction
 from eth_account.signers.local import LocalAccount
 from eth_account._utils.legacy_transactions import Transaction
+from eth_account.messages import encode_defunct
 
 from flashbots import flashbot
-
+from lib.ecdsa.account import Account
 from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
 
@@ -36,25 +36,25 @@ else:
     TLS = False
     endpoint = f"http://{HOST}:{PORT}"
 ADMIN_ACCOUNT: LocalAccount = Account.from_key(os.environ.get("ADMIN_PRIVATE_KEY","0xf380884ad465b73845ca785d7e125e4cc831a8267ed1be5da6299ea6094d177c"))
-ETH_ACCOUNT_SIGNATURE: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
+SEARCHER_KEY: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
 CHAIN_ID = 32382
 GAS_LIMIT = 25000
-
-print(f"ETH_ACCOUNT_SIGNATURE {ETH_ACCOUNT_SIGNATURE.address}")
 
 if int(os.environ.get("INSIDE_SGX", 0)) == 1:
     data_dir = "/data"
     input_dir = "/input"
+    output_dir = "/output"
 else:
     data_dir = '/Sting-Flashbots/searcher/enclave_data'
     input_dir = "/Sting-Flashbots/searcher/input_data"
+    output_dir = "/Sting-Flashbots/searcher/output_data"
 
 subversionservice_path = f'{input_dir}/leak/'
 cert_path = f'{input_dir}/tlscert.der'
 stinger_data_path = f'{data_dir}/stinger_data_path.json'
 verify_data_path = f'{data_dir}/verify_data_path.json'
 verify_info_path = f'{data_dir}/verify_info_path.json'
-
+secret_key_path = os.path.join(data_dir, "secret_key")
 
 def get_web3():
     while True:
@@ -66,14 +66,13 @@ def get_web3():
             else:
                 w3 = Web3(HTTPProvider(endpoint))
             block = w3.eth.block_number
-            print(f'current block {block}')
             break
         except Exception as e:
             time.sleep(5)
             print(f'waiting to connect to builder...', e)
             raise e
     # w3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    flashbot(w3, ETH_ACCOUNT_SIGNATURE, endpoint)
+    flashbot(w3, SEARCHER_KEY, endpoint)
     while block < 26:
         print(f'waiting for block number {block} > 25...')
         time.sleep(5)
@@ -233,3 +232,8 @@ def decode_raw_tx(w3, raw_tx):
         s=s,
         v=tx.v,
     )
+
+def sign_eth_data(w3, private_key, data):
+    data = encode_defunct(primitive=data)
+    res = w3.eth.account.sign_message(data, private_key)
+    return res.signature

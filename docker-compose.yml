@@ -17,29 +17,32 @@ services:
     depends_on:
       aesmd:
         condition: service_started
+      # builder:
+      #   condition: service_healthy
     extends:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      TLS: 1
+      SGX: "${SGX-1}"
+      DEBUG: "${DEBUG-1}"
+      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
+      RA_CLIENT_SPID: $RA_CLIENT_SPID
+      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       # all of should be for builder's configuration
       RA_TYPE: "${RA_TYPE-dcap}"
       RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
       RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
-      RA_TLS_MRENCLAVE: "9ae184ec6408fba0fd2a7a8b26b769f9d0b69b8660d2343c8388f40dcd111af6"
+      RA_TLS_MRENCLAVE: "82b30d3dba6815a1e2d5f36e955d571e0933c715499fab81ce0e097ec6f3aa93"
       RA_TLS_MRSIGNER: any
       RA_TLS_ISV_SVN: any
       RA_TLS_ISV_PROD_ID: any
-      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
-      RA_CLIENT_SPID: $RA_CLIENT_SPID
-      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-      TLS: 1
-      SGX: "${SGX-1}"
-      DEBUG: "${DEBUG-1}"
-      ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
     volumes:
       - aesmd-socket:/var/run/aesmd
-      # - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
-      # - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
+      - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
+      - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
+      - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
       - shared:/shared
       - cert:/cert/
     working_dir: /Sting-Flashbots/searcher/src
@@ -88,7 +91,7 @@ services:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
-      # - ./chain/execution/genesis.json:/etc/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/etc/genesis/
       - genesis:/etc/genesis/
       - shared:/shared
       - data:/data
@@ -113,7 +116,7 @@ services:
       create-beacon-chain-genesis:
         condition: service_completed_successfully
     volumes:
-      # - ./chain/execution/genesis.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis
       - data:/data
 
@@ -131,7 +134,9 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
+      # - ./chain/execution/:/execution/
       - genesis:/genesis/
+      # - ./chain/execution/genesis-out/:/genesis/
 
   beacon-chain:
     image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
@@ -171,7 +176,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
-      # - ./chain/execution/genesis.json:/execution/genesis.json
+      # - ./chain/execution/genesis-out/:/execution/
       - genesis:/genesis/
       # - ./chain/consensus/beacondata:/beacondata
 

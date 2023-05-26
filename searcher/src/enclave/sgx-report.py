@@ -4,7 +4,7 @@ import os
 import sys
 
 from Crypto.PublicKey import RSA
-from utils import verify_info_path
+from utils import *
 
 if not os.path.exists("/dev/attestation/report"):
     print("Cannot find `/dev/attestation/report`; are you running under SGX?")
@@ -16,13 +16,18 @@ with open("/dev/attestation/my_target_info", "rb") as f:
 with open("/dev/attestation/target_info", "wb") as f:
     f.write(my_target_info)
 
-with open(verify_info_path, "rb") as f:
-    block_hash = f.read()
+with open(secret_key_path, "rb") as f:
+    signing_key = f.read()
+signing_address = Account.from_key(signing_key).address
+
 with open("/dev/attestation/user_report_data", "wb") as f:
-    f.write(block_hash)
+    f.write(bytes.fromhex(signing_address[2:]))
 
 with open("/dev/attestation/report", "rb") as f:
     report = f.read()
+
+with open(os.path.join(output_dir, "report"), "wb") as f:
+    f.write(report)
 
 print(f"Generated SGX report with size = {len(report)} and the following fields:")
 print(f"  ATTRIBUTES.FLAGS: {report[48:56].hex()}  [ Debug bit: {report[48] & 2 > 0} ]")

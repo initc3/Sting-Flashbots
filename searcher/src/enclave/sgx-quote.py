@@ -4,7 +4,7 @@ import os
 import sys
 
 from Crypto.PublicKey import RSA
-from utils import verify_info_path
+from utils import *
 
 if not os.path.exists("/dev/attestation/quote"):
     print("Cannot find `/dev/attestation/quote`; "
@@ -14,13 +14,19 @@ if not os.path.exists("/dev/attestation/quote"):
 with open('/dev/attestation/attestation_type') as f:
     print(f"Detected attestation type: {f.read()}")
 
-with open(verify_info_path, "rb") as f:
-    block_hash = f.read()
+with open(secret_key_path, "rb") as f:
+    signing_key = f.read()
+signing_address = Account.from_key(signing_key).address
+
 with open("/dev/attestation/user_report_data", "wb") as f:
-    f.write(block_hash)
+    f.write(bytes.fromhex(signing_address[2:]))
 
 with open("/dev/attestation/quote", "rb") as f:
     quote = f.read()
+
+
+with open(os.path.join(output_dir, "quote"), "wb") as f:
+    f.write(quote)
 
 print(f"Extracted SGX quote with size = {len(quote)} and the following fields:")
 print(f"  ATTRIBUTES.FLAGS: {quote[96:104].hex()}  [ Debug bit: {quote[96] & 2 > 0} ]")

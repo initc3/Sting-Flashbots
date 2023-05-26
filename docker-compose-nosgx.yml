@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+
   searcher:
     image: sting-searcher
     build:
@@ -8,19 +9,21 @@ services:
       dockerfile: searcher.Dockerfile
       args:
         SGX: 0 
-        DEBUG: $DEBUG
+        DEBUG: "${DEBUG-1}"
+    # depends_on:
+    #   builder:
+    #     condition: service_healthy
     environment:
       TLS: 0
       SGX: -1
-      DEBUG: ${DEBUG}
+      DEBUG: "${DEBUG-1}"
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
       GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     volumes:
+      - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
       - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
       - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
-      - ./searcher/src/contracts:/Sting-Flashbots/searcher/src/contracts
-      - ./searcher/src/compile.sh:/Sting-Flashbots/searcher/src/compile.sh
-      - ./searcher/src/truffle-config.js:/Sting-Flashbots/searcher/src/truffle-config.js
       - shared:/shared
       - ./searcher/src/enclave/lib/py-evm/headers.py:/usr/local/lib/python3.10/site-packages/eth/rlp/headers.py
     working_dir: /Sting-Flashbots/searcher/src
@@ -60,7 +63,7 @@ services:
       - --builder.genesis_fork_version=0x20000089
       - --builder.bellatrix_fork_version=0x20000091
       - --builder.beacon_endpoints=http://beacon-chain:3500
-      - --miner.algotype=greedy
+      - --miner.algotype=mev-geth
       - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
     ports:
       - 28545:28545
@@ -77,7 +80,7 @@ services:
       - ./chain/execution/keystore/:/etc/keystore
       - ./chain/execution/geth_password.txt:/etc/geth_password.txt
       - ./chain/execution/jwtsecret:/etc/jwt.hex
-      # - ./chain/execution/genesis-out.json:/etc/genesis.json
+      # - ./chain/execution/genesis-out/genesis.json:/etc/genesis.json
       - genesis:/etc/genesis/
       - shared:/shared
       - data:/data
@@ -91,7 +94,7 @@ services:
       create-beacon-chain-genesis:
         condition: service_completed_successfully
     volumes:
-      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis
       - data:/data
 
@@ -109,7 +112,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
-      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis/
 
   beacon-chain:
@@ -150,7 +153,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/jwtsecret:/execution/jwtsecret
-      # - ./chain/execution/genesis-out.json:/genesis/genesis.json
+      # - ./chain/execution/genesis-out/:/genesis/
       - genesis:/genesis/
       # - ./chain/consensus/beacondata:/beacondata
 

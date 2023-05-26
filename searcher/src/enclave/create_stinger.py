@@ -16,7 +16,7 @@ def make_bundle_stinger(w3, signed_txs):
     print(f'sending stinger bundle {bundle}')
 
     target_block_num = w3.eth.blockNumber + 5
-    receipts = send_bundle(w3, bundle, ETH_ACCOUNT_SIGNATURE.address, block=target_block_num, wait=False)
+    receipts = send_bundle(w3, bundle, SEARCHER_KEY.address, block=target_block_num, wait=False)
     print('receipts', receipts)
 
     stinger_data = {

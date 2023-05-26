@@ -36,7 +36,7 @@ def make_evidence(w3):
     print(f'target block {target_block_num}')
     assert w3.eth.block_number < target_block_num
 
-    send_bundle(w3, new_bundle, ETH_ACCOUNT_SIGNATURE.address, block=target_block_num)
+    send_bundle(w3, new_bundle, SEARCHER_KEY.address, block=target_block_num)
 
     adv_receipt = w3.eth.get_transaction_receipt(signed_adv_tx.hash)
     print(f'adv_receipt {adv_receipt}')

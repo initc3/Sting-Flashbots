@@ -5,22 +5,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED 1
 ENV VENV_PATH=/root/.venvs/sting
 
-RUN apt-get update && apt-get install -y python3-venv npm
+RUN apt-get update && apt-get install -y python3-venv npm software-properties-common
 
 RUN npm install -g npm@7
 RUN npm install -g truffle@5.4.29
 
 RUN python3.10 -m venv $VENV_PATH
 
-RUN pip3 install  \
-    web3==5.31.4 \
-    pyopenssl==23.1.1
-
 WORKDIR /
 COPY requirements.txt requirements.txt 
 RUN pip install -r requirements.txt 
 RUN $VENV_PATH/bin/pip install -r requirements.txt 
 
+RUN pip install git+https://github.com/initc3/auditee.git
+RUN $VENV_PATH/bin/pip install git+https://github.com/initc3/auditee.git
 
 COPY ./searcher/src/enclave/lib/ecdsa/account.py /usr/local/lib/python3.10/site-packages/eth_account/account.py
 COPY ./searcher/src/enclave/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-packages/eth_account/_utils/signing.py
@@ -28,6 +26,7 @@ COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py /usr/local/lib/python3.10/sit
 COPY ./searcher/src/enclave/lib/ecdsa/coincurve.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
 COPY ./searcher/src/enclave/lib/ecdsa/main.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/main.py
 COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
+COPY ./searcher/src/enclave/lib/py-evm/headers.py /usr/local/lib/python3.10/site-packages/eth/rlp/headers.py
 
 COPY ./searcher/src/enclave/lib/ecdsa/account.py $VENV_PATH/lib/python3.10/site-packages/eth_account/account.py
 COPY ./searcher/src/enclave/lib/ecdsa/signing.py $VENV_PATH/lib/python3.10/site-packages/eth_account/_utils/signing.py
@@ -35,8 +34,9 @@ COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py $VENV_PATH/lib/python3.10/sit
 COPY ./searcher/src/enclave/lib/ecdsa/coincurve.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
 COPY ./searcher/src/enclave/lib/ecdsa/main.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/main.py
 COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
+COPY ./searcher/src/enclave/lib/py-evm/headers.py $VENV_PATH/lib/python3.10/site-packages/eth/rlp/headers.py
 
-# ADD /Sting-Flashbots/chain/contracts/HoneyPot.json /Sting-Flashbots/searcher/input_data/
+COPY ./chain/solidity/Honeypot.sol /Sting-Flashbots/searcher/solidity/
 
 
 ARG RA_TYPE=dcap

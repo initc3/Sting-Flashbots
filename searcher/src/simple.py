@@ -5,8 +5,6 @@ from web3.middleware import construct_sign_and_send_raw_middleware
 from enclave.flashbots import flashbot
 from web3 import Web3, HTTPProvider
 from web3.types import TxParams, Wei
-from utils import refill_ether
-import os
 import socket
 import time 
 import ssl
@@ -57,12 +55,6 @@ b = w3.eth.get_balance(ETH_ACCOUNT_FROM.address)
 print(
     f"From account {ETH_ACCOUNT_FROM.address}: {b}"
 )
-
-if b == 0:
-    refill_ether(w3, ETH_ACCOUNT_FROM.address)
-    print(
-        f"From account {ETH_ACCOUNT_FROM.address}: {w3.eth.get_balance(ETH_ACCOUNT_FROM.address)}"
-    )
 
 print(
     f"To account {ETH_ACCOUNT_TO.address}: {w3.eth.get_balance(ETH_ACCOUNT_TO.address)}"
