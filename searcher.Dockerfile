@@ -5,7 +5,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED 1
 ENV VENV_PATH=/root/.venvs/sting
 
-RUN apt-get update && apt-get install -y python3-venv 
+RUN apt-get update && apt-get install -y python3-venv npm
+
+RUN npm install -g npm@7
+RUN npm install -g truffle@5.4.29
 
 RUN python3.10 -m venv $VENV_PATH
 
@@ -22,12 +25,14 @@ RUN $VENV_PATH/bin/pip install -r requirements.txt
 COPY ./searcher/src/enclave/lib/ecdsa/account.py /usr/local/lib/python3.10/site-packages/eth_account/account.py
 COPY ./searcher/src/enclave/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-packages/eth_account/_utils/signing.py
 COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py /usr/local/lib/python3.10/site-packages/eth_keys/datatypes.py
+COPY ./searcher/src/enclave/lib/ecdsa/coincurve.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
 COPY ./searcher/src/enclave/lib/ecdsa/main.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/main.py
 COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
 
 COPY ./searcher/src/enclave/lib/ecdsa/account.py $VENV_PATH/lib/python3.10/site-packages/eth_account/account.py
 COPY ./searcher/src/enclave/lib/ecdsa/signing.py $VENV_PATH/lib/python3.10/site-packages/eth_account/_utils/signing.py
 COPY ./searcher/src/enclave/lib/ecdsa/datatypes.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/datatypes.py
+COPY ./searcher/src/enclave/lib/ecdsa/coincurve.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
 COPY ./searcher/src/enclave/lib/ecdsa/main.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/main.py
 COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
 

@@ -5,3 +5,4 @@ protobuf==3.19.5
 pycryptodome==3.17
 web3==5.31.4
 pyopenssl==23.1.1
+py-evm
