@@ -177,7 +177,6 @@ def send_bundle(w3, bundle, sender_addr, block=None, wait=True):
     result = w3.flashbots.send_bundle(bundle, target_block_number=block, opts={"signingAddress": sender_addr})
     if wait:
         result.wait()
-        receipts = result.receipts()
 
 Hx = Fq(0xbc4f48d7a8651dc97ae415f0b47a52ef1a2702098202392b88bc925f6e89ee17)
 Hy = Fq(0x361b27b55c10f94ec0630b4c7d28f963221a0031632092bf585825823f6e27df)
