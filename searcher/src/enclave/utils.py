@@ -1,3 +1,4 @@
+import json
 import socket
 import os 
 import random
@@ -82,10 +83,27 @@ def get_balance(w3, addr):
     balance = w3.eth.get_balance(addr)
     return balance
 
+def parse_contract(contract_name):
+    contract = json.load(open(f'./build/contracts/{contract_name}.json'))
+    return contract['abi'], contract['bytecode']
+
+def instantiate_contract(w3, contract_name, contract_addr):
+    abi, bytecode = parse_contract(contract_name)
+    return w3.eth.contract(address=contract_addr, abi=abi)
+
 def setup_new_account(w3):
     new_account = w3.eth.account.create()
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(new_account))
     return new_account
+
+def build_tx(func_to_call, w3, account_addr, value=0, nonce=0):
+    return func_to_call.build_transaction({
+        'from': account_addr,
+        'gas': GAS_LIMIT,
+        "gasPrice": w3.eth.gas_price,
+        'value': value,
+        'nonce': w3.eth.get_transaction_count(account_addr) if nonce == 0 else nonce
+    })
 
 def sign_tx(w3, tx, account, k=0):
     return w3.eth.account.sign_transaction(tx, account.privateKey, k)
@@ -97,12 +115,17 @@ def send_tx(w3, signed_tx):
 def wait_for_receipt(w3, tx_hash):
     return w3.eth.wait_for_transaction_receipt(tx_hash)
 
-def transfer_tx(w3, sender_addr, receiver_addr, amt):
+def transact(func_to_call, w3, account, value=0):
+    tx = build_tx(func_to_call, w3, account.address, value)
+    signed_tx = sign_tx(w3, tx, account)
+    return send_tx(w3, signed_tx)
+
+def transfer_tx(w3, sender_addr, receiver_addr, amt, gas_price=None):
     return {
         'to': receiver_addr,
         'from': sender_addr,
         'value': amt,
-        "gasPrice": w3.eth.gas_price*10,
+        "gasPrice": w3.eth.gas_price if gas_price is None else gas_price,
         'gas': GAS_LIMIT,
         'nonce': w3.eth.get_transaction_count(sender_addr),
         'chainId': CHAIN_ID,
@@ -123,12 +146,12 @@ def refill_ether(w3, receiver_addr, amt=1000):
 def sample(max=1000):
     return random.randint(0, max)
 
-def generate_tx(w3):
+def generate_tx(w3, gas_price=None):
     sender = setup_new_account(w3)
     receiver = setup_new_account(w3)
     amt = sample()
     refill_ether(w3, sender.address, amt+300000000000000)
-    return transfer_tx(w3, sender.address, receiver.address, amt), sender
+    return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price), sender
 
 def generate_signed_txs(w3, num):
     txs = []
@@ -146,16 +169,13 @@ def make_bundle(signed_txs):
         })
     return bundle
 
-def send_bundle(w3, bundle, block=None, wait=True):
+def send_bundle(w3, bundle, sender_addr, block=None, wait=True):
     if block is None:
         block = w3.eth.blockNumber + 5
     print(f"sending bundle {bundle} for block {block}")
-    result = w3.flashbots.send_bundle(bundle, target_block_number=block, opts={"signingAddress": SEARCHER_KEY.address})
+    result = w3.flashbots.send_bundle(bundle, target_block_number=block, opts={"signingAddress": sender_addr})
     if wait:
         result.wait()
-        receipts = result.receipts()
-        print(f"bundle receipts {receipts}")
-    return block
 
 Hx = Fq(0xbc4f48d7a8651dc97ae415f0b47a52ef1a2702098202392b88bc925f6e89ee17)
 Hy = Fq(0x361b27b55c10f94ec0630b4c7d28f963221a0031632092bf585825823f6e27df)
