@@ -111,8 +111,8 @@ def ecdsa_raw_sign(msg_hash: bytes,
     z = big_endian_to_int(msg_hash)
     if k == 0:
         k = deterministic_generate_k(msg_hash, private_key_bytes)
-
-    print(f'!!!! k used in signature: {k}')
+    else:
+        print(f'{k} is specified as nonce in ecdsa signature')
 
     r, y = fast_multiply(G, k)
     s_raw = inv(k, N) * (z + r * big_endian_to_int(private_key_bytes)) % N
