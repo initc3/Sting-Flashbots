@@ -37,6 +37,8 @@ rm -rf /shared/*
 
 cd /Sting-Flashbots/searcher/src/
 
+$GRAMINE ./enclave/gen_signingkey.py 
+
 # === SGX quote ===
 if [[ "$SGX" == 1 ]]; then
     $GRAMINE ./enclave/sgx-report.py &> OUTPUT

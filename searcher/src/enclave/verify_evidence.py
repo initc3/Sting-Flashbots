@@ -21,7 +21,7 @@ def verify_evidence(w3):
 
     assert(signed_adv_tx.v == adv_tx_computed.v)
     assert(signed_adv_tx.r == adv_tx_computed.r)
-    assert(signed_adv_tx.s == adv_tx_computed.s)
+    assert(signed_adv_tx.s == int(hex(adv_tx_computed.s), 16))
 
     target_block = w3.eth.get_block(verify_data['target_block_num'])
     print('target block hash', target_block.hash.hex())

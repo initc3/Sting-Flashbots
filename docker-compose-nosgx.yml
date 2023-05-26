@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+
   searcher:
     image: sting-searcher
     build:
@@ -9,6 +10,9 @@ services:
       args:
         SGX: 0 
         DEBUG: "${DEBUG-1}"
+    # depends_on:
+    #   builder:
+    #     condition: service_healthy
     environment:
       TLS: 0
       SGX: -1
@@ -20,9 +24,6 @@ services:
       - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
       - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
       - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
-      - ./searcher/src/contracts:/Sting-Flashbots/searcher/src/contracts
-      - ./searcher/src/compile.sh:/Sting-Flashbots/searcher/src/compile.sh
-      - ./searcher/src/truffle-config.js:/Sting-Flashbots/searcher/src/truffle-config.js
       - shared:/shared
       - ./searcher/src/enclave/lib/py-evm/headers.py:/usr/local/lib/python3.10/site-packages/eth/rlp/headers.py
     working_dir: /Sting-Flashbots/searcher/src
@@ -62,7 +63,7 @@ services:
       - --builder.genesis_fork_version=0x20000089
       - --builder.bellatrix_fork_version=0x20000091
       - --builder.beacon_endpoints=http://beacon-chain:3500
-      - --miner.algotype=greedy
+      - --miner.algotype=mev-geth
       - --miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524
     ports:
       - 28545:28545

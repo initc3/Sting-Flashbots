@@ -17,24 +17,26 @@ services:
     depends_on:
       aesmd:
         condition: service_started
+      # builder:
+      #   condition: service_healthy
     extends:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      TLS: 1
+      SGX: "${SGX-1}"
+      DEBUG: "${DEBUG-1}"
+      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
+      RA_CLIENT_SPID: $RA_CLIENT_SPID
+      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       # all of should be for builder's configuration
       RA_TYPE: "${RA_TYPE-dcap}"
       RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
       RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
-      RA_TLS_MRENCLAVE: "8df8873bade672b52266df0254868fdd267cef3c0d069447d60c2aed38971b62"
+      RA_TLS_MRENCLAVE: "82b30d3dba6815a1e2d5f36e955d571e0933c715499fab81ce0e097ec6f3aa93"
       RA_TLS_MRSIGNER: any
       RA_TLS_ISV_SVN: any
       RA_TLS_ISV_PROD_ID: any
-      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
-      RA_CLIENT_SPID: $RA_CLIENT_SPID
-      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
-      TLS: 1
-      SGX: "${SGX-1}"
-      DEBUG: "${DEBUG-1}"
     volumes:
       - aesmd-socket:/var/run/aesmd
       - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
@@ -132,6 +134,7 @@ services:
     volumes:
       - ./chain/consensus/config.yml:/consensus/config.yml
       - ./chain/execution/genesis.json:/execution/genesis.json
+      # - ./chain/execution/:/execution/
       - genesis:/genesis/
       # - ./chain/execution/genesis-out/:/genesis/
 

@@ -71,7 +71,7 @@ def get_web3():
             time.sleep(5)
             print(f'waiting to connect to builder...', e)
             raise e
-    w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    # w3.middleware_onion.inject(geth_poa_middleware, layer=0)
     flashbot(w3, SEARCHER_KEY, endpoint)
     while block < 26:
         print(f'waiting for block number {block} > 25...')

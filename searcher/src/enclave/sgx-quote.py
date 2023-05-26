@@ -14,16 +14,10 @@ if not os.path.exists("/dev/attestation/quote"):
 with open('/dev/attestation/attestation_type') as f:
     print(f"Detected attestation type: {f.read()}")
 
+with open(secret_key_path, "rb") as f:
+    signing_key = f.read()
+signing_address = Account.from_key(signing_key).address
 
-if os.path.isfile(secret_key_path):
-    with open(secret_key_path, "rb") as f:
-        signing_key = f.read()
-    signing_address = Account.from_key(signing_key).address
-else:
-    signing_account = setup_new_account(get_web3())
-    signing_address = signing_account.address
-    with open(secret_key_path, "wb") as f:
-        f.write(bytes(signing_account.privateKey))
 with open("/dev/attestation/user_report_data", "wb") as f:
     f.write(bytes.fromhex(signing_address[2:]))
 

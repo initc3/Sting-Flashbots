@@ -140,7 +140,7 @@ geth.args:
 			--builder.genesis_fork_version=0x20000089 \
 			--builder.bellatrix_fork_version=0x20000091 \
 			--builder.beacon_endpoints=http://beacon-chain:3500 \
-			--miner.algotype=greedy \
+			--miner.algotype=mev-geth \
       		--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
 		> $@
 endif

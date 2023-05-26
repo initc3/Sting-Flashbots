@@ -16,15 +16,10 @@ with open("/dev/attestation/my_target_info", "rb") as f:
 with open("/dev/attestation/target_info", "wb") as f:
     f.write(my_target_info)
 
-if os.path.isfile(secret_key_path):
-    with open(secret_key_path, "rb") as f:
-        signing_key = f.read()
-    signing_address = Account.from_key(signing_key).address
-else:
-    signing_account = setup_new_account(get_web3())
-    signing_address = signing_account.address
-    with open(secret_key_path, "wb") as f:
-        f.write(bytes(signing_account.privateKey))
+with open(secret_key_path, "rb") as f:
+    signing_key = f.read()
+signing_address = Account.from_key(signing_key).address
+
 with open("/dev/attestation/user_report_data", "wb") as f:
     f.write(bytes.fromhex(signing_address[2:]))
 

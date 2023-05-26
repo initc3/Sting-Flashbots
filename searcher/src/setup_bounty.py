@@ -34,15 +34,19 @@ def submit_enclave(w3):
     contract = get_contract(w3)
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
     # print(f'informant_account {informant_account.address} balance: {w3.eth.get_balance(informant_account.address)}')
-    report = open("ias.report").read()
-    report_json = json.loads(report)
-    quote = base64.b64decode(report_json["isvEnclaveQuoteBody"])
-    with open("ias.sig") as f:
-        ias_sig_b64 = f.read()
-    ias_sig = base64.b64decode(ias_sig_b64)
-    enclave_address = Web3.toChecksumAddress(quote[368:388].hex())
+    enclave_address = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
+    if int(os.environ.get("SGX", 1)) == 1:
+        report = open("ias.report").read()
+        report_json = json.loads(report)
+        quote = base64.b64decode(report_json["isvEnclaveQuoteBody"])
+        with open("ias.sig") as f:
+            ias_sig_b64 = f.read()
+        ias_sig = base64.b64decode(ias_sig_b64)
+        assert enclave_address == Web3.toChecksumAddress(quote[368:388].hex())
+    else:
+        report = "ias report"
+        ias_sig = b"ias sig"
     # print("enclave_address", enclave_address)
-    open("enclave_address", "w").write(enclave_address)
     # print("sgx report", bytes(json.dumps(report), 'utf-8'))
     send_tx(w3, contract.functions.setupEnclave(enclave_address, bytes(report, 'utf-8'), ias_sig), informant_account.address)
 
@@ -56,41 +60,42 @@ def approve_enclave(w3):
     sgx_data = contract.functions.requested_enclaves_data(contract_enclave_addr).call({"from": bounty_admin.address})
     report = sgx_data[0].decode("utf-8")
     ias_sig = sgx_data[1]
-    report_json = json.loads(report)
-    quote = base64.b64decode(report_json["isvEnclaveQuoteBody"])
+    if int(os.environ.get("SGX", 1)) == 1:
+        report_json = json.loads(report)
+        quote = base64.b64decode(report_json["isvEnclaveQuoteBody"])
 
-    mrenclave = quote[112:144].hex()
-    report_data = quote[368:432]
-    enclave_address = Web3.toChecksumAddress(report_data[:20].hex())
-    assert contract_enclave_addr == enclave_address
-    APPROVED_MRENCLAVE = mrenclave #TODO reporoducible builds
-    # assert mrenclave == APPROVED_MRENCLAVE
-    # auditee.verify_mrenclave(
-    #     'enclave/',
-    #     'python.manifest.sgx',
-    #     ias_report=report_path,
-    #     APPROVED_MRENCLAVE
-    # )
+        mrenclave = quote[112:144].hex()
+        report_data = quote[368:432]
+        enclave_address = Web3.toChecksumAddress(report_data[:20].hex())
+        assert contract_enclave_addr == enclave_address
+        APPROVED_MRENCLAVE = mrenclave #TODO reporoducible builds
+        # assert mrenclave == APPROVED_MRENCLAVE
+        # auditee.verify_mrenclave(
+        #     'enclave/',
+        #     'python.manifest.sgx',
+        #     ias_report=report_path,
+        #     APPROVED_MRENCLAVE
+        # )
 
-    report_path = "contract.report"
-    sig_path = "contract.sig"
-    open(report_path, "w").write(report)
-    ias_sig_b64 = base64.b64encode(ias_sig).decode("ascii")
-    open(sig_path, "w").write(ias_sig_b64)
+        report_path = "contract.report"
+        sig_path = "contract.sig"
+        open(report_path, "w").write(report)
+        ias_sig_b64 = base64.b64encode(ias_sig).decode("ascii")
+        open(sig_path, "w").write(ias_sig_b64)
 
+        verify_report_cmd = 'gramine-sgx-ias-verify-report ' + \
+            f'--mr-enclave {APPROVED_MRENCLAVE} ' + \
+            f'--report-data {report_data.hex()} ' + \
+            f'--report-path {report_path} ' + \
+            f'--sig-path {sig_path} ' + \
+            '--allow-debug-enclave --allow-outdated-tcb' 
+        print(verify_report_cmd)
+        res = subprocess.run(verify_report_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        if res.returncode != 0:
+            print(f"gramine-sgx-ias-verify-report failed with code {res.returncode}\n{res.stdout.decode('utf-8')}{res.stderr.decode('utf-8')}")
+            exit(res.returncode)
 
-    verify_report_cmd = 'gramine-sgx-ias-verify-report ' + \
-        f'--mr-enclave {APPROVED_MRENCLAVE} ' + \
-        f'--report-data {report_data.hex()} ' + \
-        f'--report-path {report_path} ' + \
-        f'--sig-path {sig_path} ' + \
-        '--allow-debug-enclave --allow-outdated-tcb' 
-    print(verify_report_cmd)
-    res = subprocess.run(verify_report_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    if res.returncode != 0:
-        print(f"gramine-sgx-ias-verify-report failed with code {res.returncode}\n{res.stdout.decode('utf-8')}{res.stderr.decode('utf-8')}")
-        exit(res.returncode)
-    send_tx(w3, contract.functions.approveEnclave(enclave_address), bounty_admin.address)
+    send_tx(w3, contract.functions.approveEnclave(contract_enclave_addr), bounty_admin.address)
 
 def collect_bounty(w3):
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
@@ -98,7 +103,7 @@ def collect_bounty(w3):
     sig = open("/Sting-Flashbots/searcher/output_data/proof.sig", "rb").read()
     _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
     contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
-    enclave_address = open("enclave_address").read()
+    enclave_address = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
     balance_before = w3.eth.get_balance(informant_account.address)
     send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
     balance_after = w3.eth.get_balance(informant_account.address)
@@ -148,7 +153,7 @@ def get_web3():
         try:
             HOST = socket.gethostbyname('builder')
             PORT = 8545
-            if int(os.environ.get("TLS", 1)) == 1:
+            if int(os.environ.get("TLS", 0)) == 1:
                 endpoint = f"https://{HOST}:{PORT}"
                 from enclave.ra_tls import get_ra_tls_session
                 s = get_ra_tls_session(HOST, PORT, "/cert/tlscert.der")
