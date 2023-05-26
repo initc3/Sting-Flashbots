@@ -48,10 +48,7 @@ def make_evidence(w3):
 
     verify_data = {
         'r': r,
-        # 'unsigned_adv_tx': unsigned_adv_tx,
         'adv_private_key': sender.privateKey.hex(),
-        # 'adv_tx_hash': signed_adv_tx.hash.hex(),
-        # 'stinger_bundle_hashes': [leaked_tx_hash.hex() for leaked_tx_hash in leaked_tx_hashes],
         'target_block_num': target_block_num,
         'adv_prf': adv_prf.hex(),
         'victim_prf': victim_prf.hex(),
