@@ -34,10 +34,9 @@ fi
 
 rm -rf /shared/*
 
-
 cd /Sting-Flashbots/searcher/src/
 
-$GRAMINE ./enclave/gen_signingkey.py 
+$GRAMINE -m enclave.gen_signing_key
 
 # === SGX quote ===
 if [[ "$SGX" == 1 ]]; then
@@ -49,12 +48,11 @@ if [[ "$SGX" == 1 ]]; then
     gramine-sgx-ias-request report --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig
 fi
 
-python setup_bounty.py setup_bounty_contract
-python setup_bounty.py submit_enclave
-python setup_bounty.py approve_enclave
+python -m setup_bounty setup_bounty_contract
+python -m setup_bounty submit_enclave
+python -m setup_bounty approve_enclave
 
-
-$GRAMINE enclave/create_stinger.py
+$GRAMINE -m enclave.create_stinger
 
 set +x
 while [ -z "$(ls -A /shared )" ]
@@ -64,11 +62,11 @@ done
 set -x
 
 mv /shared/* "${INPUT_PATH}/leak/"
-$GRAMINE ./enclave/make_evidence.py 
-$GRAMINE ./enclave/verify_evidence.py 
 
+python -m make_evidence
+$GRAMINE -m enclave.verify_evidence
 
-python setup_bounty.py collect_bounty
+python -m setup_bounty collect_bounty
 
 rm -rf "${INPUT_PATH}/leak/*"
 

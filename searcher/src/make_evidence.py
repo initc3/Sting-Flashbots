@@ -1,5 +1,3 @@
-import json
-
 from lib.mkp.proveth import generate_proof_blob
 from utils import *
 
@@ -19,11 +17,11 @@ def make_evidence(w3):
             break
     print(f'leaked_tx {leaked_tx}')
 
-    leaked_tx_hash = leaked_tx.hash
-    print(f'make commitment to leaked_tx_hash {leaked_tx_hash}')
+    leaked_tx_sig_hash = keccak(b''.join([int_to_bytes(leaked_tx.v), str_to_bytes(leaked_tx.r), str_to_bytes(leaked_tx.s)]))
+    print(f'make commitment to leaked_tx_hash {leaked_tx_sig_hash}')
 
-    C, r = make_pedersen_commitment(bytes_to_int(leaked_tx_hash))
-    print(f'use commitment {C} as nonce in signature')
+    C, r = make_pedersen_commitment(bytes_to_int(leaked_tx_sig_hash))
+    print(f'use commitment {C} as nonce in ECDSA signature')
 
     unsigned_adv_tx, sender = generate_tx(w3, w3.eth.gas_price * 10)
     print(f'unsigned_adv_tx {unsigned_adv_tx}')
@@ -42,7 +40,7 @@ def make_evidence(w3):
     print(f'adv_receipt {adv_receipt}')
     adv_prf = generate_proof_blob(w3, adv_receipt['blockNumber'], adv_receipt['transactionIndex'])
 
-    victim_receipt = w3.eth.get_transaction_receipt(leaked_tx_hash)
+    victim_receipt = w3.eth.get_transaction_receipt(leaked_tx.hash)
     print(f'victim_receipt {victim_receipt}')
     victim_prf = generate_proof_blob(w3, victim_receipt['blockNumber'], victim_receipt['transactionIndex'])
 
@@ -58,7 +56,9 @@ def make_evidence(w3):
 
 
 if __name__ == '__main__':
-    print(f'make_evidence =========================================================================')
+    print('========================================================================= generating_signing_key')
 
     w3 = get_web3()
     make_evidence(w3)
+
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

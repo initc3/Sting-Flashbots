@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 
-from Crypto.PublicKey import RSA
 from utils import *
+
 
 if not os.path.exists("/dev/attestation/report"):
     print("Cannot find `/dev/attestation/report`; are you running under SGX?")
