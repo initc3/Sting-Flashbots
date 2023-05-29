@@ -12,7 +12,7 @@ def verify_evidence(w3):
 
     r = verify_data['r']
     C = compute_pedersen_commitment(bytes_to_int(keccak(b''.join([int_to_bytes(signed_victim_tx.v), str_to_bytes(hex((signed_victim_tx.r))), str_to_bytes(hex(signed_victim_tx.s))]))), r)
-    print(f'make_evidence use commitment {C} as nonce in signature')
+    print(f'make_evidence use commitment {C} as nonce in ECDSA signature')
 
     adv_account = Account.from_key(verify_data['adv_private_key'])
     adv_tx_computed = sign_tx(w3, unsigned_adv_tx, adv_account, k=C)
@@ -37,7 +37,9 @@ def verify_evidence(w3):
 
 
 if __name__ == '__main__':
-    print('verify_evidence =========================================================================')
+    print('========================================================================= generating_signing_key')
 
     w3 = get_web3()
     verify_evidence(w3)
+
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

@@ -4,23 +4,21 @@ import os
 import random
 import time
 import rlp
+
 from rlp.sedes import Binary, big_endian_int, binary
 from hexbytes import HexBytes
-
 from web3 import Web3, HTTPProvider
-from web3.middleware import geth_poa_middleware
 from web3.middleware import construct_sign_and_send_raw_middleware
-from eth_utils import keccak, to_bytes
-# from eth_account.account import Account
+from eth_utils import keccak
 from eth_account.datastructures import SignedTransaction
 from eth_account.signers.local import LocalAccount
 from eth_account._utils.legacy_transactions import Transaction
 from eth_account.messages import encode_defunct
-
-from flashbots import flashbot
+from lib.flashbots import flashbot
 from lib.ecdsa.account import Account
 from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
+
 
 while True:
     try:
@@ -54,7 +52,8 @@ cert_path = f'{input_dir}/tlscert.der'
 stinger_data_path = f'{data_dir}/stinger_data_path.json'
 verify_data_path = f'{data_dir}/verify_data_path.json'
 verify_info_path = f'{data_dir}/verify_info_path.json'
-secret_key_path = os.path.join(data_dir, "secret_key")
+secret_key_path = f'{data_dir}/secret_key'
+
 
 def get_web3():
     while True:
@@ -83,13 +82,6 @@ def get_balance(w3, addr):
     balance = w3.eth.get_balance(addr)
     return balance
 
-def parse_contract(contract_name):
-    contract = json.load(open(f'./build/contracts/{contract_name}.json'))
-    return contract['abi'], contract['bytecode']
-
-def instantiate_contract(w3, contract_name, contract_addr):
-    abi, bytecode = parse_contract(contract_name)
-    return w3.eth.contract(address=contract_addr, abi=abi)
 
 def setup_new_account(w3):
     new_account = w3.eth.account.create()
@@ -115,7 +107,7 @@ def send_tx(w3, signed_tx):
 def wait_for_receipt(w3, tx_hash):
     return w3.eth.wait_for_transaction_receipt(tx_hash)
 
-def transact(func_to_call, w3, account, value=0):
+def transact(w3, func_to_call, account, value=0):
     tx = build_tx(func_to_call, w3, account.address, value)
     signed_tx = sign_tx(w3, tx, account)
     return send_tx(w3, signed_tx)

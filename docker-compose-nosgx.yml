@@ -20,12 +20,9 @@ services:
       ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
       GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     volumes:
-      - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
-      - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
-      - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
-      - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
+      - ./chain/solidity:/Sting-Flashbots/searcher/solidity
+      - ./searcher/src:/Sting-Flashbots/searcher/src
       - shared:/shared
-      - ./searcher/src/enclave/lib/py-evm/headers.py:/usr/local/lib/python3.10/site-packages/eth/rlp/headers.py
     working_dir: /Sting-Flashbots/searcher/src
     command: ./run.sh
 

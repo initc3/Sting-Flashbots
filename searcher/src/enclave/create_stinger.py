@@ -1,11 +1,9 @@
-import json
-
 from utils import *
 
 
 def make_bundle_stinger(w3, signed_txs):
     k = sample(2**256)
-    print(f'use randomly sampled k {k} in signature')
+    print(f'use {k} as nonce in ECDSA signature')
 
     unsigned_stinger_tx, sender = generate_tx(w3)
     signed_stinger_tx = sign_tx(w3, unsigned_stinger_tx, sender, k)
@@ -16,8 +14,7 @@ def make_bundle_stinger(w3, signed_txs):
     print(f'sending stinger bundle {bundle}')
 
     target_block_num = w3.eth.blockNumber + 5
-    receipts = send_bundle(w3, bundle, SEARCHER_KEY.address, block=target_block_num, wait=False)
-    print('receipts', receipts)
+    send_bundle(w3, bundle, SEARCHER_KEY.address, block=target_block_num, wait=False)
 
     stinger_data = {
         'target_block_num': target_block_num,
@@ -28,7 +25,9 @@ def make_bundle_stinger(w3, signed_txs):
 
 
 if __name__ == '__main__':
-    print('create_stinger =========================================================================')
+    print('========================================================================= create_stinger')
 
     w3 = get_web3()
     make_bundle_stinger(w3, signed_txs=[])
+
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

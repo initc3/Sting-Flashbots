@@ -1,5 +1,3 @@
-import json
-
 from lib.mkp.proveth import generate_proof_blob
 from utils import *
 
@@ -23,7 +21,7 @@ def make_evidence(w3):
     print(f'make commitment to leaked_tx_hash {leaked_tx_sig_hash}')
 
     C, r = make_pedersen_commitment(bytes_to_int(leaked_tx_sig_hash))
-    print(f'use commitment {C} as nonce in signature')
+    print(f'use commitment {C} as nonce in ECDSA signature')
 
     unsigned_adv_tx, sender = generate_tx(w3, w3.eth.gas_price * 10)
     print(f'unsigned_adv_tx {unsigned_adv_tx}')
@@ -58,7 +56,9 @@ def make_evidence(w3):
 
 
 if __name__ == '__main__':
-    print(f'make_evidence =========================================================================')
+    print('========================================================================= generating_signing_key')
 
     w3 = get_web3()
     make_evidence(w3)
+
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

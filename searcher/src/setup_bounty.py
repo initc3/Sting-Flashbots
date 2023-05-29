@@ -1,34 +1,23 @@
-import auditee
 import base64
-import json
-import os 
-import time 
-import socket
 import subprocess
 import sys 
 
-import web3
-from web3 import Web3, HTTPProvider
-from web3.middleware import geth_poa_middleware
-from web3.middleware import construct_sign_and_send_raw_middleware
 from eth_account.account import Account
 import solcx
 from solcx import compile_source
+from utils import *
+
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
 BOUNTY_AMT = 150000000000000
 
-try:
-    contract_address = open("contract_address").read()
-except Exception as e:
-    pass 
 
 def setup_bounty_contract(w3):
     bounty_admin = get_account(w3, os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
-    # print(f'bounty_admin {bounty_admin.address} balance: {w3.eth.get_balance(bounty_admin.address)}')
     contract_address, contract, contract_id = deploy_contract(w3, bounty_admin.address, SOLIDITY_SOURCE)
     with open("contract_address", "w") as f:
         f.write(contract_address)
+
 
 def submit_enclave(w3):
     contract = get_contract(w3)
@@ -50,6 +39,7 @@ def submit_enclave(w3):
     # print("sgx report", bytes(json.dumps(report), 'utf-8'))
     send_tx(w3, contract.functions.submitEnclave(enclave_address, bytes(report, 'utf-8'), ias_sig), informant_account.address)
 
+
 def approve_enclave(w3):
     contract = get_contract(w3)
     bounty_admin = Account.from_key(os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
@@ -69,13 +59,6 @@ def approve_enclave(w3):
         enclave_address = Web3.toChecksumAddress(report_data[:20].hex())
         assert contract_enclave_addr == enclave_address
         APPROVED_MRENCLAVE = mrenclave #TODO reporoducible builds
-        # assert mrenclave == APPROVED_MRENCLAVE
-        # auditee.verify_mrenclave(
-        #     'enclave/',
-        #     'python.manifest.sgx',
-        #     ias_report=report_path,
-        #     APPROVED_MRENCLAVE
-        # )
 
         report_path = "contract.report"
         sig_path = "contract.sig"
@@ -97,11 +80,13 @@ def approve_enclave(w3):
 
     send_tx(w3, contract.functions.approveEnclave(contract_enclave_addr), bounty_admin.address)
 
+
 def collect_bounty(w3):
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
     proof = open("/Sting-Flashbots/searcher/output_data/proof_blob", "rb").read()
     sig = open("/Sting-Flashbots/searcher/output_data/proof_sig", "rb").read()
     _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
+    contract_address = open("contract_address").read()
     contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
     enclave_address = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
     balance_before = w3.eth.get_balance(informant_account.address)
@@ -111,14 +96,18 @@ def collect_bounty(w3):
     assert contract.functions.claimed().call()
     assert balance_after > balance_before
 
+
 def get_account(w3, secret_key):
     account = Account.from_key(secret_key)
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
     return account   
 
+
 def get_contract(w3):
     _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
+    contract_address = open("contract_address").read()
     return w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
+
 
 def compile_source_file(contract_paths):
     base_path, contract_source_path, allowed = contract_paths
@@ -138,6 +127,7 @@ def compile_source_file(contract_paths):
         bins = bins + contract_interface['bin']
     return contract_id, abis, bins
 
+
 def deploy_contract(w3, admin_addr, contract_paths):
     contract_id,abis,bins = compile_source_file(contract_paths)
     contract = w3.eth.contract(abi=abis, bytecode=bins)
@@ -148,30 +138,6 @@ def deploy_contract(w3, admin_addr, contract_paths):
     print(f'Deployed {contract_id} to: {contract_address} with hash  {tx_hash.hex()}')
     return contract_address, contract, contract_id
 
-def get_web3():
-    while True:
-        try:
-            HOST = socket.gethostbyname('builder')
-            PORT = 8545
-            if int(os.environ.get("TLS", 0)) == 1:
-                endpoint = f"https://{HOST}:{PORT}"
-                from enclave.ra_tls import get_ra_tls_session
-                s = get_ra_tls_session(HOST, PORT, "/cert/tlscert.der")
-                w3 = Web3(HTTPProvider(endpoint, session=s))
-            else:
-                endpoint = f"http://{HOST}:{PORT}"
-                w3 = Web3(HTTPProvider(endpoint))
-            block = w3.eth.block_number
-            break
-        except Exception as e:
-            time.sleep(5)
-            print(f'waiting to connect to builder...', e)
-            raise e
-    while block < 26:
-        print(f'waiting for block number {block} > 25...')
-        time.sleep(5)
-        block = w3.eth.block_number
-    return w3
 
 def send_tx(w3, foo, user_addr, value=0):
     print(f"send_tx from address: {user_addr} {foo}")
@@ -191,7 +157,12 @@ def send_tx(w3, foo, user_addr, value=0):
         print(f"send_tx error Gas cost exceeds 10000000 < {gas_estimate}")
         exit(1)
 
+
 if __name__ == '__main__':
+    print(f'========================================================================= {sys.argv[1]}')
+
     w3 = get_web3()
     solcx.install_solc()
     globals()[sys.argv[1]](w3)
+
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
