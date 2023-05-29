@@ -1,5 +1,3 @@
-import json 
-
 from lib.mkp.proveth import verify_tx_proof
 from utils import *
 
@@ -26,13 +24,16 @@ def verify_evidence(w3):
     target_block = w3.eth.get_block(verify_data['target_block_num'])
     print('target block hash', target_block.hash.hex())
 
-    proof = bytes(target_block.hash) + verify_data['target_block_num'].to_bytes(32, 'big')
+    proof_blob = rlp.encode([
+         verify_data['target_block_num'],
+         target_block.hash,
+    ])
     secret_key = open(secret_key_path, "rb").read()
-    sig = sign_eth_data(w3, secret_key, proof)
-    print("sig",sig)
-    print("proof",proof)
-    open(os.path.join(output_dir, "proof"), "wb").write(proof)
-    open(os.path.join(output_dir, "proof.sig"), "wb").write(sig)
+    sig = sign_eth_data(w3, secret_key, proof_blob)
+    print(f'proof_sig {sig}')
+    open(os.path.join(output_dir, "proof_blob"), "wb").write(proof_blob)
+    open(os.path.join(output_dir, "proof_sig"), "wb").write(sig)
+
 
 if __name__ == '__main__':
     print('verify_evidence =========================================================================')

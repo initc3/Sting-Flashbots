@@ -48,7 +48,7 @@ def submit_enclave(w3):
         ias_sig = b"ias sig"
     # print("enclave_address", enclave_address)
     # print("sgx report", bytes(json.dumps(report), 'utf-8'))
-    send_tx(w3, contract.functions.setupEnclave(enclave_address, bytes(report, 'utf-8'), ias_sig), informant_account.address)
+    send_tx(w3, contract.functions.submitEnclave(enclave_address, bytes(report, 'utf-8'), ias_sig), informant_account.address)
 
 def approve_enclave(w3):
     contract = get_contract(w3)
@@ -56,8 +56,8 @@ def approve_enclave(w3):
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(bounty_admin))
     print(f'bounty_admin {bounty_admin.address} balance: {w3.eth.get_balance(bounty_admin.address)}')
 
-    contract_enclave_addr = contract.functions.requested_enclaves(0).call({"from": bounty_admin.address})
-    sgx_data = contract.functions.requested_enclaves_data(contract_enclave_addr).call({"from": bounty_admin.address})
+    contract_enclave_addr = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
+    sgx_data = contract.functions.enclaveData(contract_enclave_addr).call()
     report = sgx_data[0].decode("utf-8")
     ias_sig = sgx_data[1]
     if int(os.environ.get("SGX", 1)) == 1:
@@ -99,8 +99,8 @@ def approve_enclave(w3):
 
 def collect_bounty(w3):
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
-    proof = open("/Sting-Flashbots/searcher/output_data/proof", "rb").read()
-    sig = open("/Sting-Flashbots/searcher/output_data/proof.sig", "rb").read()
+    proof = open("/Sting-Flashbots/searcher/output_data/proof_blob", "rb").read()
+    sig = open("/Sting-Flashbots/searcher/output_data/proof_sig", "rb").read()
     _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
     contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
     enclave_address = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
@@ -108,7 +108,7 @@ def collect_bounty(w3):
     send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
     balance_after = w3.eth.get_balance(informant_account.address)
     print("profit", balance_after - balance_before)
-    assert contract.functions.claimed().call({"from": informant_account.address})
+    assert contract.functions.claimed().call()
     assert balance_after > balance_before
 
 def get_account(w3, secret_key):

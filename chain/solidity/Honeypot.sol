@@ -1,20 +1,34 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.0;
+pragma solidity >=0.5.10 <0.9.0;
+
+import "./RLPReader.sol";
+
 contract Honeypot {
 
-    address public owner;
-    uint public bounty;
-    bool public claimed;
+    using RLPReader for RLPReader.RLPItem;
+    using RLPReader for bytes;
 
     struct EnclaveData {
         bytes sgx_report;
         bytes ias_sig;
     }
-    mapping (address => EnclaveData) public requested_enclaves_data;
-    address[] public requested_enclaves;
-    address[] public approved_enclaves;
+
+    address public owner;
+    uint public bounty;
+    bool public claimed;
+
+    mapping (address => bool) public enclaveRequested;
+    mapping (address => bool) public enclaveApproved;
+    mapping (address => EnclaveData) public enclaveData;
+
 
     event BountyClaimed(address winner);
+
+
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
 
 
     constructor() payable public {
@@ -22,47 +36,40 @@ contract Honeypot {
         bounty = msg.value;
     }
 
-    function setupEnclave(address enclave_address, bytes memory sgx_report, bytes memory ias_sig) public {
-        for (uint i = 0; i < approved_enclaves.length; i++) {
-            require(approved_enclaves[i] != enclave_address, "address already approved");
-        }
-        require(sgx_report.length > 0, "sgx_report is empty");
-        require(ias_sig.length > 0, "ias_sig is empty");
-        requested_enclaves_data[enclave_address] = EnclaveData(sgx_report, ias_sig);
-        requested_enclaves.push(enclave_address);
+    function submitEnclave(address enclaveAddr, bytes memory sgxReport, bytes memory iasSig) public {
+        require(!enclaveRequested[enclaveAddr], "address already requested");
+        require(!enclaveApproved[enclaveAddr], "address already approved");
+        require(sgxReport.length > 0, "empty sgx_report");
+        require(iasSig.length > 0, "empty ias_sig");
+
+        enclaveData[enclaveAddr] = EnclaveData(sgxReport, iasSig);
+        enclaveRequested[enclaveAddr] = true;
     }
 
-    function approveEnclave(address enclave_address) public {
-        require(msg.sender == owner, "not authorized");
-        approved_enclaves.push(enclave_address);
-        for (uint i = 0; i < requested_enclaves.length; i++) {
-            delete requested_enclaves[i];
-        }
+    function approveEnclave(address enclaveAddr) public onlyOwner {
+        require(enclaveRequested[enclaveAddr], "address not requested");
+        require(!enclaveApproved[enclaveAddr], "address already approved");
+
+        enclaveRequested[enclaveAddr] = false;
+        enclaveApproved[enclaveAddr] = true;
     }
 
-    function collectBounty(address enclave_address, bytes calldata proof, bytes calldata sig) public {
-        require(claimed == false, "bounty already claimed");
-        bool found_address = false;
-        for (uint i = 0; i < approved_enclaves.length; i++) {
-            if (approved_enclaves[i] == enclave_address) {
-                found_address = true;
-            }
-        }
-        require(found_address, "enclave_address not approved");
-        verify_proof(proof);
-        bytes32 hash = hash_data(proof);
+    function collectBounty(address enclaveAddr, bytes memory proofBlob, bytes memory sig) public {
+        require(!claimed, "bounty already claimed");
+        require(enclaveApproved[enclaveAddr], "address not approved");
+
+        bytes32 hash = hash_data(proofBlob);
         address signer = recover(hash, sig);
-        require(signer == enclave_address, "proof must be signed by enclave_address");
+        require(signer == enclaveAddr, "incorrect signature");
+
+        RLPReader.RLPItem[] memory items = proofBlob.toRlpItem().toList();
+        uint blockNum = items[0].toUint();
+        bytes32 blockHash = toBytes32(items[1].toBytes());
+        require(blockhash(blockNum) == blockHash, "block hash does not match block number");
+
         claimed = true;
         payable(msg.sender).transfer(bounty);
         emit BountyClaimed(msg.sender);
-    }
-
-    function verify_proof(bytes calldata proof) internal view {
-        uint proof_blocknum = bytes2Uint(proof[32:]);
-        bytes32 proof_blockhash = bytes32(proof[:32]);
-        require(proof_blocknum < block.number, "proof blocknum is too low");
-        require(blockhash(proof_blocknum) == proof_blockhash, "proof block hash incorrect");
     }
 
     function hash_data(bytes memory data) internal pure returns (bytes32) {
@@ -120,11 +127,12 @@ contract Honeypot {
         str = string(bstr);
     }
 
-    function bytes2Uint(bytes memory b) internal pure returns (uint256){
-        uint256 number;
-        for(uint i=0;i<b.length;i++){
-            number = number + uint(uint8(b[i]))*(2**(8*(b.length-(i+1))));
+    function toBytes32(bytes memory b) internal pure returns (bytes32) {
+        bytes32 out;
+        for (uint i = 0; i < 32; i++) {
+          out |= bytes32(b[i] & 0xFF) >> (i * 8);
         }
-        return number;
+        return out;
     }
+
 }

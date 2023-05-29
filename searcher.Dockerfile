@@ -36,9 +36,6 @@ COPY ./searcher/src/enclave/lib/ecdsa/main.py $VENV_PATH/lib/python3.10/site-pac
 COPY ./searcher/src/enclave/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
 COPY ./searcher/src/enclave/lib/py-evm/headers.py $VENV_PATH/lib/python3.10/site-packages/eth/rlp/headers.py
 
-COPY ./chain/solidity/Honeypot.sol /Sting-Flashbots/searcher/solidity/
-
-
 ARG RA_TYPE=dcap
 ENV RA_TYPE=$RA_TYPE
 ARG RA_CLIENT_SPID
