@@ -64,7 +64,7 @@ done
 set -x
 
 mv /shared/* "${INPUT_PATH}/leak/"
-$GRAMINE ./enclave/make_evidence.py 
+python ./enclave/make_evidence.py
 $GRAMINE ./enclave/verify_evidence.py 
 
 

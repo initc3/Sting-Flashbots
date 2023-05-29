@@ -143,13 +143,13 @@ def refill_ether(w3, receiver_addr, amt=1000):
         send_tx(w3, signed_tx)
     print(f'refilling {receiver_addr} updated: {get_balance(w3, receiver_addr)}')
 
-def sample(max=1000):
-    return random.randint(0, max)
+def sample(range):
+    return random.randint(0, range)
 
 def generate_tx(w3, gas_price=None):
     sender = setup_new_account(w3)
     receiver = setup_new_account(w3)
-    amt = sample()
+    amt = sample(10000)
     refill_ether(w3, sender.address, amt+300000000000000)
     return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price), sender
 

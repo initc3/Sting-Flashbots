@@ -4,7 +4,7 @@ from utils import *
 
 
 def make_bundle_stinger(w3, signed_txs):
-    k = sample()
+    k = sample(2**256)
     print(f'use randomly sampled k {k} in signature')
 
     unsigned_stinger_tx, sender = generate_tx(w3)

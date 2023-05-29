@@ -8,9 +8,10 @@ def verify_evidence(w3):
     print(f'unsigned_adv_tx {unsigned_adv_tx}')
     print(f'signed_adv_tx {signed_adv_tx}')
     _, signed_victim_tx = verify_tx_proof(w3, verify_data['target_block_num'], hex_to_bytes(verify_data['victim_prf']))
+    print(f'signed_victim_tx {signed_victim_tx}')
 
     r = verify_data['r']
-    C = compute_pedersen_commitment(bytes_to_int(signed_victim_tx.hash), r)
+    C = compute_pedersen_commitment(bytes_to_int(keccak(b''.join([int_to_bytes(signed_victim_tx.v), str_to_bytes(hex((signed_victim_tx.r))), str_to_bytes(hex(signed_victim_tx.s))]))), r)
     print(f'make_evidence use commitment {C} as nonce in signature')
 
     adv_account = Account.from_key(verify_data['adv_private_key'])
