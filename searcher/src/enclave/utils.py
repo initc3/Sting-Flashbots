@@ -49,8 +49,8 @@ else:
 
 subversionservice_path = f'{input_dir}/leak/'
 cert_path = f'{input_dir}/tlscert.der'
-stinger_data_path = f'{data_dir}/stinger_data_path.json'
-verify_data_path = f'{data_dir}/verify_data_path.json'
+stinger_data_path = f'{output_dir}/stinger_data_path.json'
+verify_data_path = f'{input_dir}/verify_data_path.json'
 verify_info_path = f'{data_dir}/verify_info_path.json'
 secret_key_path = f'{data_dir}/secret_key'
 
@@ -59,7 +59,7 @@ def get_web3():
     while True:
         try:
             if TLS:
-                from ra_tls import get_ra_tls_session
+                from enclave.ra_tls import get_ra_tls_session
                 s = get_ra_tls_session(HOST, PORT, cert_path)
                 w3 = Web3(HTTPProvider(endpoint, session=s))
             else:

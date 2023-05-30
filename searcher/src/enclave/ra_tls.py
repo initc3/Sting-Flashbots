@@ -59,7 +59,8 @@ def verify_callback(connection, x509, errnum, depth, ok):
     ra_tls_result = ra_tls_verify_callback_results(0,0,_U(epid(),dcap(),misc()))
     ra_tls_result_p = ctypes.pointer(ra_tls_result)
     ret = VERIFY_LIB.ra_tls_verify_callback_extended_der(CERT_DER, len(CERT_DER), ra_tls_result_p)
-    print("ra_tls_verify_callback returns mbedtls error code:", hex(-ret))
+    if ret != 0:
+        print("ra_tls_verify_callback returns mbedtls error code:", hex(-ret))
     return ret == 0
 
 def convert_der_pem(cert_der_path, cert_pem_path):

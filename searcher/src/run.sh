@@ -40,9 +40,9 @@ $GRAMINE -m enclave.gen_signing_key
 
 # === SGX quote ===
 if [[ "$SGX" == 1 ]]; then
-    $GRAMINE ./enclave/sgx-report.py &> OUTPUT
+    $GRAMINE -m enclave.sgx-report &> OUTPUT
     grep -q "Generated SGX report" OUTPUT && echo "[ Success SGX report ]"
-    $GRAMINE ./enclave/sgx-quote.py &>> OUTPUT
+    $GRAMINE -m enclave.sgx-quote &>> OUTPUT
     grep -q "Extracted SGX quote" OUTPUT && echo "[ Success SGX quote ]"
     cat OUTPUT
     gramine-sgx-ias-request report --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig

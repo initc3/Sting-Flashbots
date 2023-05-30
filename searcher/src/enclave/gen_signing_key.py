@@ -2,7 +2,7 @@ from enclave.utils import *
 
 
 def gen_signingKey(w3):
-    signing_account = setup_new_account(get_web3())
+    signing_account = setup_new_account(w3)
 
     with open(secret_key_path, "wb") as f:
         f.write(bytes(signing_account.privateKey))
