@@ -18,8 +18,8 @@
 #|The underlying 'long' value can be extracted as `p.n` if `type(p) is Fp`.
 import sys
 sys.path += ['elliptic-curves-finite-fields']
-from lib.commitment.elliptic_curves_finite_fields.finitefield.finitefield import FiniteField
-from lib.commitment.elliptic_curves_finite_fields.elliptic import EllipticCurve, Point, Ideal
+from enclave.lib.commitment.elliptic_curves_finite_fields.finitefield.finitefield import FiniteField
+from enclave.lib.commitment.elliptic_curves_finite_fields.elliptic import EllipticCurve, Point, Ideal
 # import elliptic
 # import os
 # import random

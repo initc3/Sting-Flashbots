@@ -1,5 +1,5 @@
-from lib.mkp.proveth import verify_tx_proof
-from utils import *
+from enclave.lib.mkp.proveth import verify_tx_proof
+from enclave.utils import *
 
 
 def verify_evidence(w3):

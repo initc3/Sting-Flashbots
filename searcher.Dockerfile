@@ -20,21 +20,21 @@ RUN $VENV_PATH/bin/pip install -r requirements.txt
 RUN pip install git+https://github.com/initc3/auditee.git
 RUN $VENV_PATH/bin/pip install git+https://github.com/initc3/auditee.git
 
-COPY searcher/src/lib/ecdsa/account.py /usr/local/lib/python3.10/site-packages/eth_account/account.py
-COPY searcher/src/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-packages/eth_account/_utils/signing.py
-COPY searcher/src/lib/ecdsa/datatypes.py /usr/local/lib/python3.10/site-packages/eth_keys/datatypes.py
-COPY searcher/src/lib/ecdsa/coincurve.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
-COPY searcher/src/lib/ecdsa/main.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/main.py
-COPY searcher/src/lib/ecdsa/ecdsa.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
-COPY searcher/src/lib/py-evm/headers.py /usr/local/lib/python3.10/site-packages/eth/rlp/headers.py
+COPY searcher/src/enclave/lib/ecdsa/account.py /usr/local/lib/python3.10/site-packages/eth_account/account.py
+COPY searcher/src/enclave/lib/ecdsa/signing.py /usr/local/lib/python3.10/site-packages/eth_account/_utils/signing.py
+COPY searcher/src/enclave/lib/ecdsa/datatypes.py /usr/local/lib/python3.10/site-packages/eth_keys/datatypes.py
+COPY searcher/src/enclave/lib/ecdsa/coincurve.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
+COPY searcher/src/enclave/lib/ecdsa/main.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/main.py
+COPY searcher/src/enclave/lib/ecdsa/ecdsa.py /usr/local/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
+COPY searcher/src/enclave/lib/py-evm/headers.py /usr/local/lib/python3.10/site-packages/eth/rlp/headers.py
 
-COPY searcher/src/lib/ecdsa/account.py $VENV_PATH/lib/python3.10/site-packages/eth_account/account.py
-COPY searcher/src/lib/ecdsa/signing.py $VENV_PATH/lib/python3.10/site-packages/eth_account/_utils/signing.py
-COPY searcher/src/lib/ecdsa/datatypes.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/datatypes.py
-COPY searcher/src/lib/ecdsa/coincurve.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
-COPY searcher/src/lib/ecdsa/main.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/main.py
-COPY searcher/src/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
-COPY searcher/src/lib/py-evm/headers.py $VENV_PATH/lib/python3.10/site-packages/eth/rlp/headers.py
+COPY searcher/src/enclave/lib/ecdsa/account.py $VENV_PATH/lib/python3.10/site-packages/eth_account/account.py
+COPY searcher/src/enclave/lib/ecdsa/signing.py $VENV_PATH/lib/python3.10/site-packages/eth_account/_utils/signing.py
+COPY searcher/src/enclave/lib/ecdsa/datatypes.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/datatypes.py
+COPY searcher/src/enclave/lib/ecdsa/coincurve.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/coincurve.py
+COPY searcher/src/enclave/lib/ecdsa/main.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/main.py
+COPY searcher/src/enclave/lib/ecdsa/ecdsa.py $VENV_PATH/lib/python3.10/site-packages/eth_keys/backends/native/ecdsa.py
+COPY searcher/src/enclave/lib/py-evm/headers.py $VENV_PATH/lib/python3.10/site-packages/eth/rlp/headers.py
 
 ARG RA_TYPE=dcap
 ENV RA_TYPE=$RA_TYPE

@@ -14,10 +14,10 @@ from eth_account.datastructures import SignedTransaction
 from eth_account.signers.local import LocalAccount
 from eth_account._utils.legacy_transactions import Transaction
 from eth_account.messages import encode_defunct
-from lib.flashbots import flashbot
-from lib.ecdsa.account import Account
-from lib.commitment.elliptic_curves_finite_fields.elliptic import Point
-from lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
+from enclave.lib.flashbots import flashbot
+from enclave.lib.ecdsa.account import Account
+from enclave.lib.commitment.elliptic_curves_finite_fields.elliptic import Point
+from enclave.lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
 
 
 while True:

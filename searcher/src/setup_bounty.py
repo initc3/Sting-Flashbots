@@ -5,7 +5,7 @@ import sys
 from eth_account.account import Account
 import solcx
 from solcx import compile_source
-from utils import *
+from enclave.utils import *
 
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])

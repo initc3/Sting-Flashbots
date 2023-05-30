@@ -1,5 +1,5 @@
-from lib.mkp.proveth import generate_proof_blob
-from utils import *
+from enclave.lib.mkp.proveth import generate_proof_blob
+from enclave.utils import *
 
 
 def make_evidence(w3):

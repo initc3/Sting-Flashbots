@@ -2,7 +2,7 @@
 
 import sys
 
-from utils import *
+from enclave.utils import *
 
 
 if not os.path.exists("/dev/attestation/report"):
