@@ -49,9 +49,9 @@ else:
 
 subversionservice_path = f'{input_dir}/leak/'
 cert_path = f'{input_dir}/tlscert.der'
-stinger_data_path = f'{output_dir}/stinger_data_path.json'
-verify_data_path = f'{input_dir}/verify_data_path.json'
-verify_info_path = f'{data_dir}/verify_info_path.json'
+stinger_data_path = f'{output_dir}/stinger_data.json'
+verify_data_path = f'{input_dir}/verify_data.json'
+stinger_tx_path = f'{data_dir}/stinger_tx'
 secret_key_path = f'{data_dir}/secret_key'
 
 
@@ -224,6 +224,10 @@ def decode_raw_tx(w3, raw_tx):
         s=s,
         v=tx.v,
     )
+
+def encode_tx(nonce, gas_price, gas, to, vakue, data, v ,r , s):
+    tx = Transaction(nonce, gas_price, gas, to, vakue, data, v ,r , s)
+    return rlp.encode(tx)
 
 def sign_eth_data(w3, private_key, data):
     data = encode_defunct(primitive=data)

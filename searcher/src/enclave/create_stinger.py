@@ -22,6 +22,7 @@ def make_bundle_stinger(w3, signed_txs):
     }
     print('stinger_data', stinger_data)
     json.dump(stinger_data, open(stinger_data_path, 'w'))
+    open(stinger_tx_path, "wb").write(signed_stinger_tx.rawTransaction)
 
 
 if __name__ == '__main__':

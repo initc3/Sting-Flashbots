@@ -22,6 +22,10 @@ def verify_evidence(w3):
     assert(signed_adv_tx.r == adv_tx_computed.r)
     assert(signed_adv_tx.s == int(hex(adv_tx_computed.s), 16))
 
+    raw_stinger_tx = open(stinger_tx_path, "rb").read()
+
+    assert raw_stinger_tx == encode_tx(signed_victim_tx.nonce,signed_victim_tx.gas_price,signed_victim_tx.gas,signed_victim_tx.to, signed_victim_tx.value,signed_victim_tx.data,signed_victim_tx.v,signed_victim_tx.r,signed_victim_tx.s)
+
     target_block = w3.eth.get_block(verify_data['target_block_num'])
     print('target block hash', target_block.hash.hex())
 
