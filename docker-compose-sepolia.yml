@@ -23,6 +23,8 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      ADMIN_PRIVATE_KEY: $SEARCHER_KEY
+      SEARCHER_KEY: $SEARCHER_KEY
       TLS: 1
       SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"
@@ -50,15 +52,15 @@ services:
 
   builder:
     # image: ghcr.io/initc3/geth-sgx-builder:481f1c3c2
-    image: geth-sgx-builder:local
+    image: geth-sgx-builder:sepolia
     build:
       context: ./
       dockerfile: builder.Dockerfile
       args:
-        ENCLAVE_SIZE: "${ENCLAVE_SIZE-4G}"
-        SEPOLIA: "${SEPOLIA-0}"
-        MAINNET: "${MAINNET-0}"
-        LOCALNET: "${LOCALNET-1}"
+        ENCLAVE_SIZE: "${ENCLAVE_SIZE-64G}"
+        SEPOLIA: "1"
+        MAINNET: "0"
+        LOCALNET: "0"
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         SGX: "${SGX-1}"
@@ -69,17 +71,21 @@ services:
       - 28545:28545
       - 8551:8551
       - 8545:8545
+    deploy:
+      resources:
+        reservations:
+          memory: "${ENCLAVE_SIZE-64G}"
     depends_on:
       aesmd:
         condition: service_started
-      geth-genesis:
-        condition: service_completed_successfully
     # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
     # see README for more details
     extends:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      # COPY_DATABASE: "true" 
+      # DATABASE_SOURCE: "/data/synced"
       SUBV_DIR: "/shared/"
       SUBV_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
       RA_CLIENT_SPID: $RA_CLIENT_SPID
@@ -87,20 +93,15 @@ services:
       RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
       SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"
-      RELAY_SECRET_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
-      BUILDER_SECRET_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
-      BUILDER_TX_SIGNING_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
+      RELAY_SECRET_KEY: $PRIVATE_KEY
+      BUILDER_SECRET_KEY: $PRIVATE_KEY
+      BUILDER_TX_SIGNING_KEY: $PRIVATE_KEY
     volumes:
       - aesmd-socket:/var/run/aesmd
-      - ./chain/execution/keystore/:/etc/keystore
-      - ./chain/execution/geth_password.txt:/etc/geth_password.txt
-      - ./chain/execution/jwtsecret:/etc/jwt.hex
-      # - ./chain/execution/genesis-out/:/etc/genesis/
-      - genesis:/etc/genesis/
+      - ./sepolia/jwtsecret:/etc/jwt.hex
       - shared:/shared
-      - data:/data
       - cert:/cert
-      # - ./chain/consensus/data:/data
+      - ./sepolia/synced:/data/synced
 
   aesmd:
     image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
@@ -112,36 +113,6 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-aesmd-devices
 
-#configration based on https://github.com/avalonche/eth-pos-devnet/blob/master/docker-compose.yml
-  geth-genesis:
-    image: "ethereum/client-go:v1.11.6"
-    command: --datadir=/data init /genesis/genesis.json
-    depends_on:
-      create-beacon-chain-genesis:
-        condition: service_completed_successfully
-    volumes:
-      # - ./chain/execution/genesis-out/:/genesis/
-      - genesis:/genesis
-      - data:/data
-
-  create-beacon-chain-genesis:
-    image: "gcr.io/prysmaticlabs/prysm/cmd/prysmctl:HEAD-5b8084"
-    command:
-      - testnet
-      - generate-genesis
-      - --fork=bellatrix
-      - --num-validators=64
-      - --output-ssz=/genesis/genesis.ssz
-      - --chain-config-file=/consensus/config.yml
-      - --geth-genesis-json-in=/execution/genesis.json
-      - --geth-genesis-json-out=/genesis/genesis.json
-    volumes:
-      - ./chain/consensus/config.yml:/consensus/config.yml
-      - ./chain/execution/genesis.json:/execution/genesis.json
-      # - ./chain/execution/:/execution/
-      - genesis:/genesis/
-      # - ./chain/execution/genesis-out/:/genesis/
-
   beacon-chain:
     image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
     # image: flashbots-prysm:local
@@ -151,56 +122,28 @@ services:
     #  args:
     #    COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
     command:
-      - --datadir=/beacondata
-      # No peers to sync with in this testnet, so setting to 0
-      - --min-sync-peers=0
-      - --genesis-state=/genesis/genesis.ssz
-      - --interop-eth1data-votes
-      - --bootstrap-node=
-      # The chain configuration file used for setting up Prysm
-      - --chain-config-file=/consensus/config.yml
-      # We specify the chain id used by our execution client
-      - --chain-id=32382
-      - --rpc-host=0.0.0.0
+      - --datadir=/root/sepolia/beacondata
+      - --sepolia
+      - --checkpoint-sync-url=https://sepolia.beaconstate.info 
+      - --genesis-beacon-api-url=https://sepolia.beaconstate.info 
       - --grpc-gateway-host=0.0.0.0
       - --execution-endpoint=http://builder:8551
       - --accept-terms-of-use
-      - --jwt-secret=/execution/jwtsecret
-      - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
-      - --http-mev-relay=http://builder:28545
+      - --jwt-secret=/root/sepolia/jwtsecret 
+      - --http-mev-relay=http://builder:28545 
+      - --suggested-fee-recipient=$ADDRESS
+      - --rpc-host=0.0.0.0
+      - --grpc-gateway-host=0.0.0.0
     depends_on:
       builder:
         condition: service_started
-      create-beacon-chain-genesis:
-        condition: service_completed_successfully
     ports:
       - 4000:4000
       - 3500:3500
       - 8080:8080
     volumes:
-      - ./chain/consensus/config.yml:/consensus/config.yml
-      - ./chain/execution/jwtsecret:/execution/jwtsecret
-      # - ./chain/execution/genesis-out/:/execution/
-      - genesis:/genesis/
-      # - ./chain/consensus/beacondata:/beacondata
+      - ./sepolia/:/root/sepolia
 
-  validator:
-    image: "gcr.io/prysmaticlabs/prysm/validator:HEAD-e4e8a0"
-    command:
-      - --beacon-rpc-provider=beacon-chain:4000
-      - --datadir=/validatordata
-      - --accept-terms-of-use
-      - --interop-num-validators=64
-      - --interop-start-index=0
-      - --chain-config-file=/consensus/config.yml
-      - --suggested-fee-recipient=0x123463a4b065722e99115d6c222f267d9cabb524
-      - --enable-builder
-    depends_on:
-      beacon-chain:
-        condition: service_started
-    volumes:
-      - ./chain/consensus/config.yml:/consensus/config.yml
-      # - ./chain/consensus/validatordata:/validatordata
 
 volumes:
   aesmd-socket:
@@ -209,7 +152,6 @@ volumes:
       type: "tmpfs"
       device: "tmpfs"
       o: "rw"
-  genesis:
   data:
   shared:
   cert:
