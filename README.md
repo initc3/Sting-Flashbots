@@ -94,12 +94,10 @@ docker compose down -v
 
 ### Setup 
 
-* Environment variables
+* Set environment variables for an account (this demo will eventually need two different accounts)
 
 ```env
-PRIVATE_KEY=<Sepolia account private key>
-export BUILDER_SECRET_KEY=$PRIVATE_KEY
-export BUILDER_TX_SIGNING_KEY=$PRIVATE_KEY
+export PRIVATE_KEY=<private key for account with balance on Sepolia>
 ```
 
 * Generate jwt secret 
@@ -127,8 +125,10 @@ docker network create sting-sync-net
 
 ```bash
 docker run --publish 8551:8551 --publish 8545:8545 --net sting-sync-net --name builder \
+  -e BUILDER_SECRET_KEY=$PRIVATE_KEY \
+  -e BUILDER_TX_SIGNING_KEY=$PRIVATE_KEY \
   -v $PWD/sepolia:/root/sepolia  \
-  --rm flashbots-builder:local \
+  --rm flashbots-builder:local --sepolia \
   --http --http.api=engine,eth,web3,net,debug,flashbots \
   --http.corsdomain=* \
   --http.addr=0.0.0.0 \
@@ -144,7 +144,7 @@ docker run --publish 8551:8551 --publish 8545:8545 --net sting-sync-net --name b
 docker run --publish 4000:4000 --publish 3500:3500 --publish 8080:8080 --net sting-sync-net --name beacon-chain \
   -v $PWD/sepolia:/root/sepolia \
   --rm ghcr.io/initc3/flashbots-prysm:cecd2d9cb \
-  -datadir=/root/sepolia/beacondata --sepolia \
+  --datadir=/root/sepolia/beacondata --sepolia \
   --checkpoint-sync-url=https://sepolia.beaconstate.info \
   --genesis-beacon-api-url=https://sepolia.beaconstate.info \
   --grpc-gateway-host=0.0.0.0 \
@@ -157,7 +157,7 @@ docker run --publish 4000:4000 --publish 3500:3500 --publish 8080:8080 --net sti
 
 ```bash
 
-docker logs builder 
+docker logs builder # | grep "Snap sync complete"
 ...
 ...
 INFO [06-02|11:18:23.743] Syncing: chain download in progress      synced=100.00% chain=12.23GiB   headers=3,609,948@1.16GiB    bodies=3,609,948@9.37GiB    receipts=3,609,948@1.71GiB    eta=0s

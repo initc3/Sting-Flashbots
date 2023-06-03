@@ -110,7 +110,6 @@ geth.args:
 			--bootnodes=enode://9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066@18.168.182.86:30303,enode://ec66ddcf1a974950bd4c782789a7e04f8aa7110a72569b6e65fcd51e937e74eed303b1ea734e4d19cfaec9fbff9b6ee65bf31dcb50ba79acce9dd63a6aca61c7@52.14.151.177:30303 \
 			--cache.trie.journal= \
 			--cache.trie.rejournal=0 \
-			--datadir=/data/synced \
 			--datadir.ancient=/data/ancient \
 		> $@
 endif
@@ -125,16 +124,16 @@ geth.args:
 			--authrpc.addr=0.0.0.0 \
 			--authrpc.jwtsecret=/etc/jwt.hex \
 			--datadir=/data \
-    		--allow-insecure-unlock \
-    		--unlock=0x123463a4b065722e99115d6c222f267d9cabb524 \
-      		--keystore=/etc/keystore \
-    		--password=/etc/geth_password.txt \
-    		--nodiscover \
-    		--syncmode=full \
+			--allow-insecure-unlock \
+			--unlock=0x123463a4b065722e99115d6c222f267d9cabb524 \
+			--keystore=/etc/keystore \
+			--password=/etc/geth_password.txt \
+			--nodiscover \
+			--syncmode=full \
 			--verbosity=4 \
-    		--mine \
+			--mine \
 			--builder \
-      		--builder.local_relay=true \
+			--builder.local_relay=true \
 			--builder.secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
 			--builder.relay_secret_key=0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622 \
 			--builder.genesis_validators_root=0x83431ec7fcf92cfc44947fc0418e831c25e1d0806590231c439830db7ad54fda \
@@ -142,7 +141,7 @@ geth.args:
 			--builder.bellatrix_fork_version=0x20000091 \
 			--builder.beacon_endpoints=http://beacon-chain:3500 \
 			--miner.algotype=mev-geth \
-      		--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
+			--miner.etherbase=0x123463a4B065722E99115D6c222f267d9cABb524 \
 		> $@
 endif
 
