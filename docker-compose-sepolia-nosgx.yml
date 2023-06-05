@@ -1,0 +1,120 @@
+version: '3.9'
+
+services:
+
+  searcher:
+    image: sting-searcher
+    build:
+      context: ./
+      dockerfile: searcher.Dockerfile
+      args:
+        SGX: "${SGX-0}"
+        DEBUG: "${DEBUG-1}"
+        RA_TYPE: "${RA_TYPE-dcap}"
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+    # depends_on:
+    #   builder:
+    #     condition: service_healthy
+    environment:
+      ADMIN_PRIVATE_KEY: $SEARCHER_KEY
+      SEARCHER_KEY: $SEARCHER_KEY
+      TLS: 0
+      SGX: -1
+      DEBUG: "${DEBUG-1}"
+      GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+    volumes:
+      - ./chain/solidity:/Sting-Flashbots/searcher/solidity
+      - ./searcher/src:/Sting-Flashbots/searcher/src
+      - shared:/shared
+    working_dir: /Sting-Flashbots/searcher/src
+    command: ./run.sh
+
+  builder:
+    # image: ghcr.io/initc3/flashbots-builder:481f1c3c2
+    image: flashbots-builder:local
+    build:
+      context: ./
+      dockerfile: geth.Dockerfile
+      args:
+        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+    entrypoint: geth
+    command:
+      - --sepolia
+      - --http
+      - --http.api=engine,eth,web3,net,debug,flashbots
+      - --http.corsdomain=*
+      - --http.addr=0.0.0.0
+      - --ws
+      - --ws.api=engine,eth,web3,net,debug
+      - --authrpc.jwtsecret=/etc/jwt.hex
+      - --authrpc.vhosts=*
+      - --authrpc.addr=0.0.0.0
+      - --builder
+      # - --builder.local_relay=true
+      - --builder.beacon_endpoints=http://beacon-chain:3500
+      # - --builder.secret_key=$PRIVATE_KEY
+      # - --builder.relay_secret_key=$PRIVATE_KEY
+      - --builder.genesis_fork_version=0x90000069
+      - --builder.bellatrix_fork_version=0x90000071
+      - --builder.genesis_validators_root=0xd8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078
+      - --builder.remote_relay_endpoint=https://boost-relay-sepolia.flashbots.net
+      # - --syncmode=full
+      - --verbosity=4
+      # - --mine
+      - --miner.extradata='Illuminate Dmocrtz Dstrib Prtct'
+      - --miner.algotype=mev-geth
+      - --bootnodes=enode://9246d00bc8fd1742e5ad2428b80fc4dc45d786283e05ef6edbd9002cbc335d40998444732fbe921cb88e1d2c73d1b1de53bae6a2237996e9bfe14f871baf7066@18.168.182.86:30303,enode://ec66ddcf1a974950bd4c782789a7e04f8aa7110a72569b6e65fcd51e937e74eed303b1ea734e4d19cfaec9fbff9b6ee65bf31dcb50ba79acce9dd63a6aca61c7@52.14.151.177:30303
+      - --cache.trie.journal=
+      - --cache.trie.rejournal=0
+      # - --datadir.ancient=/data/synced/ancient
+      - --datadir=/data/synced
+    ports:
+      - 28545:28545
+      - 8551:8551
+      - 8545:8545
+    environment:
+      SUBV_DIR: "/shared/"
+      SUBV_ADDRESS: $SEARCHER_ADDRESS
+      RELAY_SECRET_KEY: $PRIVATE_KEY
+      BUILDER_SECRET_KEY: $PRIVATE_KEY
+      BUILDER_TX_SIGNING_KEY: $PRIVATE_KEY
+    volumes:
+      - ./sepolia/jwtsecret:/etc/jwt.hex
+      - shared:/shared
+      - ./sepolia/synced:/data/synced
+
+  beacon-chain:
+    image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
+    # image: flashbots-prysm:local
+    # build:
+    #  context: ./
+    #  dockerfile: beacon.Dockerfile
+    #  args:
+    #    COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
+    command:
+      - --datadir=/root/sepolia/beacondata
+      - --sepolia
+      - --checkpoint-sync-url=https://sepolia.beaconstate.info 
+      - --genesis-beacon-api-url=https://sepolia.beaconstate.info 
+      - --grpc-gateway-host=0.0.0.0
+      - --execution-endpoint=http://builder:8551
+      - --accept-terms-of-use
+      - --jwt-secret=/root/sepolia/jwtsecret 
+      - --http-mev-relay=http://builder:28545 
+      - --suggested-fee-recipient=$ADDRESS
+      - --rpc-host=0.0.0.0
+    depends_on:
+      builder:
+        condition: service_started
+    ports:
+      - 4000:4000
+      - 3500:3500
+      - 8080:8080
+    volumes:
+      - ./sepolia/:/root/sepolia
+
+volumes:
+  data:
+  shared:

@@ -84,8 +84,8 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
-      COPY_DATABASE: "true" 
-      DATABASE_SOURCE: "/data/synced"
+      COPY_DATABASE: "false" 
+      # DATABASE_SOURCE: "/data/synced"
       SUBV_DIR: "/shared/"
       SUBV_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
       RA_CLIENT_SPID: $RA_CLIENT_SPID
@@ -133,7 +133,6 @@ services:
       - --http-mev-relay=http://builder:28545 
       - --suggested-fee-recipient=$ADDRESS
       - --rpc-host=0.0.0.0
-      - --grpc-gateway-host=0.0.0.0
     depends_on:
       builder:
         condition: service_started

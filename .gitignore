@@ -21,3 +21,6 @@ chain/consensus/beacondata/
 .env
 node_modules
 *contract_address
+sepolia/beacondata
+sepolia/synced
+sepolia/jwtsecret

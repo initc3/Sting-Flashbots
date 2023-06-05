@@ -99,7 +99,7 @@ geth.args:
 			--authrpc.vhosts=* \
 			--authrpc.addr=0.0.0.0 \
 			--builder \
-			--builder.beacon_endpoints=http://127.0.0.1:3500 \
+			--builder.beacon_endpoints=http://beacon-chain:3500 \
 			--builder.genesis_fork_version=0x90000069 \
 			--builder.bellatrix_fork_version=0x90000071 \
 			--builder.genesis_validators_root=0xd8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078 \
@@ -111,6 +111,7 @@ geth.args:
 			--cache.trie.journal= \
 			--cache.trie.rejournal=0 \
 			--datadir.ancient=/data/ancient \
+			--datadir=/data/synced \
 		> $@
 endif
 ifeq ($(LOCALNET),1)

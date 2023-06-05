@@ -8,16 +8,19 @@ services:
       context: ./
       dockerfile: searcher.Dockerfile
       args:
-        SGX: 0 
+        SGX: "${SGX-0}"
         DEBUG: "${DEBUG-1}"
+        RA_TYPE: "${RA_TYPE-dcap}"
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     # depends_on:
-    #   builder:
-    #     condition: service_healthy
+      # builder:
+      #   condition: service_healthy
     environment:
       TLS: 0
       SGX: -1
       DEBUG: "${DEBUG-1}"
-      ETH_SIGNER_KEY: "0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622"
       GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
     volumes:
       - ./chain/solidity:/Sting-Flashbots/searcher/solidity
@@ -26,15 +29,14 @@ services:
     working_dir: /Sting-Flashbots/searcher/src
     command: ./run.sh
 
-
   builder:
     # image: ghcr.io/initc3/flashbots-builder:481f1c3c2
     image: flashbots-builder:local
     build:
-     context: ./
-     dockerfile: geth.Dockerfile
-     args:
-       GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+      context: ./
+      dockerfile: geth.Dockerfile
+      args:
+        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
     entrypoint: geth
     command:
       - --http

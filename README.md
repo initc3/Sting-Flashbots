@@ -94,10 +94,15 @@ docker compose down -v
 
 ### Setup 
 
-* Set environment variables for an account (this demo will eventually need two different accounts)
+* Add Sepolia private keys and address to `.env` file
 
 ```env
-export PRIVATE_KEY=<private key for account with balance on Sepolia>
+# .env file
+...
+ADDRESS=<address for $PRIVATE_KEY>
+PRIVATE_KEY=<Sepolia account private key>
+SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
+SEARCHER_KEY=<Another Sepolia account private key>
 ```
 
 * Generate jwt secret 
@@ -107,18 +112,51 @@ mkdir -p sepolia
 openssl rand -hex 32 | sudo tee ./sepolia/jwtsecret
 ```
 
+## Running on Sepolia without SGX
+
+* build images for Sepolia
+
+```bash
+docker compose -f docker-compose-sepolia-nosgx.yml build
+```
+
+* Start containers
+```bash
+docker compose -f docker-compose-sepolia-nosgx.yml up -d
+```
+
+* Look at searcher logs
+
+```bash
+docker compose -f docker-compose-sepolia-nosgx.yml logs -f searcher 
+```
+
+* Delete containers and volume
+
+```bash
+docker compose -f docker-compose-sepolia-nosgx.yml down -v
+```
+
+## Running on Sepolia with SGX
+
+### Download network snapshot
+
 * Build non-sgx docker containers for downloading snapshot
 
 ```bash
 docker compose -f docker-compose-nosgx.yml build builder beacon-chain
 ```
 
-### Download network snapshot
-
 * create docker network 
 
 ```bash
 docker network create sting-sync-net
+```
+
+* Set environment variables for an account 
+
+```env
+export PRIVATE_KEY=<private key for account with balance on Sepolia>
 ```
 
 * start builder
@@ -195,7 +233,14 @@ docker network rm sting-sync-net
 ...
 ADDRESS=<address for $PRIVATE_KEY>
 PRIVATE_KEY=<Sepolia account private key>
+SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
 SEARCHER_KEY=<Another Sepolia account private key>
+```
+
+* add Fake propose to environment (or create a new [geth-sgx-gramine](https://github.com/flashbots/geth-sgx-gramine/tree/main/examples/confidential-builder-boost-relay))
+
+```bash
+export FAKE_PROPOSER=$(cat sepolia/validator_data.json)
 ```
 
 * build images for Sepolia
@@ -203,6 +248,8 @@ SEARCHER_KEY=<Another Sepolia account private key>
 ```bash
 docker compose -f docker-compose-sepolia.yml build
 ```
+
+* if you have less than 64G memory on the machine increase the swap file size to 64G
 
 * Start containers
 
