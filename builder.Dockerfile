@@ -23,10 +23,10 @@ RUN tar -C /usr/local -xzf go1.20.3.linux-amd64.tar.gz
 RUN git clone https://github.com/flashbots/geth-sgx-gramine.git /geth-sgx/ && \
         cd /geth-sgx/ && git checkout 34d4a040b220f5402d058f046bfd29c3f7dddf81
 
-# HEALTHCHECK --interval=5s --start-period=360s \
-#         CMD curl -s -k -X POST https://localhost:8545 -H "Content-Type: application/json" \
-#         -d "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1,\"jsonrpc\":\"2.0\"}" | \
-#         jq .result | xargs printf "%d" | xargs test 25 -lt
+HEALTHCHECK --interval=5s --start-period=360s \
+        CMD curl -s -k -X POST https://localhost:8545 -H "Content-Type: application/json" \
+        -d "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1,\"jsonrpc\":\"2.0\"}" | \
+        jq .result | xargs printf "%d" | xargs test 25 -lt
 
 RUN gramine-sgx-gen-private-key -f
 
