@@ -225,18 +225,6 @@ docker network rm sting-sync-net
 
 ### Run demo
 
-
-* add Sepolia private keys and address to `.env` file
-
-```env
-# .env file
-...
-ADDRESS=<address for $PRIVATE_KEY>
-PRIVATE_KEY=<Sepolia account private key>
-SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
-SEARCHER_KEY=<Another Sepolia account private key>
-```
-
 * add Fake propose to environment (or create a new [geth-sgx-gramine](https://github.com/flashbots/geth-sgx-gramine/tree/main/examples/confidential-builder-boost-relay))
 
 ```bash
