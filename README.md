@@ -99,10 +99,10 @@ docker compose down -v
 ```env
 # .env file
 ...
-ADDRESS=<address for $PRIVATE_KEY>
-PRIVATE_KEY=<Sepolia account private key>
 SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
-SEARCHER_KEY=<Another Sepolia account private key>
+SEARCHER_KEY=<Sepolia account private key for searcher>
+STINGER_KEY=<Another Sepolia account private key for sending the stinger>
+POF_KEYS=[<list of Sepolia account private keys to use for private order flow transaction simulations>] #optional
 ```
 
 * Generate jwt secret 

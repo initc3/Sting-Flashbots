@@ -52,6 +52,8 @@ python -m setup_bounty setup_bounty_contract
 python -m setup_bounty submit_enclave
 python -m setup_bounty approve_enclave
 
+python -m setup_bounty generate_bundle
+
 $GRAMINE -m enclave.create_stinger
 
 set +x

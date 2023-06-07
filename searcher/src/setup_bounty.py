@@ -9,7 +9,7 @@ from enclave.utils import *
 
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
-BOUNTY_AMT = 150000000000000
+BOUNTY_AMT = 10000
 
 
 def setup_bounty_contract(w3):
@@ -97,11 +97,25 @@ def collect_bounty(w3):
     assert balance_after > balance_before
 
 
-def get_account(w3, secret_key):
-    account = Account.from_key(secret_key)
-    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
-    return account   
+def generate_bundle(w3):
+    stinger_sender = get_account(w3, os.environ.get("STINGER_PK"))
+    sting_tx, _ = generate_tx(w3, sender=stinger_sender)
+    bundle_txs = private_order_flow(w3, 4)
+    sting_bundle = make_bundle(bundle_txs)
+    json.dump(sting_bundle, open("/Sting-Flashbots/searcher/input_data/sting_bundle.json", "w"))
+    json.dump(sting_tx, open("/Sting-Flashbots/searcher/input_data/sting_tx.json", "w"))
+    print(f'generate stinger tx {sting_tx}')
+    print(f'generate stinger bundle {sting_bundle}')
 
+
+def private_order_flow(w3, num_txs):
+    keys = json.loads(os.environ.get("POF_KEYS"))
+    print("keys", keys)
+    if keys is not None:
+        senders=[get_account(w3, pk) for pk in keys]
+    else:
+        senders is None
+    return generate_signed_txs(w3, num_txs, senders=senders)
 
 def get_contract(w3):
     _, abis, bins = compile_source_file(SOLIDITY_SOURCE)

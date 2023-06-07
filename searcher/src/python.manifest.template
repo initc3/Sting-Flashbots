@@ -18,7 +18,8 @@ loader.env.RA_TLS_ISV_PROD_ID = { passthrough = true }
 loader.env.RA_TLS_EPID_API_KEY = { passthrough = true }
 loader.env.ADMIN_PRIVATE_KEY = { passthrough = true }
 loader.env.SEARCHER_KEY = { passthrough = true }
-
+loader.env.STINGER_PK = { passthrough = true }
+loader.env.POF_KEYS = { passthrough = true }
 
 loader.insecure__use_cmdline_argv = true
 

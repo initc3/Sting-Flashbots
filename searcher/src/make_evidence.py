@@ -22,10 +22,10 @@ def make_evidence(w3):
 
     C, r = make_pedersen_commitment(bytes_to_int(leaked_tx_sig_hash))
     print(f'use commitment {C} as nonce in ECDSA signature')
-
-    unsigned_adv_tx, sender = generate_tx(w3, w3.eth.gas_price * 10)
+    sting_sender = get_account(w3, os.environ.get("STINGER_PK"))
+    unsigned_adv_tx, _ = generate_tx(w3, sender=sting_sender, gas_price=w3.eth.gas_price * 10)
     print(f'unsigned_adv_tx {unsigned_adv_tx}')
-    signed_adv_tx = sign_tx(w3, unsigned_adv_tx, sender, k=C)
+    signed_adv_tx = sign_tx(w3, unsigned_adv_tx, sting_sender, k=C)
     print(f'signed_adv_tx {signed_adv_tx}')
     new_bundle = make_bundle([signed_adv_tx])
 
@@ -46,7 +46,7 @@ def make_evidence(w3):
 
     verify_data = {
         'r': r,
-        'adv_private_key': sender.privateKey.hex(),
+        'adv_private_key': sting_sender.privateKey.hex(),
         'target_block_num': target_block_num,
         'adv_prf': adv_prf.hex(),
         'victim_prf': victim_prf.hex(),

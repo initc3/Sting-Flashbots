@@ -23,6 +23,8 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      STINGER_PK: "0x0763770ef43a3bb2314d0be24c98da346f695d96e6632646915f94ab7aafd04a"
+      POF_KEYS: $POF_KEYS
       TLS: 1
       SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"

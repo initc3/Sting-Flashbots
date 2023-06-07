@@ -49,8 +49,12 @@ else:
 
 subversionservice_path = f'{input_dir}/leak/'
 cert_path = f'{input_dir}/tlscert.der'
-stinger_data_path = f'{output_dir}/stinger_data.json'
+sting_bundle_path = f'{input_dir}/sting_bundle.json'
+sting_tx_path = f'{input_dir}/sting_tx.json'
 verify_data_path = f'{input_dir}/verify_data.json'
+
+stinger_data_path = f'{output_dir}/stinger_data.json'
+
 stinger_tx_path = f'{data_dir}/stinger_tx'
 secret_key_path = f'{data_dir}/secret_key'
 
@@ -82,6 +86,10 @@ def get_balance(w3, addr):
     balance = w3.eth.get_balance(addr)
     return balance
 
+def get_account(w3, secret_key):
+    account = Account.from_key(secret_key)
+    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
+    return account  
 
 def setup_new_account(w3):
     new_account = w3.eth.account.create()
@@ -138,17 +146,22 @@ def refill_ether(w3, receiver_addr, amt=1000):
 def sample(range):
     return random.randint(0, range)
 
-def generate_tx(w3, gas_price=None):
-    sender = setup_new_account(w3)
+def generate_tx(w3, sender=None, gas_price=None):
+    if sender is None:
+        sender = setup_new_account(w3)
     receiver = setup_new_account(w3)
     amt = sample(10000)
-    refill_ether(w3, sender.address, amt+300000000000000)
+    refill_ether(w3, sender.address, amt+10000)
     return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price), sender
 
-def generate_signed_txs(w3, num):
+def generate_signed_txs(w3, num, senders=None):
     txs = []
-    for _ in range(num):
-        tx, sender = generate_tx(w3)
+    for i in range(num):
+        if senders is None:
+            tx, sender = generate_tx(w3)
+        else:
+            sender = senders[i % len(senders)]
+            tx, _ = generate_tx(w3, sender=sender)
         signed_tx = sign_tx(w3, tx, sender)
         txs.append(signed_tx)
     return txs
