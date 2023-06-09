@@ -18,6 +18,8 @@ services:
       # builder:
       #   condition: service_healthy
     environment:
+      SEPOLIA: "0"
+      LOCALNET: "1"
       STINGER_PK: "0x0763770ef43a3bb2314d0be24c98da346f695d96e6632646915f94ab7aafd04a"
       TLS: 0
       SGX: -1

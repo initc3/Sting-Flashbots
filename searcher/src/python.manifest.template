@@ -20,6 +20,8 @@ loader.env.ADMIN_PRIVATE_KEY = { passthrough = true }
 loader.env.SEARCHER_KEY = { passthrough = true }
 loader.env.STINGER_PK = { passthrough = true }
 loader.env.POF_KEYS = { passthrough = true }
+loader.env.SEPOLIA = { passthrough = true }
+loader.env.LOCALNET = { passthrough = true }
 
 loader.insecure__use_cmdline_argv = true
 

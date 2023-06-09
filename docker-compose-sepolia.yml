@@ -23,6 +23,8 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      SEPOLIA: "1"
+      LOCALNET: "0"
       ADMIN_PRIVATE_KEY: $SEARCHER_KEY
       SEARCHER_KEY: $SEARCHER_KEY
       BOUNTY_CONTRACT_ADMIN_PK: $SEARCHER_KEY
@@ -32,6 +34,7 @@ services:
       TLS: 1
       SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"
+      GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
       RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
       RA_CLIENT_SPID: $RA_CLIENT_SPID
       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
@@ -63,7 +66,6 @@ services:
       args:
         ENCLAVE_SIZE: "${ENCLAVE_SIZE-64G}"
         SEPOLIA: "1"
-        MAINNET: "0"
         LOCALNET: "0"
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
@@ -91,15 +93,14 @@ services:
       COPY_DATABASE: "false" 
       # DATABASE_SOURCE: "/data/synced"
       SUBV_DIR: "/shared/"
-      SUBV_ADDRESS: "0x4588765017b315E1d190f46B8f1911F49D918bc4"
+      SUBV_ADDRESS: $SEARCHER_ADDRESS
       RA_CLIENT_SPID: $RA_CLIENT_SPID
       RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
       RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
       SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"
-      RELAY_SECRET_KEY: $PRIVATE_KEY
-      BUILDER_SECRET_KEY: $PRIVATE_KEY
-      BUILDER_TX_SIGNING_KEY: $PRIVATE_KEY
+      BUILDER_SECRET_KEY: "${BUILDER_KEY-0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622}"
+      BUILDER_TX_SIGNING_KEY: "${BUILDER_KEY-0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622}"
     volumes:
       - aesmd-socket:/var/run/aesmd
       - ./sepolia/jwtsecret:/etc/jwt.hex
@@ -135,7 +136,7 @@ services:
       - --accept-terms-of-use
       - --jwt-secret=/root/sepolia/jwtsecret 
       - --http-mev-relay=http://builder:28545 
-      - --suggested-fee-recipient=$ADDRESS
+      - --suggested-fee-recipient=${BUILDER_ADDRESS-0x123463a4b065722e99115d6c222f267d9cabb524}
       - --rpc-host=0.0.0.0
     depends_on:
       builder:
@@ -146,7 +147,6 @@ services:
       - 8080:8080
     volumes:
       - ./sepolia/:/root/sepolia
-
 
 volumes:
   aesmd-socket:

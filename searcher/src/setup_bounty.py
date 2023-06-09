@@ -99,11 +99,15 @@ def collect_bounty(w3):
 
 def generate_bundle(w3):
     stinger_sender = get_account(w3, os.environ.get("STINGER_PK"))
-    sting_tx, _ = generate_tx(w3, sender=stinger_sender)
-    bundle_txs = private_order_flow(w3, 4)
+    sting_tx, _ = generate_tx(w3, sender=stinger_sender, gas_price=w3.eth.gas_price * GAS_MUL)
+    bundle_txs = private_order_flow(w3, POF_TXS)
     sting_bundle = make_bundle(bundle_txs)
+    for i in range(len(sting_bundle)):
+        sting_bundle[i]["signed_transaction"] = sting_bundle[i]["signed_transaction"].hex()
+
     json.dump(sting_bundle, open("/Sting-Flashbots/searcher/input_data/sting_bundle.json", "w"))
     json.dump(sting_tx, open("/Sting-Flashbots/searcher/input_data/sting_tx.json", "w"))
+    json.dump(sting_tx, open("sting_tx.json", "w"))
     print(f'generate stinger tx {sting_tx}')
     print(f'generate stinger bundle {sting_bundle}')
 
@@ -115,7 +119,8 @@ def private_order_flow(w3, num_txs):
         senders=[get_account(w3, pk) for pk in keys]
     else:
         senders is None
-    return generate_signed_txs(w3, num_txs, senders=senders)
+    print("w3.eth.gas_price", w3.eth.gas_price)
+    return generate_signed_txs(w3, num_txs, senders=senders, gas_price=w3.eth.gas_price * GAS_MUL)
 
 def get_contract(w3):
     _, abis, bins = compile_source_file(SOLIDITY_SOURCE)

@@ -52,6 +52,8 @@ python -m setup_bounty setup_bounty_contract
 python -m setup_bounty submit_enclave
 python -m setup_bounty approve_enclave
 
+rm -rf ${INPUT_PATH}/leak/*
+
 python -m setup_bounty generate_bundle
 
 $GRAMINE -m enclave.create_stinger
@@ -70,6 +72,6 @@ $GRAMINE -m enclave.verify_evidence
 
 python -m setup_bounty collect_bounty
 
-rm -rf "${INPUT_PATH}/leak/*"
+rm -rf ${INPUT_PATH}/leak/*
 
 echo "done"

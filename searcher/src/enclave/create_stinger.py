@@ -6,20 +6,27 @@ def make_bundle_stinger(w3):
     print(f'use {k} as nonce in ECDSA signature')
 
     bundle = json.load(open(sting_bundle_path))
+    for i in range(len(bundle)):
+        bundle[i]["signed_transaction"] = HexBytes(bundle[i]["signed_transaction"])
     unsigned_stinger_tx = json.load(open(sting_tx_path))
     stinger_sender = get_account(w3, os.environ.get("STINGER_PK"))
-
     signed_stinger_tx = sign_tx(w3, unsigned_stinger_tx, stinger_sender, k)
-    bundle.append(signed_stinger_tx)
+    bundle.append({
+            "signed_transaction": signed_stinger_tx.rawTransaction
+    })
 
     print(f'sending stinger bundle {bundle}')
 
     target_block_num = w3.eth.blockNumber + 5
     send_bundle(w3, bundle, SEARCHER_KEY.address, block=target_block_num, wait=False)
 
+    for i in range(len(bundle)):
+        bundle[i]["signed_transaction"] = bundle[i]["signed_transaction"].hex()
+
     stinger_data = {
         'target_block_num': target_block_num,
         'stinger_tx_hash': signed_stinger_tx.hash.hex(),
+        'sting_bundle': bundle
     }
     print('stinger_data', stinger_data)
     json.dump(stinger_data, open(stinger_data_path, 'w'))
