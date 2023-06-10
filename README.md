@@ -103,6 +103,7 @@ SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
 SEARCHER_KEY=<Sepolia account private key for searcher>
 STINGER_KEY=<Another Sepolia account private key for sending the stinger>
 POF_KEYS=[<list of Sepolia account private keys to use for private order flow transaction simulations>] #optional
+BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SECRET_KEY> #optional
 ```
 
 * Generate jwt secret 

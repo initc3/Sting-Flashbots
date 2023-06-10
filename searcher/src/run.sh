@@ -16,7 +16,7 @@ OUTPUT_PATH=/Sting-Flashbots/searcher/output_data
 
 mkdir -p "${INPUT_PATH}/leak/"
 
-if [[ "$SGX" != "-1" ]]; then
+if [[ "$TLS" == "1" ]]; then
     echo "Waiting for builder cert..."
 
     if [ -z "$(ls -A /cert )" ]; then 
