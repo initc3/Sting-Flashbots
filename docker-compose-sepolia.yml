@@ -1,0 +1,159 @@
+version: '3.9'
+
+services:
+
+  searcher:
+    image: sting-searcher
+    build:
+      context: ./
+      dockerfile: searcher.Dockerfile
+      args:
+        SGX: "${SGX-1}"
+        DEBUG: "${DEBUG-1}"
+        RA_TYPE: "${RA_TYPE-dcap}"
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+    depends_on:
+      aesmd:
+        condition: service_started
+      # builder:
+      #   condition: service_healthy
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-enclave-devices
+    environment:
+      SEPOLIA: "1"
+      LOCALNET: "0"
+      ADMIN_PRIVATE_KEY: $SEARCHER_KEY
+      SEARCHER_KEY: $SEARCHER_KEY
+      BOUNTY_CONTRACT_ADMIN_PK: $SEARCHER_KEY
+      INFORMANT_PK: $SEARCHER_KEY
+      STINGER_PK: $STINGER_PK
+      POF_KEYS: $POF_KEYS
+      TLS: 1
+      SGX: "${SGX-1}"
+      DEBUG: "${DEBUG-1}"
+      GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
+      RA_CLIENT_SPID: $RA_CLIENT_SPID
+      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+      # all of should be for builder's configuration
+      RA_TYPE: "${RA_TYPE-dcap}"
+      RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
+      RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
+      RA_TLS_MRSIGNER: any
+      RA_TLS_ISV_SVN: any
+      RA_TLS_ISV_PROD_ID: any
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+      - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
+      - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
+      - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
+      - shared:/shared
+      - cert:/cert/
+    working_dir: /Sting-Flashbots/searcher/src
+    command: ./run.sh
+
+  builder:
+    # image: ghcr.io/initc3/geth-sgx-builder:481f1c3c2
+    image: geth-sgx-builder:sepolia
+    build:
+      context: ./
+      dockerfile: builder.Dockerfile
+      args:
+        ENCLAVE_SIZE: "${ENCLAVE_SIZE-64G}"
+        SEPOLIA: "1"
+        LOCALNET: "0"
+        RA_CLIENT_SPID: $RA_CLIENT_SPID
+        RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+        SGX: "${SGX-1}"
+        RA_TYPE: "${RA_TYPE-dcap}"
+        GETH_COMMIT: 481f1c3c23b51aa39822b3ba40cfafc653a451b8
+        GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+    ports:
+      - 28545:28545
+      - 8551:8551
+      - 8545:8545
+    deploy:
+      resources:
+        reservations:
+          memory: "${ENCLAVE_SIZE-64G}"
+    depends_on:
+      aesmd:
+        condition: service_started
+    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
+    # see README for more details
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-enclave-devices
+    environment:
+      COPY_DATABASE: "false" 
+      # DATABASE_SOURCE: "/data/synced"
+      SUBV_DIR: "/shared/"
+      SUBV_ADDRESS: $SEARCHER_ADDRESS
+      RA_CLIENT_SPID: $RA_CLIENT_SPID
+      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
+      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
+      SGX: "${SGX-1}"
+      DEBUG: "${DEBUG-1}"
+      BUILDER_SECRET_KEY: "${BUILDER_KEY-0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622}"
+      BUILDER_TX_SIGNING_KEY: "${BUILDER_KEY-0x2e0834786285daccd064ca17f1654f67b4aef298acbb82cef9ec422fb4975622}"
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+      - ./sepolia/jwtsecret:/etc/jwt.hex
+      - shared:/shared
+      - cert:/cert
+      - ./sepolia/synced:/data/synced
+
+  aesmd:
+    image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
+    # see README for more details
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-aesmd-devices
+
+  beacon-chain:
+    image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
+    # image: flashbots-prysm:local
+    # build:
+    #  context: ./
+    #  dockerfile: beacon.Dockerfile
+    #  args:
+    #    COMMIT: cecd2d9cbb9bd32187dcdc8167fe72b77d48eebe
+    command:
+      - --datadir=/root/sepolia/beacondata
+      - --sepolia
+      - --checkpoint-sync-url=https://sepolia.beaconstate.info 
+      - --genesis-beacon-api-url=https://sepolia.beaconstate.info 
+      - --grpc-gateway-host=0.0.0.0
+      - --execution-endpoint=http://builder:8551
+      - --accept-terms-of-use
+      - --jwt-secret=/root/sepolia/jwtsecret 
+      - --http-mev-relay=http://builder:28545 
+      - --suggested-fee-recipient=${BUILDER_ADDRESS-0x123463a4b065722e99115d6c222f267d9cabb524}
+      - --rpc-host=0.0.0.0
+    depends_on:
+      builder:
+        condition: service_started
+    ports:
+      - 4000:4000
+      - 3500:3500
+      - 8080:8080
+    volumes:
+      - ./sepolia/:/root/sepolia
+
+volumes:
+  aesmd-socket:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "rw"
+  data:
+  shared:
+  cert:

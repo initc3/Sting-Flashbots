@@ -23,6 +23,10 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
+      SEPOLIA: "0"
+      LOCALNET: "1"
+      STINGER_PK: "0x0763770ef43a3bb2314d0be24c98da346f695d96e6632646915f94ab7aafd04a"
+      POF_KEYS: $POF_KEYS
       TLS: 1
       SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"
@@ -33,7 +37,6 @@ services:
       RA_TYPE: "${RA_TYPE-dcap}"
       RA_TLS_ALLOW_DEBUG_ENCLAVE_INSECURE: 1
       RA_TLS_ALLOW_OUTDATED_TCB_INSECURE: 1
-      RA_TLS_MRENCLAVE: "82b30d3dba6815a1e2d5f36e955d571e0933c715499fab81ce0e097ec6f3aa93"
       RA_TLS_MRSIGNER: any
       RA_TLS_ISV_SVN: any
       RA_TLS_ISV_PROD_ID: any
@@ -55,6 +58,9 @@ services:
       context: ./
       dockerfile: builder.Dockerfile
       args:
+        ENCLAVE_SIZE: "${ENCLAVE_SIZE-4G}"
+        SEPOLIA: "0"
+        LOCALNET: "1"
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         SGX: "${SGX-1}"

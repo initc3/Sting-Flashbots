@@ -28,7 +28,7 @@ HEALTHCHECK --interval=5s --start-period=360s \
         -d "{\"method\":\"eth_blockNumber\",\"params\":[],\"id\":1,\"jsonrpc\":\"2.0\"}" | \
         jq .result | xargs printf "%d" | xargs test 25 -lt
 
-# RUN gramine-sgx-gen-private-key -f
+RUN gramine-sgx-gen-private-key -f
 
 WORKDIR /geth-sgx/
 ADD builder/geth/geth.manifest.template /geth-sgx/
@@ -41,12 +41,29 @@ ARG RA_CLIENT_SPID
 ENV RA_CLIENT_SPID=$RA_CLIENT_SPID
 ARG RA_CLIENT_LINKABLE=0
 ENV RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE
-ARG RA_TYPE=epid
+ARG RA_TYPE=dcap
 ENV RA_TYPE=$RA_TYPE
 ARG SGX=1
 ENV SGX=$SGX
 
-RUN make TLS=1 ENCLAVE_SIZE=4G LOCALNET=1
+ARG LOCALNET=1
+ENV LOCALNET=$LOCALNET
+ARG ENCLAVE_SIZE=4G
+ENV ENCLAVE_SIZE=$ENCLAVE_SIZE
+ARG SEPOLIA=0
+ENV SEPOLIA=$SEPOLIA
+ARG MAINNET=0
+ENV MAINNET=$MAINNET
+
+RUN make TLS=1
+
+WORKDIR /geth-sgx/go-ethereum
+RUN go mod download
+RUN go run build/ci.go install -static ./cmd/geth
+RUN cp /geth-sgx/go-ethereum/build/bin/geth /usr/local/bin/
+
+WORKDIR /geth-sgx/
+
 CMD ./run.sh
 # CMD gramine-sgx ./geth
 # RUN gramine-sgx-sigstruct-view geth.sig

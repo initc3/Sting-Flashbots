@@ -9,15 +9,13 @@ from enclave.utils import *
 
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
-BOUNTY_AMT = 150000000000000
-
+SOLIDITY_PATH = "../solidity/build/contracts/Honeypot.json"
 
 def setup_bounty_contract(w3):
     bounty_admin = get_account(w3, os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
-    contract_address, contract, contract_id = deploy_contract(w3, bounty_admin.address, SOLIDITY_SOURCE)
+    contract_address, contract = deploy_contract(w3, bounty_admin.address)
     with open("contract_address", "w") as f:
         f.write(contract_address)
-
 
 def submit_enclave(w3):
     contract = get_contract(w3)
@@ -97,15 +95,38 @@ def collect_bounty(w3):
     assert balance_after > balance_before
 
 
-def get_account(w3, secret_key):
-    account = Account.from_key(secret_key)
-    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
-    return account   
+def generate_bundle(w3):
+    stinger_sender = get_account(w3, os.environ.get("STINGER_PK"))
+    sting_tx, _ = generate_tx(w3, sender=stinger_sender, gas_price=w3.eth.gas_price * GAS_MUL)
+    bundle_txs = private_order_flow(w3, POF_TXS)
+    sting_bundle = make_bundle(bundle_txs)
+    for i in range(len(sting_bundle)):
+        sting_bundle[i]["signed_transaction"] = sting_bundle[i]["signed_transaction"].hex()
 
+    json.dump(sting_bundle, open("/Sting-Flashbots/searcher/input_data/sting_bundle.json", "w"))
+    json.dump(sting_tx, open("/Sting-Flashbots/searcher/input_data/sting_tx.json", "w"))
+    print(f'generate stinger tx {sting_tx}')
+    print(f'generate stinger bundle {sting_bundle}')
+
+
+def private_order_flow(w3, num_txs):
+    keys = os.environ.get("POF_KEYS")
+    if keys is not None and keys != "":
+        print("POF_KEYS", keys)
+        keys = json.loads(keys)
+        senders = [get_account(w3, pk) for pk in keys]
+    else:
+        senders = None
+    return generate_signed_txs(w3, num_txs, senders=senders, gas_price=w3.eth.gas_price * GAS_MUL)
+
+def parse_contract(contract_path):
+    contract = json.load(open(contract_path))
+    return contract['abi'], contract['bytecode']
 
 def get_contract(w3):
-    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
+    abis, bins = parse_contract(SOLIDITY_PATH)
     contract_address = open("contract_address").read()
+    print("contract_address", contract_address)
     return w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
 
 
@@ -128,15 +149,15 @@ def compile_source_file(contract_paths):
     return contract_id, abis, bins
 
 
-def deploy_contract(w3, admin_addr, contract_paths):
-    contract_id,abis,bins = compile_source_file(contract_paths)
+def deploy_contract(w3, admin_addr):
+    abis, bins = parse_contract(SOLIDITY_PATH)
     contract = w3.eth.contract(abi=abis, bytecode=bins)
     tx_hash = contract.constructor().transact({"from": admin_addr, "value": BOUNTY_AMT})
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
     contract_address = receipt['contractAddress']
     contract = w3.eth.contract(address=contract_address, abi=abis)
-    print(f'Deployed {contract_id} to: {contract_address} with hash  {tx_hash.hex()}')
-    return contract_address, contract, contract_id
+    print(f'Deployed Honeypot contract to: {contract_address} with hash  {tx_hash.hex()}')
+    return contract_address, contract
 
 
 def send_tx(w3, foo, user_addr, value=0):

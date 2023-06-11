@@ -4,10 +4,11 @@ from enclave.utils import *
 
 def verify_evidence(w3):
     verify_data = json.load(open(verify_data_path))
-    unsigned_adv_tx, signed_adv_tx = verify_tx_proof(w3, verify_data['target_block_num'], hex_to_bytes(verify_data['adv_prf']))
+    sting_block_num = verify_data['target_block_num']
+    unsigned_adv_tx, signed_adv_tx = verify_tx_proof(w3, sting_block_num, hex_to_bytes(verify_data['adv_prf']))
     print(f'unsigned_adv_tx {unsigned_adv_tx}')
     print(f'signed_adv_tx {signed_adv_tx}')
-    _, signed_victim_tx = verify_tx_proof(w3, verify_data['target_block_num'], hex_to_bytes(verify_data['victim_prf']))
+    _, signed_victim_tx = verify_tx_proof(w3, sting_block_num, hex_to_bytes(verify_data['victim_prf']))
     print(f'signed_victim_tx {signed_victim_tx}')
 
     r = verify_data['r']
@@ -24,13 +25,13 @@ def verify_evidence(w3):
 
     raw_stinger_tx = open(stinger_tx_path, "rb").read()
 
-    assert raw_stinger_tx == encode_tx(signed_victim_tx.nonce,signed_victim_tx.gas_price,signed_victim_tx.gas,signed_victim_tx.to, signed_victim_tx.value,signed_victim_tx.data,signed_victim_tx.v,signed_victim_tx.r,signed_victim_tx.s)
+    assert raw_stinger_tx == encode_tx(signed_victim_tx)
 
-    target_block = w3.eth.get_block(verify_data['target_block_num'])
+    target_block = w3.eth.get_block(sting_block_num)
     print('target block hash', target_block.hash.hex())
 
     proof_blob = rlp.encode([
-         verify_data['target_block_num'],
+         sting_block_num,
          target_block.hash,
     ])
     secret_key = open(secret_key_path, "rb").read()
@@ -41,7 +42,7 @@ def verify_evidence(w3):
 
 
 if __name__ == '__main__':
-    print('========================================================================= generating_signing_key')
+    print('========================================================================= verify_evidence')
 
     w3 = get_web3()
     verify_evidence(w3)

@@ -35,7 +35,19 @@ else:
     endpoint = f"http://{HOST}:{PORT}"
 ADMIN_ACCOUNT: LocalAccount = Account.from_key(os.environ.get("ADMIN_PRIVATE_KEY","0xf380884ad465b73845ca785d7e125e4cc831a8267ed1be5da6299ea6094d177c"))
 SEARCHER_KEY: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x4ac4fdb381ee97a57fd217ce2cea80efa3c0d8ea7012d28b480bd51a942ce9f8"))
-CHAIN_ID = 32382
+
+if int(os.environ.get("SEPOLIA", 0)) == 1:
+    CHAIN_ID = 11155111
+    LOCALNET=False
+    POF_TXS=25
+    BOUNTY_AMT=6000000000
+    GAS_MUL=100000
+else:
+    LOCALNET=True
+    CHAIN_ID = 32382
+    GAS_MUL=10
+    POF_TXS=5
+    BOUNTY_AMT=150000000000000
 GAS_LIMIT = 25000
 
 if int(os.environ.get("INSIDE_SGX", 0)) == 1:
@@ -49,8 +61,12 @@ else:
 
 subversionservice_path = f'{input_dir}/leak/'
 cert_path = f'{input_dir}/tlscert.der'
-stinger_data_path = f'{output_dir}/stinger_data.json'
+sting_bundle_path = f'{input_dir}/sting_bundle.json'
+sting_tx_path = f'{input_dir}/sting_tx.json'
 verify_data_path = f'{input_dir}/verify_data.json'
+
+stinger_data_path = f'{output_dir}/stinger_data.json'
+
 stinger_tx_path = f'{data_dir}/stinger_tx'
 secret_key_path = f'{data_dir}/secret_key'
 
@@ -82,6 +98,10 @@ def get_balance(w3, addr):
     balance = w3.eth.get_balance(addr)
     return balance
 
+def get_account(w3, secret_key):
+    account = Account.from_key(secret_key)
+    w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
+    return account  
 
 def setup_new_account(w3):
     new_account = w3.eth.account.create()
@@ -112,43 +132,49 @@ def transact(w3, func_to_call, account, value=0):
     signed_tx = sign_tx(w3, tx, account)
     return send_tx(w3, signed_tx)
 
-def transfer_tx(w3, sender_addr, receiver_addr, amt, gas_price=None):
+def transfer_tx(w3, sender_addr, receiver_addr, amt, gas_price=None, nonce_add=0):
     return {
         'to': receiver_addr,
         'from': sender_addr,
         'value': amt,
         "gasPrice": w3.eth.gas_price if gas_price is None else gas_price,
         'gas': GAS_LIMIT,
-        'nonce': w3.eth.get_transaction_count(sender_addr),
+        'nonce': w3.eth.get_transaction_count(sender_addr) + nonce_add,
         'chainId': CHAIN_ID,
     }
 
 def refill_ether(w3, receiver_addr, amt=1000):
-    print(f"admin_account balance: {get_balance(w3, ADMIN_ACCOUNT.address)}")
+    # print(f"admin_account balance: {get_balance(w3, ADMIN_ACCOUNT.address)}")
     balance = get_balance(w3, receiver_addr)
     amt -= balance
-    print(f'refilling {receiver_addr} amt: {amt} current: {balance}')
-
+    # print(f'refilling {receiver_addr} amt: {amt} current: {balance}')
+    
     if amt > 0:
         tx = transfer_tx(w3, ADMIN_ACCOUNT.address, receiver_addr, amt)
         signed_tx = sign_tx(w3, tx, ADMIN_ACCOUNT)
         send_tx(w3, signed_tx)
-    print(f'refilling {receiver_addr} updated: {get_balance(w3, receiver_addr)}')
+        print(f'refilled {receiver_addr} updated balance: {get_balance(w3, receiver_addr)}')
 
 def sample(range):
     return random.randint(0, range)
 
-def generate_tx(w3, gas_price=None):
-    sender = setup_new_account(w3)
+def generate_tx(w3, sender=None, gas_price=None, nonce_add=0):
+    if sender is None:
+        sender = setup_new_account(w3)
     receiver = setup_new_account(w3)
     amt = sample(10000)
-    refill_ether(w3, sender.address, amt+300000000000000)
-    return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price), sender
+    if LOCALNET:
+        refill_ether(w3, sender.address, amt+30000000000000)
+    return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price, nonce_add), sender
 
-def generate_signed_txs(w3, num):
+def generate_signed_txs(w3, num, senders=None, gas_price=None):
     txs = []
-    for _ in range(num):
-        tx, sender = generate_tx(w3)
+    for i in range(num):
+        if senders is None:
+            tx, sender = generate_tx(w3)
+        else:
+            sender = senders[i % len(senders)]
+            tx, _ = generate_tx(w3, sender=sender, gas_price=gas_price, nonce_add=int(i/len(senders)))
         signed_tx = sign_tx(w3, tx, sender)
         txs.append(signed_tx)
     return txs
@@ -225,9 +251,9 @@ def decode_raw_tx(w3, raw_tx):
         v=tx.v,
     )
 
-def encode_tx(nonce, gas_price, gas, to, vakue, data, v ,r , s):
-    tx = Transaction(nonce, gas_price, gas, to, vakue, data, v ,r , s)
-    return rlp.encode(tx)
+def encode_tx(tx):
+    tx_obj = Transaction(tx["nonce"], tx["gas_price"], tx["gas"], tx["to"], tx["value"], tx["data"], tx["v"] ,tx["r"] , tx["s"])
+    return rlp.encode(tx_obj)
 
 def sign_eth_data(w3, private_key, data):
     data = encode_defunct(primitive=data)

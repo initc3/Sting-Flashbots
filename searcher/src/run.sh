@@ -16,7 +16,7 @@ OUTPUT_PATH=/Sting-Flashbots/searcher/output_data
 
 mkdir -p "${INPUT_PATH}/leak/"
 
-if [[ "$SGX" != "-1" ]]; then
+if [[ "$TLS" == "1" ]]; then
     echo "Waiting for builder cert..."
 
     if [ -z "$(ls -A /cert )" ]; then 
@@ -30,9 +30,11 @@ if [[ "$SGX" != "-1" ]]; then
     set -x
 
     cp /cert/tlscert.der "${INPUT_PATH}/tlscert.der"
+    cp /shared/builder_enclave.json builder_enclave.json
+    export RA_TLS_MRENCLAVE=$(cat builder_enclave.json | jq -r .mr_enclave )
 fi 
 
-rm -rf /shared/*
+rm -rf /shared/0x*
 
 cd /Sting-Flashbots/searcher/src/
 
@@ -52,22 +54,26 @@ python -m setup_bounty setup_bounty_contract
 python -m setup_bounty submit_enclave
 python -m setup_bounty approve_enclave
 
+rm -rf ${INPUT_PATH}/leak/*
+
+python -m setup_bounty generate_bundle
+
 $GRAMINE -m enclave.create_stinger
 
 set +x
-while [ -z "$(ls -A /shared )" ]
+while [ -z "$(ls -A /shared/0x* )" ]
 do  
     sleep 2
 done
 set -x
 
-mv /shared/* "${INPUT_PATH}/leak/"
+mv /shared/0x* "${INPUT_PATH}/leak/"
 
 python -m make_evidence
 $GRAMINE -m enclave.verify_evidence
 
 python -m setup_bounty collect_bounty
 
-rm -rf "${INPUT_PATH}/leak/*"
+rm -rf ${INPUT_PATH}/leak/*
 
 echo "done"

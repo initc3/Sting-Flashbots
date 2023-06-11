@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED 1
 ENV VENV_PATH=/root/.venvs/sting
 
-RUN apt-get update && apt-get install -y python3-venv npm software-properties-common
+RUN apt-get update && apt-get install -y python3-venv npm software-properties-common jq
 
 RUN npm install -g npm@7
 RUN npm install -g truffle@5.4.29
