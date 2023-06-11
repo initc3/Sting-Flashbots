@@ -22,7 +22,7 @@ RUN go run build/ci.go install -static ./cmd/geth
 # Pull Geth into a second stage deploy alpine container
 FROM alpine:latest
 
-RUN apk add --no-cache ca-certificates jq
+RUN apk add --no-cache ca-certificates jq curl
 COPY --from=builder /go-ethereum/build/bin/geth /usr/local/bin/
 
 HEALTHCHECK --interval=5s --start-period=360s \

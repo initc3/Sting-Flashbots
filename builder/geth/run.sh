@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 set -e
+set -x
+
 if [[ "$SGX" == 1 ]]; then
     GRAMINE="gramine-sgx"
 else

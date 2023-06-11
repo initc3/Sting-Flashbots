@@ -39,9 +39,9 @@ SEARCHER_KEY: LocalAccount = Account.from_key(os.environ.get("SEARCHER_KEY", "0x
 if int(os.environ.get("SEPOLIA", 0)) == 1:
     CHAIN_ID = 11155111
     LOCALNET=False
-    GAS_MUL=10000000
-    POF_TXS=50
-    BOUNTY_AMT=1000
+    POF_TXS=25
+    BOUNTY_AMT=6000000000
+    GAS_MUL=100000
 else:
     LOCALNET=True
     CHAIN_ID = 32382

@@ -31,7 +31,7 @@ def make_evidence(w3):
     })
 
     print(f'current block {w3.eth.block_number}')
-    target_block_num = stinger_data['target_block_num']-1
+    target_block_num = stinger_data['target_block_num']
     print(f'target block {target_block_num}')
     assert w3.eth.block_number < target_block_num
 
