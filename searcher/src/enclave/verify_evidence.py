@@ -27,7 +27,7 @@ def verify_evidence(w3):
 
     assert raw_stinger_tx == encode_tx(signed_victim_tx)
 
-    target_block = w3.eth.get_block(sting_block_num-1)
+    target_block = w3.eth.get_block(sting_block_num)
     print('target block hash', target_block.hash.hex())
 
     proof_blob = rlp.encode([

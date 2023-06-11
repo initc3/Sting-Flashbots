@@ -9,7 +9,6 @@ from enclave.utils import *
 
 
 SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
-BOUNTY_AMT = 10000
 
 
 def setup_bounty_contract(w3):

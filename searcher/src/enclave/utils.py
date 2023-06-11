@@ -41,11 +41,13 @@ if int(os.environ.get("SEPOLIA", 0)) == 1:
     LOCALNET=False
     GAS_MUL=10000000
     POF_TXS=50
+    BOUNTY_AMT=1000
 else:
     LOCALNET=True
     CHAIN_ID = 32382
     GAS_MUL=10
     POF_TXS=5
+    BOUNTY_AMT=150000000000000
 GAS_LIMIT = 25000
 
 if int(os.environ.get("INSIDE_SGX", 0)) == 1:
@@ -162,7 +164,7 @@ def generate_tx(w3, sender=None, gas_price=None, nonce_add=0):
     receiver = setup_new_account(w3)
     amt = sample(10000)
     if LOCALNET:
-        refill_ether(w3, sender.address, amt+10000)
+        refill_ether(w3, sender.address, amt+30000000000000)
     return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price, nonce_add), sender
 
 def generate_signed_txs(w3, num, senders=None, gas_price=None):
