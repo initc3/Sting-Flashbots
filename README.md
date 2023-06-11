@@ -257,3 +257,10 @@ docker compose -f docker-compose-sepolia.yml logs -f searcher
 ```bash
 docker compose -f docker-compose-sepolia.yml down -v
 ```
+## Sepolia Demo
+We demonstrated this on Sepolia Test Net.
+
+* Instance of the contract on Sepolia [Reward Contract](https://sepolia.etherscan.io/tx/0x6f1d87b9b1b5be2fba8ea9872792e429a576dae7c70eaf27015ddde73ad0bb2e)
+* Block containing the sting bundle [Block](https://sepolia.etherscan.io/tx/0xaf53e1b99788c29bcb2b3eae3e82322d74d2d1d807c40bbc8925c99e479c6044)
+* Sting transaction generated in SGX with sig_nonce 30136919085670681544726071097920847459004406643340331248827579930501700917868 [sting_tx](https://sepolia.etherscan.io/tx/0xc94ec5c9f30785ff43daad255d1397ec848775d8de18ae14fe07cd6d6dd9e28a)
+* Evidence transaction with nonce 30136919085670681544726071097920847459004406643340331248827579930501700917868 = Commitment(sting_tx.sig_nonce)  [evidence_tx](https://sepolia.etherscan.io/tx/0xaf53e1b99788c29bcb2b3eae3e82322d74d2d1d807c40bbc8925c99e479c6044)
