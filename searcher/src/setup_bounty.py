@@ -8,13 +8,12 @@ from solcx import compile_source
 from enclave.utils import *
 
 
-SOLIDITY_SOURCE = ("../solidity", "Honeypot.sol", [])
 BOUNTY_AMT = 150000000000000
 
 
 def setup_bounty_contract(w3):
     bounty_admin = get_account(w3, os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
-    contract_address, contract, contract_id = deploy_contract(w3, bounty_admin.address, SOLIDITY_SOURCE)
+    contract_address, contract = deploy_contract(w3, bounty_admin.address)
     with open("contract_address", "w") as f:
         f.write(contract_address)
 
@@ -85,9 +84,7 @@ def collect_bounty(w3):
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
     proof = open("/Sting-Flashbots/searcher/output_data/proof_blob", "rb").read()
     sig = open("/Sting-Flashbots/searcher/output_data/proof_sig", "rb").read()
-    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
-    contract_address = open("contract_address").read()
-    contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
+    contract = get_contract(w3)
     enclave_address = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
     balance_before = w3.eth.get_balance(informant_account.address)
     send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
@@ -98,45 +95,32 @@ def collect_bounty(w3):
 
 
 def get_account(w3, secret_key):
+    print('!!!!', secret_key)
     account = Account.from_key(secret_key)
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account)) 
     return account   
 
 
 def get_contract(w3):
-    _, abis, bins = compile_source_file(SOLIDITY_SOURCE)
+    abi, bin = parse_contract()
     contract_address = open("contract_address").read()
-    return w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
+    return w3.eth.contract(abi=abi, bytecode=bin, address=contract_address)
 
 
-def compile_source_file(contract_paths):
-    base_path, contract_source_path, allowed = contract_paths
-    with open(os.path.join(base_path, contract_source_path), 'r') as f:
-        contract_source = f.read()
-    compiled_sol = compile_source(contract_source,
-                                  output_values=['abi', 'bin'],
-                                  base_path=base_path,
-                                  allow_paths=[allowed])
-    abis = []
-    bins = ""
-    contract_id = ""
-    for x in compiled_sol:
-        contract_id += x
-        contract_interface=compiled_sol[x]
-        abis = abis + contract_interface['abi']
-        bins = bins + contract_interface['bin']
-    return contract_id, abis, bins
+def parse_contract():
+    contract = json.load(open('../solidity/build/contracts/Honeypot.json'))
+    return contract['abi'], contract['bytecode']
 
 
-def deploy_contract(w3, admin_addr, contract_paths):
-    contract_id,abis,bins = compile_source_file(contract_paths)
-    contract = w3.eth.contract(abi=abis, bytecode=bins)
+def deploy_contract(w3, admin_addr):
+    abi, bin = parse_contract()
+    contract = w3.eth.contract(abi=abi, bytecode=bin)
     tx_hash = contract.constructor().transact({"from": admin_addr, "value": BOUNTY_AMT})
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
     contract_address = receipt['contractAddress']
-    contract = w3.eth.contract(address=contract_address, abi=abis)
-    print(f'Deployed {contract_id} to: {contract_address} with hash  {tx_hash.hex()}')
-    return contract_address, contract, contract_id
+    contract = w3.eth.contract(address=contract_address, abi=abi)
+    print(f'Deployed to: {contract_address} with hash  {tx_hash.hex()}')
+    return contract_address, contract
 
 
 def send_tx(w3, foo, user_addr, value=0):
