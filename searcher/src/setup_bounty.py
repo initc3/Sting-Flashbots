@@ -113,12 +113,13 @@ def generate_bundle(w3):
 
 
 def private_order_flow(w3, num_txs):
-    keys = json.loads(os.environ.get("POF_KEYS"))
-    print("keys", keys)
+    keys = os.environ.get("POF_KEYS")
     if keys is not None:
-        senders=[get_account(w3, pk) for pk in keys]
+        keys = json.loads(keys)
+        print("POF_KEYS", keys)
+        senders = [get_account(w3, pk) for pk in keys]
     else:
-        senders is None
+        senders = None
     print("w3.eth.gas_price", w3.eth.gas_price)
     return generate_signed_txs(w3, num_txs, senders=senders, gas_price=w3.eth.gas_price * GAS_MUL)
 

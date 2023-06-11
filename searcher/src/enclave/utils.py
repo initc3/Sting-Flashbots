@@ -40,11 +40,12 @@ if int(os.environ.get("SEPOLIA", 0)) == 1:
     CHAIN_ID = 11155111
     LOCALNET=False
     GAS_MUL=10000000
+    POF_TXS=50
 else:
     LOCALNET=True
     CHAIN_ID = 32382
     GAS_MUL=10
-POF_TXS=50
+    POF_TXS=5
 GAS_LIMIT = 25000
 
 if int(os.environ.get("INSIDE_SGX", 0)) == 1:
