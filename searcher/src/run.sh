@@ -30,9 +30,11 @@ if [[ "$TLS" == "1" ]]; then
     set -x
 
     cp /cert/tlscert.der "${INPUT_PATH}/tlscert.der"
+    cp /shared/builder_enclave.json builder_enclave.json
+    export RA_TLS_MRENCLAVE=$(cat builder_enclave.json | jq -r .mr_enclave )
 fi 
 
-rm -rf /shared/*
+rm -rf /shared/0x*
 
 cd /Sting-Flashbots/searcher/src/
 
@@ -59,13 +61,13 @@ python -m setup_bounty generate_bundle
 $GRAMINE -m enclave.create_stinger
 
 set +x
-while [ -z "$(ls -A /shared )" ]
+while [ -z "$(ls -A /shared/0x* )" ]
 do  
     sleep 2
 done
 set -x
 
-mv /shared/* "${INPUT_PATH}/leak/"
+mv /shared/0x* "${INPUT_PATH}/leak/"
 
 python -m make_evidence
 $GRAMINE -m enclave.verify_evidence

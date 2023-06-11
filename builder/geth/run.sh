@@ -6,5 +6,6 @@ if [[ "$SGX" == 1 ]]; then
 else
     GRAMINE="gramine-direct"
 fi
+gramine-sgx-sigstruct-view --output-format json geth.sig > /shared/builder_enclave.json
 
 $GRAMINE ./geth

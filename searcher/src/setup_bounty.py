@@ -106,16 +106,15 @@ def generate_bundle(w3):
 
     json.dump(sting_bundle, open("/Sting-Flashbots/searcher/input_data/sting_bundle.json", "w"))
     json.dump(sting_tx, open("/Sting-Flashbots/searcher/input_data/sting_tx.json", "w"))
-    json.dump(sting_tx, open("sting_tx.json", "w"))
     print(f'generate stinger tx {sting_tx}')
     print(f'generate stinger bundle {sting_bundle}')
 
 
 def private_order_flow(w3, num_txs):
     keys = os.environ.get("POF_KEYS")
-    if keys is not None:
-        keys = json.loads(keys)
+    if keys is not None and keys != "":
         print("POF_KEYS", keys)
+        keys = json.loads(keys)
         senders = [get_account(w3, pk) for pk in keys]
     else:
         senders = None
