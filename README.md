@@ -100,10 +100,10 @@ docker compose down -v
 # .env file
 ...
 SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
-SEARCHER_KEY=<Sepolia account private key for searcher>
-STINGER_KEY=<Another Sepolia account private key for sending the stinger>
-POF_KEYS=[<list of Sepolia account private keys to use for private order flow transaction simulations>] #optional
-BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SECRET_KEY> #optional
+SEARCHER_KEY=<Sepolia account private key for searcher (with balance)>
+STINGER_KEY=<Another Sepolia account private key for sending the stinger (with balance)>
+POF_KEYS=[<list of Sepolia account private keys to use for private order flow transaction simulations (with balances)>]
+BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SECRET_KEY>
 ```
 
 * Generate jwt secret 
@@ -157,15 +157,15 @@ docker network create sting-sync-net
 * Set environment variables for an account 
 
 ```env
-export PRIVATE_KEY=<private key for account with balance on Sepolia>
+export BUILDER_KEY=<builder bls secret key>
 ```
 
 * start builder
 
 ```bash
 docker run --publish 8551:8551 --publish 8545:8545 --net sting-sync-net --name builder \
-  -e BUILDER_SECRET_KEY=$PRIVATE_KEY \
-  -e BUILDER_TX_SIGNING_KEY=$PRIVATE_KEY \
+  -e BUILDER_SECRET_KEY=$BUILDER_KEY \
+  -e BUILDER_TX_SIGNING_KEY=$BUILDER_KEY \
   -v $PWD/sepolia:/root/sepolia  \
   --rm flashbots-builder:local --sepolia \
   --http --http.api=engine,eth,web3,net,debug,flashbots \
