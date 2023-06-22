@@ -8,15 +8,20 @@ services:
       context: ./
       dockerfile: searcher.Dockerfile
       args:
-        SGX: "${SGX-0}"
+        SGX: "${SGX-1}"
         DEBUG: "${DEBUG-1}"
         RA_TYPE: "${RA_TYPE-dcap}"
         RA_CLIENT_SPID: $RA_CLIENT_SPID
         RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
         GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
-    # depends_on:
-    #   builder:
-    #     condition: service_healthy
+    depends_on:
+      aesmd:
+        condition: service_started
+      # builder:
+      #   condition: service_healthy
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-enclave-devices
     environment:
       SEPOLIA: "1"
       LOCALNET: "0"
@@ -27,12 +32,19 @@ services:
       STINGER_PK: $STINGER_PK
       POF_KEYS: $POF_KEYS
       TLS: 0
-      SGX: -1
+      SGX: "${SGX-1}"
       DEBUG: "${DEBUG-1}"
       GRAMINE_IMG_TAG: $GRAMINE_IMG_TAG
+      RA_TLS_EPID_API_KEY: $RA_TLS_EPID_API_KEY
+      RA_CLIENT_SPID: $RA_CLIENT_SPID
+      RA_CLIENT_LINKABLE: $RA_CLIENT_LINKABLE
     volumes:
-      - ./chain/solidity:/Sting-Flashbots/searcher/solidity
-      - ./searcher/src:/Sting-Flashbots/searcher/src
+      - aesmd-socket:/var/run/aesmd
+      - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
+      - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
+      - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
+      - ./searcher/src/make_evidence.py:/Sting-Flashbots/searcher/src/make_evidence.py
+      - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
       - shared:/shared
     working_dir: /Sting-Flashbots/searcher/src
     command: ./run.sh
@@ -90,6 +102,16 @@ services:
       - shared:/shared
       - ./sepolia/synced:/data/synced
 
+  aesmd:
+    image: ghcr.io/initc3/sgx-aesm:2.19-buster-81eb0d3
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+    # NOTE set SGX_DRIVER in your .env file to "oot" or "inkernel"
+    # see README for more details
+    extends:
+      file: sgx-driver.yml
+      service: ${SGX_DRIVER}-aesmd-devices
+
   beacon-chain:
     image: ghcr.io/initc3/flashbots-prysm:cecd2d9cb
     # image: flashbots-prysm:local
@@ -121,5 +143,11 @@ services:
       - ./sepolia/:/root/sepolia
 
 volumes:
+  aesmd-socket:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "rw"
   data:
   shared:

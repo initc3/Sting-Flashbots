@@ -101,6 +101,7 @@ docker compose down -v
 ...
 SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
 SEARCHER_KEY=<Sepolia account private key for searcher (with balance)>
+BOUNTY_CONTRACT_ADMIN_PK=<Sepolia account for admin who approves sting enclaves (can be the same as $SEARCHER_KEY)>
 STINGER_KEY=<Another Sepolia account private key for sending the stinger (with balance)>
 POF_KEYS=[<list of Sepolia account private keys to use for private order flow transaction simulations (with balances)>]
 BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SECRET_KEY>
@@ -110,7 +111,7 @@ BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SE
 
 ```bash
 mkdir -p sepolia
-openssl rand -hex 32 | sudo tee ./sepolia/jwtsecret
+openssl rand -hex 32 | tee ./sepolia/jwtsecret
 ```
 
 ## Running on Sepolia without SGX
@@ -258,7 +259,7 @@ docker compose -f docker-compose-sepolia.yml logs -f searcher
 docker compose -f docker-compose-sepolia.yml down -v
 ```
 ## Sepolia Demo
-We demonstrated this on Sepolia Test Net.
+We demonstrated this on Sepolia Test Net using [docker-compose-sepolia-combined.yml](docker-compose-sepolia-combined.yml) running the searcher in SGX and the builder not in SGX
 
 * Instance of the contract on Sepolia [Reward Contract](https://sepolia.etherscan.io/address/0x8c09C1732B833dbf9FFb2825548274DD4cFe8369)
 * Block containing the sting bundle [Block](https://sepolia.etherscan.io/block/3670021)
