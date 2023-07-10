@@ -27,7 +27,7 @@ services:
       LOCALNET: "0"
       ADMIN_PRIVATE_KEY: $SEARCHER_KEY
       SEARCHER_KEY: $SEARCHER_KEY
-      BOUNTY_CONTRACT_ADMIN_PK: $SEARCHER_KEY
+      BOUNTY_CONTRACT_ADMIN_PK: $BOUNTY_CONTRACT_ADMIN_PK
       INFORMANT_PK: $SEARCHER_KEY
       STINGER_PK: $STINGER_PK
       POF_KEYS: $POF_KEYS
@@ -89,8 +89,8 @@ services:
       file: sgx-driver.yml
       service: ${SGX_DRIVER}-enclave-devices
     environment:
-      COPY_DATABASE: "false" 
-      # DATABASE_SOURCE: "/data/synced"
+      COPY_DATABASE: "true" 
+      DATABASE_SOURCE: "/data/synced"
       SUBV_DIR: "/shared/"
       SUBV_ADDRESS: $SEARCHER_ADDRESS
       RA_CLIENT_SPID: $RA_CLIENT_SPID

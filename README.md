@@ -101,6 +101,7 @@ docker compose down -v
 ...
 SEARCHER_ADDRESS=<address for $SEARCHER_KEY>
 SEARCHER_KEY=<Sepolia account private key for searcher (with balance)>
+BOUNTY_CONTRACT_ADMIN_PK=<Sepolia account for admin who approves sting enclaves (can be the same as $SEARCHER_KEY)>
 STINGER_KEY=<Another Sepolia account private key for sending the stinger (with balance)>
 POF_KEYS=[<list of Sepolia account private keys to use for private order flow transaction simulations (with balances)>]
 BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SECRET_KEY>
@@ -110,7 +111,7 @@ BUILDER_KEY=<builder bls secret key to set BUILDER_TX_SIGNING_KEY and BUILDER_SE
 
 ```bash
 mkdir -p sepolia
-openssl rand -hex 32 | sudo tee ./sepolia/jwtsecret
+openssl rand -hex 32 | tee ./sepolia/jwtsecret
 ```
 
 ## Running on Sepolia without SGX
@@ -154,7 +155,7 @@ docker compose -f docker-compose-nosgx.yml build builder beacon-chain
 docker network create sting-sync-net
 ```
 
-* Set environment variables for an account 
+* Set environment variables for builder key
 
 ```env
 export BUILDER_KEY=<builder bls secret key>
@@ -226,7 +227,7 @@ docker network rm sting-sync-net
 
 ### Run demo
 
-* add Fake propose to environment (or create a new [geth-sgx-gramine](https://github.com/flashbots/geth-sgx-gramine/tree/main/examples/confidential-builder-boost-relay))
+* add Fake propose to environment (you can create a new one using: [geth-sgx-gramine](https://github.com/flashbots/geth-sgx-gramine/tree/main/examples/confidential-builder-boost-relay))
 
 ```bash
 export FAKE_PROPOSER=$(cat sepolia/validator_data.json)
@@ -258,9 +259,9 @@ docker compose -f docker-compose-sepolia.yml logs -f searcher
 docker compose -f docker-compose-sepolia.yml down -v
 ```
 ## Sepolia Demo
-We demonstrated this on Sepolia Test Net.
+We demonstrated this on Sepolia Test Net using [docker-compose-sepolia-combined.yml](docker-compose-sepolia-combined.yml) running the searcher in SGX and the builder not in SGX
 
-* Instance of the contract on Sepolia [Reward Contract](https://sepolia.etherscan.io/tx/0x6f1d87b9b1b5be2fba8ea9872792e429a576dae7c70eaf27015ddde73ad0bb2e)
-* Block containing the sting bundle [Block](https://sepolia.etherscan.io/tx/0xaf53e1b99788c29bcb2b3eae3e82322d74d2d1d807c40bbc8925c99e479c6044)
+* Instance of the contract on Sepolia [Reward Contract](https://sepolia.etherscan.io/address/0x8c09C1732B833dbf9FFb2825548274DD4cFe8369)
+* Block containing the sting bundle [Block](https://sepolia.etherscan.io/block/3670021)
 * Sting transaction signed in SGX with sig_nonce 64393256116112811812186352716830363224904947493293752501720077651081401306790 [sting_tx](https://sepolia.etherscan.io/tx/0xc94ec5c9f30785ff43daad255d1397ec848775d8de18ae14fe07cd6d6dd9e28a)
 * Evidence transaction with nonce 30136919085670681544726071097920847459004406643340331248827579930501700917868 = Commitment(sting_tx.sig_nonce)  [evidence_tx](https://sepolia.etherscan.io/tx/0xaf53e1b99788c29bcb2b3eae3e82322d74d2d1d807c40bbc8925c99e479c6044)
