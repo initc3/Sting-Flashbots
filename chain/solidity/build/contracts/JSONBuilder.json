@@ -1,0 +1,2207 @@
+{
+  "contractName": "JSONBuilder",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.20+commit.a1b79de6\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/rave/JSONBuilder.sol\":\"JSONBuilder\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/rave/JSONBuilder.sol\":{\"keccak256\":\"0xdb8791923904b5d1b324005e41163ab478dba5ef1d06a45b7b027de52f019ba3\",\"license\":\"Apache-2.0\",\"urls\":[\"bzz-raw://d27dc516848818b72527e1dd2753688048b645c350e23d4adc4fc06180116403\",\"dweb:/ipfs/QmRA6g6bWc16R5oZ737uHLzkvVv6Wei85PS17S1pNNjJB9\"]}},\"version\":1}",
+  "bytecode": "0x6055604b600b8282823980515f1a607314603f577f4e487b71000000000000000000000000000000000000000000000000000000005f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea2646970667358221220c924b1b6562b76a2b51bee7bd99c148ce4a653d14f77d9076c380fca4546338e64736f6c63430008140033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea2646970667358221220c924b1b6562b76a2b51bee7bd99c148ce4a653d14f77d9076c380fca4546338e64736f6c63430008140033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "72:2356:7:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "72:2356:7:-:0;;;;;;;;",
+  "source": "// SPDX-License-Identifier: Apache-2.0\npragma solidity >=0.8.0 <0.9.0;\n\nlibrary JSONBuilder {\n    struct Values {\n//        bytes id;\n//        bytes timestamp;\n//        bytes version;\n//        bytes epidPseudonym;\n//        bytes advisoryURL;\n//        bytes advisoryIDs;\n//        bytes isvEnclaveQuoteStatus;\n//        bytes isvEnclaveQuoteBody;\n        bytes id;\n        bytes timestamp;\n        bytes version;\n        bytes advisoryURL;\n        bytes advisoryIDs;\n        bytes isvEnclaveQuoteStatus;\n        bytes platformInfoBlob;\n        bytes isvEnclaveQuoteBody;\n    }\n\n    function buildJSON(Values memory values) internal pure returns (string memory json) {\n//        json = string(\n//            abi.encodePacked(\n//                '{\"id\":\"',\n//                values.id,\n//                '\",\"timestamp\":\"',\n//                values.timestamp,\n//                '\",\"version\":',\n//                values.version,\n//                ',\"epidPseudonym\":\"',\n//                values.epidPseudonym\n//            )\n//        );\n//        json = string(\n//            abi.encodePacked(\n//                json,\n//                '\",\"advisoryURL\":\"',\n//                values.advisoryURL,\n//                '\",\"advisoryIDs\":',\n//                values.advisoryIDs,\n//                ',\"isvEnclaveQuoteStatus\":\"',\n//                values.isvEnclaveQuoteStatus,\n//                '\",\"isvEnclaveQuoteBody\":\"',\n//                values.isvEnclaveQuoteBody,\n//                '\"}'\n//            )\n//        );\n        json = string(\n            bytes.concat(\n                abi.encodePacked(\n                    '{',\n                    '\"id\":\"',\n                    values.id,\n                    '\",\"timestamp\":\"',\n                    values.timestamp,\n                    '\",\"version\":',\n                    values.version,\n                    ',\"advisoryURL\":\"',\n                    values.advisoryURL\n                ),\n                abi.encodePacked(\n                    '\",\"advisoryIDs\":',\n                    values.advisoryIDs,\n                    ',\"isvEnclaveQuoteStatus\":\"',\n                    values.isvEnclaveQuoteStatus,\n                    '\",\"platformInfoBlob\":\"',\n                    values.platformInfoBlob,\n                    '\",\"isvEnclaveQuoteBody\":\"',\n                    values.isvEnclaveQuoteBody,\n                    '\"',\n                    '}'\n                )\n            )\n        );\n    }\n}",
+  "sourcePath": "/Sting-Flashbots/searcher/solidity/contracts/rave/JSONBuilder.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/rave/JSONBuilder.sol",
+    "exportedSymbols": {
+      "JSONBuilder": [
+        3108
+      ]
+    },
+    "id": 3109,
+    "license": "Apache-2.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3038,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "39:31:7"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "JSONBuilder",
+        "contractDependencies": [],
+        "contractKind": "library",
+        "fullyImplemented": true,
+        "id": 3108,
+        "linearizedBaseContracts": [
+          3108
+        ],
+        "name": "JSONBuilder",
+        "nameLocation": "80:11:7",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "JSONBuilder.Values",
+            "id": 3055,
+            "members": [
+              {
+                "constant": false,
+                "id": 3040,
+                "mutability": "mutable",
+                "name": "id",
+                "nameLocation": "365:2:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "359:8:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3039,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "359:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3042,
+                "mutability": "mutable",
+                "name": "timestamp",
+                "nameLocation": "383:9:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "377:15:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3041,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "377:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3044,
+                "mutability": "mutable",
+                "name": "version",
+                "nameLocation": "408:7:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "402:13:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3043,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "402:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3046,
+                "mutability": "mutable",
+                "name": "advisoryURL",
+                "nameLocation": "431:11:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "425:17:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3045,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "425:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3048,
+                "mutability": "mutable",
+                "name": "advisoryIDs",
+                "nameLocation": "458:11:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "452:17:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3047,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "452:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3050,
+                "mutability": "mutable",
+                "name": "isvEnclaveQuoteStatus",
+                "nameLocation": "485:21:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "479:27:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3049,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "479:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3052,
+                "mutability": "mutable",
+                "name": "platformInfoBlob",
+                "nameLocation": "522:16:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "516:22:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3051,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "516:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3054,
+                "mutability": "mutable",
+                "name": "isvEnclaveQuoteBody",
+                "nameLocation": "554:19:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "548:25:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3053,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "548:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Values",
+            "nameLocation": "105:6:7",
+            "nodeType": "StructDefinition",
+            "scope": 3108,
+            "src": "98:482:7",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 3106,
+              "nodeType": "Block",
+              "src": "670:1756:7",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 3104,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 3063,
+                      "name": "json",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3061,
+                      "src": "1519:4:7",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_string_memory_ptr",
+                        "typeString": "string memory"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "arguments": [
+                                {
+                                  "hexValue": "7b",
+                                  "id": 3071,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1614:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_a91eddf639b0b768929589c1a9fd21dcb0107199bdd82e55c5348018a1572f52",
+                                    "typeString": "literal_string \"{\""
+                                  },
+                                  "value": "{"
+                                },
+                                {
+                                  "hexValue": "226964223a22",
+                                  "id": 3072,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1639:8:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_248a07d0ca1ead74b91938e1c345e1f78b3866c43e752af02203fd3737512185",
+                                    "typeString": "literal_string \"\"id\":\"\""
+                                  },
+                                  "value": "\"id\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3073,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1669:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3074,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1676:2:7",
+                                  "memberName": "id",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3040,
+                                  "src": "1669:9:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c2274696d657374616d70223a22",
+                                  "id": 3075,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1700:17:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_6a8dc8a459bb51376069f9f74f406a3f613150330a0a9b436ab5e99624e052a0",
+                                    "typeString": "literal_string \"\",\"timestamp\":\"\""
+                                  },
+                                  "value": "\",\"timestamp\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3076,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1739:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3077,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1746:9:7",
+                                  "memberName": "timestamp",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3042,
+                                  "src": "1739:16:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c2276657273696f6e223a",
+                                  "id": 3078,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1777:14:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_cebfbd9eeab369bde7c8d3de0098f9ff8e9b4afe72d910d61cd3e5ee57ee159c",
+                                    "typeString": "literal_string \"\",\"version\":\""
+                                  },
+                                  "value": "\",\"version\":"
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3079,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1813:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3080,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1820:7:7",
+                                  "memberName": "version",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3044,
+                                  "src": "1813:14:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "2c2261647669736f727955524c223a22",
+                                  "id": 3081,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1849:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_501c36d43eacddb6e1f857bf42a2bd4ff697db6b57b7089495ddfc576db86fd4",
+                                    "typeString": "literal_string \",\"advisoryURL\":\"\""
+                                  },
+                                  "value": ",\"advisoryURL\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3082,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1889:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3083,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1896:11:7",
+                                  "memberName": "advisoryURL",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3046,
+                                  "src": "1889:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_stringliteral_a91eddf639b0b768929589c1a9fd21dcb0107199bdd82e55c5348018a1572f52",
+                                    "typeString": "literal_string \"{\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_248a07d0ca1ead74b91938e1c345e1f78b3866c43e752af02203fd3737512185",
+                                    "typeString": "literal_string \"\"id\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_6a8dc8a459bb51376069f9f74f406a3f613150330a0a9b436ab5e99624e052a0",
+                                    "typeString": "literal_string \"\",\"timestamp\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_cebfbd9eeab369bde7c8d3de0098f9ff8e9b4afe72d910d61cd3e5ee57ee159c",
+                                    "typeString": "literal_string \"\",\"version\":\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_501c36d43eacddb6e1f857bf42a2bd4ff697db6b57b7089495ddfc576db86fd4",
+                                    "typeString": "literal_string \",\"advisoryURL\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                ],
+                                "expression": {
+                                  "id": 3069,
+                                  "name": "abi",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 4294967295,
+                                  "src": "1576:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_magic_abi",
+                                    "typeString": "abi"
+                                  }
+                                },
+                                "id": 3070,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "memberLocation": "1580:12:7",
+                                "memberName": "encodePacked",
+                                "nodeType": "MemberAccess",
+                                "src": "1576:16:7",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                  "typeString": "function () pure returns (bytes memory)"
+                                }
+                              },
+                              "id": 3084,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "nameLocations": [],
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1576:349:7",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            },
+                            {
+                              "arguments": [
+                                {
+                                  "hexValue": "222c2261647669736f7279494473223a",
+                                  "id": 3087,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1981:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_a274a192908db679ce32da9899a81d8dcd0909778c3881ab9a1028cf5709d899",
+                                    "typeString": "literal_string \"\",\"advisoryIDs\":\""
+                                  },
+                                  "value": "\",\"advisoryIDs\":"
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3088,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2021:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3089,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2028:11:7",
+                                  "memberName": "advisoryIDs",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3048,
+                                  "src": "2021:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "2c22697376456e636c61766551756f7465537461747573223a22",
+                                  "id": 3090,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2061:28:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_a1c417d0a55c38b1ac4116d1b14d41d9bfb454df272020d4ad9b2ae5c1b551b6",
+                                    "typeString": "literal_string \",\"isvEnclaveQuoteStatus\":\"\""
+                                  },
+                                  "value": ",\"isvEnclaveQuoteStatus\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3091,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2111:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3092,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2118:21:7",
+                                  "memberName": "isvEnclaveQuoteStatus",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3050,
+                                  "src": "2111:28:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c22706c6174666f726d496e666f426c6f62223a22",
+                                  "id": 3093,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2161:24:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_507a75b5f7d3da517fbebfe12e42f3cf86a0d42414589f59c0b5c49b12badf31",
+                                    "typeString": "literal_string \"\",\"platformInfoBlob\":\"\""
+                                  },
+                                  "value": "\",\"platformInfoBlob\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3094,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2207:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3095,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2214:16:7",
+                                  "memberName": "platformInfoBlob",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3052,
+                                  "src": "2207:23:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c22697376456e636c61766551756f7465426f6479223a22",
+                                  "id": 3096,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2252:27:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_5fe8ab9e7717e5e80e750130e487890e98e393f274cf9773990fefbe7a5fa925",
+                                    "typeString": "literal_string \"\",\"isvEnclaveQuoteBody\":\"\""
+                                  },
+                                  "value": "\",\"isvEnclaveQuoteBody\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3097,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2301:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3098,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2308:19:7",
+                                  "memberName": "isvEnclaveQuoteBody",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3054,
+                                  "src": "2301:26:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "22",
+                                  "id": 3099,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2349:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_6e9f33448a4153023cdaf3eb759f1afdc24aba433a3e18b683f8c04a6eaa69f0",
+                                    "typeString": "literal_string \"\"\""
+                                  },
+                                  "value": "\""
+                                },
+                                {
+                                  "hexValue": "7d",
+                                  "id": 3100,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2374:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_8e2ffa389f3a6ded42d759b3377ac0d928e6a268d143bcc9517093d10c843bff",
+                                    "typeString": "literal_string \"}\""
+                                  },
+                                  "value": "}"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_stringliteral_a274a192908db679ce32da9899a81d8dcd0909778c3881ab9a1028cf5709d899",
+                                    "typeString": "literal_string \"\",\"advisoryIDs\":\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_a1c417d0a55c38b1ac4116d1b14d41d9bfb454df272020d4ad9b2ae5c1b551b6",
+                                    "typeString": "literal_string \",\"isvEnclaveQuoteStatus\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_507a75b5f7d3da517fbebfe12e42f3cf86a0d42414589f59c0b5c49b12badf31",
+                                    "typeString": "literal_string \"\",\"platformInfoBlob\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_5fe8ab9e7717e5e80e750130e487890e98e393f274cf9773990fefbe7a5fa925",
+                                    "typeString": "literal_string \"\",\"isvEnclaveQuoteBody\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_6e9f33448a4153023cdaf3eb759f1afdc24aba433a3e18b683f8c04a6eaa69f0",
+                                    "typeString": "literal_string \"\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_8e2ffa389f3a6ded42d759b3377ac0d928e6a268d143bcc9517093d10c843bff",
+                                    "typeString": "literal_string \"}\""
+                                  }
+                                ],
+                                "expression": {
+                                  "id": 3085,
+                                  "name": "abi",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 4294967295,
+                                  "src": "1943:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_magic_abi",
+                                    "typeString": "abi"
+                                  }
+                                },
+                                "id": 3086,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "memberLocation": "1947:12:7",
+                                "memberName": "encodePacked",
+                                "nodeType": "MemberAccess",
+                                "src": "1943:16:7",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                  "typeString": "function () pure returns (bytes memory)"
+                                }
+                              },
+                              "id": 3101,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "nameLocations": [],
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1943:452:7",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              },
+                              {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            ],
+                            "expression": {
+                              "id": 3067,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "nodeType": "ElementaryTypeNameExpression",
+                              "src": "1546:5:7",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_bytes_storage_ptr_$",
+                                "typeString": "type(bytes storage pointer)"
+                              },
+                              "typeName": {
+                                "id": 3066,
+                                "name": "bytes",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "1546:5:7",
+                                "typeDescriptions": {}
+                              }
+                            },
+                            "id": 3068,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberLocation": "1552:6:7",
+                            "memberName": "concat",
+                            "nodeType": "MemberAccess",
+                            "src": "1546:12:7",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_bytesconcat_pure$__$returns$_t_bytes_memory_ptr_$",
+                              "typeString": "function () pure returns (bytes memory)"
+                            }
+                          },
+                          "id": 3102,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1546:863:7",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        ],
+                        "id": 3065,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1526:6:7",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_string_storage_ptr_$",
+                          "typeString": "type(string storage pointer)"
+                        },
+                        "typeName": {
+                          "id": 3064,
+                          "name": "string",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1526:6:7",
+                          "typeDescriptions": {}
+                        }
+                      },
+                      "id": 3103,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1526:893:7",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_string_memory_ptr",
+                        "typeString": "string memory"
+                      }
+                    },
+                    "src": "1519:900:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_memory_ptr",
+                      "typeString": "string memory"
+                    }
+                  },
+                  "id": 3105,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1519:900:7"
+                }
+              ]
+            },
+            "id": 3107,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "buildJSON",
+            "nameLocation": "595:9:7",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3059,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3058,
+                  "mutability": "mutable",
+                  "name": "values",
+                  "nameLocation": "619:6:7",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3107,
+                  "src": "605:20:7",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                    "typeString": "struct JSONBuilder.Values"
+                  },
+                  "typeName": {
+                    "id": 3057,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 3056,
+                      "name": "Values",
+                      "nameLocations": [
+                        "605:6:7"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 3055,
+                      "src": "605:6:7"
+                    },
+                    "referencedDeclaration": 3055,
+                    "src": "605:6:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Values_$3055_storage_ptr",
+                      "typeString": "struct JSONBuilder.Values"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "604:22:7"
+            },
+            "returnParameters": {
+              "id": 3062,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3061,
+                  "mutability": "mutable",
+                  "name": "json",
+                  "nameLocation": "664:4:7",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3107,
+                  "src": "650:18:7",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 3060,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "650:6:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "649:20:7"
+            },
+            "scope": 3108,
+            "src": "586:1840:7",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 3109,
+        "src": "72:2356:7",
+        "usedErrors": [],
+        "usedEvents": []
+      }
+    ],
+    "src": "39:2389:7"
+  },
+  "legacyAST": {
+    "absolutePath": "project:/contracts/rave/JSONBuilder.sol",
+    "exportedSymbols": {
+      "JSONBuilder": [
+        3108
+      ]
+    },
+    "id": 3109,
+    "license": "Apache-2.0",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 3038,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0",
+          "<",
+          "0.9",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "39:31:7"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "JSONBuilder",
+        "contractDependencies": [],
+        "contractKind": "library",
+        "fullyImplemented": true,
+        "id": 3108,
+        "linearizedBaseContracts": [
+          3108
+        ],
+        "name": "JSONBuilder",
+        "nameLocation": "80:11:7",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "JSONBuilder.Values",
+            "id": 3055,
+            "members": [
+              {
+                "constant": false,
+                "id": 3040,
+                "mutability": "mutable",
+                "name": "id",
+                "nameLocation": "365:2:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "359:8:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3039,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "359:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3042,
+                "mutability": "mutable",
+                "name": "timestamp",
+                "nameLocation": "383:9:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "377:15:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3041,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "377:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3044,
+                "mutability": "mutable",
+                "name": "version",
+                "nameLocation": "408:7:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "402:13:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3043,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "402:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3046,
+                "mutability": "mutable",
+                "name": "advisoryURL",
+                "nameLocation": "431:11:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "425:17:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3045,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "425:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3048,
+                "mutability": "mutable",
+                "name": "advisoryIDs",
+                "nameLocation": "458:11:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "452:17:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3047,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "452:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3050,
+                "mutability": "mutable",
+                "name": "isvEnclaveQuoteStatus",
+                "nameLocation": "485:21:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "479:27:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3049,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "479:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3052,
+                "mutability": "mutable",
+                "name": "platformInfoBlob",
+                "nameLocation": "522:16:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "516:22:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3051,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "516:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 3054,
+                "mutability": "mutable",
+                "name": "isvEnclaveQuoteBody",
+                "nameLocation": "554:19:7",
+                "nodeType": "VariableDeclaration",
+                "scope": 3055,
+                "src": "548:25:7",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bytes_storage_ptr",
+                  "typeString": "bytes"
+                },
+                "typeName": {
+                  "id": 3053,
+                  "name": "bytes",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "548:5:7",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_storage_ptr",
+                    "typeString": "bytes"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Values",
+            "nameLocation": "105:6:7",
+            "nodeType": "StructDefinition",
+            "scope": 3108,
+            "src": "98:482:7",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 3106,
+              "nodeType": "Block",
+              "src": "670:1756:7",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 3104,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "id": 3063,
+                      "name": "json",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 3061,
+                      "src": "1519:4:7",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_string_memory_ptr",
+                        "typeString": "string memory"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "arguments": [
+                        {
+                          "arguments": [
+                            {
+                              "arguments": [
+                                {
+                                  "hexValue": "7b",
+                                  "id": 3071,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1614:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_a91eddf639b0b768929589c1a9fd21dcb0107199bdd82e55c5348018a1572f52",
+                                    "typeString": "literal_string \"{\""
+                                  },
+                                  "value": "{"
+                                },
+                                {
+                                  "hexValue": "226964223a22",
+                                  "id": 3072,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1639:8:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_248a07d0ca1ead74b91938e1c345e1f78b3866c43e752af02203fd3737512185",
+                                    "typeString": "literal_string \"\"id\":\"\""
+                                  },
+                                  "value": "\"id\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3073,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1669:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3074,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1676:2:7",
+                                  "memberName": "id",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3040,
+                                  "src": "1669:9:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c2274696d657374616d70223a22",
+                                  "id": 3075,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1700:17:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_6a8dc8a459bb51376069f9f74f406a3f613150330a0a9b436ab5e99624e052a0",
+                                    "typeString": "literal_string \"\",\"timestamp\":\"\""
+                                  },
+                                  "value": "\",\"timestamp\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3076,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1739:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3077,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1746:9:7",
+                                  "memberName": "timestamp",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3042,
+                                  "src": "1739:16:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c2276657273696f6e223a",
+                                  "id": 3078,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1777:14:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_cebfbd9eeab369bde7c8d3de0098f9ff8e9b4afe72d910d61cd3e5ee57ee159c",
+                                    "typeString": "literal_string \"\",\"version\":\""
+                                  },
+                                  "value": "\",\"version\":"
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3079,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1813:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3080,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1820:7:7",
+                                  "memberName": "version",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3044,
+                                  "src": "1813:14:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "2c2261647669736f727955524c223a22",
+                                  "id": 3081,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1849:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_501c36d43eacddb6e1f857bf42a2bd4ff697db6b57b7089495ddfc576db86fd4",
+                                    "typeString": "literal_string \",\"advisoryURL\":\"\""
+                                  },
+                                  "value": ",\"advisoryURL\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3082,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "1889:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3083,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "1896:11:7",
+                                  "memberName": "advisoryURL",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3046,
+                                  "src": "1889:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_stringliteral_a91eddf639b0b768929589c1a9fd21dcb0107199bdd82e55c5348018a1572f52",
+                                    "typeString": "literal_string \"{\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_248a07d0ca1ead74b91938e1c345e1f78b3866c43e752af02203fd3737512185",
+                                    "typeString": "literal_string \"\"id\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_6a8dc8a459bb51376069f9f74f406a3f613150330a0a9b436ab5e99624e052a0",
+                                    "typeString": "literal_string \"\",\"timestamp\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_cebfbd9eeab369bde7c8d3de0098f9ff8e9b4afe72d910d61cd3e5ee57ee159c",
+                                    "typeString": "literal_string \"\",\"version\":\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_501c36d43eacddb6e1f857bf42a2bd4ff697db6b57b7089495ddfc576db86fd4",
+                                    "typeString": "literal_string \",\"advisoryURL\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                ],
+                                "expression": {
+                                  "id": 3069,
+                                  "name": "abi",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 4294967295,
+                                  "src": "1576:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_magic_abi",
+                                    "typeString": "abi"
+                                  }
+                                },
+                                "id": 3070,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "memberLocation": "1580:12:7",
+                                "memberName": "encodePacked",
+                                "nodeType": "MemberAccess",
+                                "src": "1576:16:7",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                  "typeString": "function () pure returns (bytes memory)"
+                                }
+                              },
+                              "id": 3084,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "nameLocations": [],
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1576:349:7",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            },
+                            {
+                              "arguments": [
+                                {
+                                  "hexValue": "222c2261647669736f7279494473223a",
+                                  "id": 3087,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "1981:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_a274a192908db679ce32da9899a81d8dcd0909778c3881ab9a1028cf5709d899",
+                                    "typeString": "literal_string \"\",\"advisoryIDs\":\""
+                                  },
+                                  "value": "\",\"advisoryIDs\":"
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3088,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2021:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3089,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2028:11:7",
+                                  "memberName": "advisoryIDs",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3048,
+                                  "src": "2021:18:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "2c22697376456e636c61766551756f7465537461747573223a22",
+                                  "id": 3090,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2061:28:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_a1c417d0a55c38b1ac4116d1b14d41d9bfb454df272020d4ad9b2ae5c1b551b6",
+                                    "typeString": "literal_string \",\"isvEnclaveQuoteStatus\":\"\""
+                                  },
+                                  "value": ",\"isvEnclaveQuoteStatus\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3091,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2111:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3092,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2118:21:7",
+                                  "memberName": "isvEnclaveQuoteStatus",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3050,
+                                  "src": "2111:28:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c22706c6174666f726d496e666f426c6f62223a22",
+                                  "id": 3093,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2161:24:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_507a75b5f7d3da517fbebfe12e42f3cf86a0d42414589f59c0b5c49b12badf31",
+                                    "typeString": "literal_string \"\",\"platformInfoBlob\":\"\""
+                                  },
+                                  "value": "\",\"platformInfoBlob\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3094,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2207:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3095,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2214:16:7",
+                                  "memberName": "platformInfoBlob",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3052,
+                                  "src": "2207:23:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "222c22697376456e636c61766551756f7465426f6479223a22",
+                                  "id": 3096,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2252:27:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_5fe8ab9e7717e5e80e750130e487890e98e393f274cf9773990fefbe7a5fa925",
+                                    "typeString": "literal_string \"\",\"isvEnclaveQuoteBody\":\"\""
+                                  },
+                                  "value": "\",\"isvEnclaveQuoteBody\":\""
+                                },
+                                {
+                                  "expression": {
+                                    "id": 3097,
+                                    "name": "values",
+                                    "nodeType": "Identifier",
+                                    "overloadedDeclarations": [],
+                                    "referencedDeclaration": 3058,
+                                    "src": "2301:6:7",
+                                    "typeDescriptions": {
+                                      "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                                      "typeString": "struct JSONBuilder.Values memory"
+                                    }
+                                  },
+                                  "id": 3098,
+                                  "isConstant": false,
+                                  "isLValue": true,
+                                  "isPure": false,
+                                  "lValueRequested": false,
+                                  "memberLocation": "2308:19:7",
+                                  "memberName": "isvEnclaveQuoteBody",
+                                  "nodeType": "MemberAccess",
+                                  "referencedDeclaration": 3054,
+                                  "src": "2301:26:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  }
+                                },
+                                {
+                                  "hexValue": "22",
+                                  "id": 3099,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2349:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_6e9f33448a4153023cdaf3eb759f1afdc24aba433a3e18b683f8c04a6eaa69f0",
+                                    "typeString": "literal_string \"\"\""
+                                  },
+                                  "value": "\""
+                                },
+                                {
+                                  "hexValue": "7d",
+                                  "id": 3100,
+                                  "isConstant": false,
+                                  "isLValue": false,
+                                  "isPure": true,
+                                  "kind": "string",
+                                  "lValueRequested": false,
+                                  "nodeType": "Literal",
+                                  "src": "2374:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_stringliteral_8e2ffa389f3a6ded42d759b3377ac0d928e6a268d143bcc9517093d10c843bff",
+                                    "typeString": "literal_string \"}\""
+                                  },
+                                  "value": "}"
+                                }
+                              ],
+                              "expression": {
+                                "argumentTypes": [
+                                  {
+                                    "typeIdentifier": "t_stringliteral_a274a192908db679ce32da9899a81d8dcd0909778c3881ab9a1028cf5709d899",
+                                    "typeString": "literal_string \"\",\"advisoryIDs\":\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_a1c417d0a55c38b1ac4116d1b14d41d9bfb454df272020d4ad9b2ae5c1b551b6",
+                                    "typeString": "literal_string \",\"isvEnclaveQuoteStatus\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_507a75b5f7d3da517fbebfe12e42f3cf86a0d42414589f59c0b5c49b12badf31",
+                                    "typeString": "literal_string \"\",\"platformInfoBlob\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_5fe8ab9e7717e5e80e750130e487890e98e393f274cf9773990fefbe7a5fa925",
+                                    "typeString": "literal_string \"\",\"isvEnclaveQuoteBody\":\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_bytes_memory_ptr",
+                                    "typeString": "bytes memory"
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_6e9f33448a4153023cdaf3eb759f1afdc24aba433a3e18b683f8c04a6eaa69f0",
+                                    "typeString": "literal_string \"\"\""
+                                  },
+                                  {
+                                    "typeIdentifier": "t_stringliteral_8e2ffa389f3a6ded42d759b3377ac0d928e6a268d143bcc9517093d10c843bff",
+                                    "typeString": "literal_string \"}\""
+                                  }
+                                ],
+                                "expression": {
+                                  "id": 3085,
+                                  "name": "abi",
+                                  "nodeType": "Identifier",
+                                  "overloadedDeclarations": [],
+                                  "referencedDeclaration": 4294967295,
+                                  "src": "1943:3:7",
+                                  "typeDescriptions": {
+                                    "typeIdentifier": "t_magic_abi",
+                                    "typeString": "abi"
+                                  }
+                                },
+                                "id": 3086,
+                                "isConstant": false,
+                                "isLValue": false,
+                                "isPure": true,
+                                "lValueRequested": false,
+                                "memberLocation": "1947:12:7",
+                                "memberName": "encodePacked",
+                                "nodeType": "MemberAccess",
+                                "src": "1943:16:7",
+                                "typeDescriptions": {
+                                  "typeIdentifier": "t_function_abiencodepacked_pure$__$returns$_t_bytes_memory_ptr_$",
+                                  "typeString": "function () pure returns (bytes memory)"
+                                }
+                              },
+                              "id": 3101,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": false,
+                              "kind": "functionCall",
+                              "lValueRequested": false,
+                              "nameLocations": [],
+                              "names": [],
+                              "nodeType": "FunctionCall",
+                              "src": "1943:452:7",
+                              "tryCall": false,
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            }
+                          ],
+                          "expression": {
+                            "argumentTypes": [
+                              {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              },
+                              {
+                                "typeIdentifier": "t_bytes_memory_ptr",
+                                "typeString": "bytes memory"
+                              }
+                            ],
+                            "expression": {
+                              "id": 3067,
+                              "isConstant": false,
+                              "isLValue": false,
+                              "isPure": true,
+                              "lValueRequested": false,
+                              "nodeType": "ElementaryTypeNameExpression",
+                              "src": "1546:5:7",
+                              "typeDescriptions": {
+                                "typeIdentifier": "t_type$_t_bytes_storage_ptr_$",
+                                "typeString": "type(bytes storage pointer)"
+                              },
+                              "typeName": {
+                                "id": 3066,
+                                "name": "bytes",
+                                "nodeType": "ElementaryTypeName",
+                                "src": "1546:5:7",
+                                "typeDescriptions": {}
+                              }
+                            },
+                            "id": 3068,
+                            "isConstant": false,
+                            "isLValue": false,
+                            "isPure": false,
+                            "lValueRequested": false,
+                            "memberLocation": "1552:6:7",
+                            "memberName": "concat",
+                            "nodeType": "MemberAccess",
+                            "src": "1546:12:7",
+                            "typeDescriptions": {
+                              "typeIdentifier": "t_function_bytesconcat_pure$__$returns$_t_bytes_memory_ptr_$",
+                              "typeString": "function () pure returns (bytes memory)"
+                            }
+                          },
+                          "id": 3102,
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "kind": "functionCall",
+                          "lValueRequested": false,
+                          "nameLocations": [],
+                          "names": [],
+                          "nodeType": "FunctionCall",
+                          "src": "1546:863:7",
+                          "tryCall": false,
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        }
+                      ],
+                      "expression": {
+                        "argumentTypes": [
+                          {
+                            "typeIdentifier": "t_bytes_memory_ptr",
+                            "typeString": "bytes memory"
+                          }
+                        ],
+                        "id": 3065,
+                        "isConstant": false,
+                        "isLValue": false,
+                        "isPure": true,
+                        "lValueRequested": false,
+                        "nodeType": "ElementaryTypeNameExpression",
+                        "src": "1526:6:7",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_type$_t_string_storage_ptr_$",
+                          "typeString": "type(string storage pointer)"
+                        },
+                        "typeName": {
+                          "id": 3064,
+                          "name": "string",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "1526:6:7",
+                          "typeDescriptions": {}
+                        }
+                      },
+                      "id": 3103,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "kind": "typeConversion",
+                      "lValueRequested": false,
+                      "nameLocations": [],
+                      "names": [],
+                      "nodeType": "FunctionCall",
+                      "src": "1526:893:7",
+                      "tryCall": false,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_string_memory_ptr",
+                        "typeString": "string memory"
+                      }
+                    },
+                    "src": "1519:900:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_memory_ptr",
+                      "typeString": "string memory"
+                    }
+                  },
+                  "id": 3105,
+                  "nodeType": "ExpressionStatement",
+                  "src": "1519:900:7"
+                }
+              ]
+            },
+            "id": 3107,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "buildJSON",
+            "nameLocation": "595:9:7",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 3059,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3058,
+                  "mutability": "mutable",
+                  "name": "values",
+                  "nameLocation": "619:6:7",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3107,
+                  "src": "605:20:7",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Values_$3055_memory_ptr",
+                    "typeString": "struct JSONBuilder.Values"
+                  },
+                  "typeName": {
+                    "id": 3057,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 3056,
+                      "name": "Values",
+                      "nameLocations": [
+                        "605:6:7"
+                      ],
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 3055,
+                      "src": "605:6:7"
+                    },
+                    "referencedDeclaration": 3055,
+                    "src": "605:6:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Values_$3055_storage_ptr",
+                      "typeString": "struct JSONBuilder.Values"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "604:22:7"
+            },
+            "returnParameters": {
+              "id": 3062,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3061,
+                  "mutability": "mutable",
+                  "name": "json",
+                  "nameLocation": "664:4:7",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 3107,
+                  "src": "650:18:7",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 3060,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "650:6:7",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "649:20:7"
+            },
+            "scope": 3108,
+            "src": "586:1840:7",
+            "stateMutability": "pure",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 3109,
+        "src": "72:2356:7",
+        "usedErrors": [],
+        "usedEvents": []
+      }
+    ],
+    "src": "39:2389:7"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.20+commit.a1b79de6.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.4",
+  "updatedAt": "2023-10-27T01:09:35.229Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

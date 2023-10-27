@@ -19,12 +19,12 @@ mkdir -p "${INPUT_PATH}/leak/"
 if [[ "$TLS" == "1" ]]; then
     echo "Waiting for builder cert..."
 
-    if [ -z "$(ls -A /cert )" ]; then 
-        sleep 350
+    if [ -z "$(ls -A /cert )" ]; then
+        sleep 60
     fi
     set +x
     while [ -z "$(ls -A /cert )" ]
-    do  
+    do
         sleep 2
     done
     set -x
@@ -32,7 +32,7 @@ if [[ "$TLS" == "1" ]]; then
     cp /cert/tlscert.der "${INPUT_PATH}/tlscert.der"
     cp /shared/builder_enclave.json builder_enclave.json
     export RA_TLS_MRENCLAVE=$(cat builder_enclave.json | jq -r .mr_enclave )
-fi 
+fi
 
 rm -rf /shared/0x*
 
@@ -47,12 +47,16 @@ if [[ "$SGX" == 1 ]]; then
     $GRAMINE -m enclave.sgx-quote &>> OUTPUT
     grep -q "Extracted SGX quote" OUTPUT && echo "[ Success SGX quote ]"
     cat OUTPUT
-    gramine-sgx-ias-request report --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig
+    gramine-sgx-ias-request report --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig -c ias.cert -v
 fi
+
+cd /Sting-Flashbots/searcher/solidity/
+rm -rf ./build
+truffle compile
+cd /Sting-Flashbots/searcher/src
 
 python -m setup_bounty setup_bounty_contract
 python -m setup_bounty submit_enclave
-python -m setup_bounty approve_enclave
 
 rm -rf ${INPUT_PATH}/leak/*
 

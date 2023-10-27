@@ -1,6 +1,6 @@
 .idea/
 __pycache__/
-chain/build
+*/build
 chain/poa/data/
 *key.txt
 *sealed*.txt
@@ -24,3 +24,4 @@ node_modules
 sepolia/beacondata
 sepolia/synced
 sepolia/jwtsecret
+*cert

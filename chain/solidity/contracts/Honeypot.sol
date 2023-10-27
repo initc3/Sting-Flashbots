@@ -2,28 +2,24 @@
 pragma solidity >=0.5.10 <0.9.0;
 
 import "./RLPReader.sol";
+import { X509Verifier } from "./rave/X509Verifier.sol";
+import "./rave/RemoteAttestation.sol";
 
 contract Honeypot {
 
     using RLPReader for RLPReader.RLPItem;
     using RLPReader for bytes;
 
-    struct EnclaveData {
-        bytes sgx_report;
-        bytes ias_sig;
-    }
-
     address public owner;
     uint public bounty;
     bool public claimed;
 
-    mapping (address => bool) public enclaveRequested;
     mapping (address => bool) public enclaveApproved;
-    mapping (address => EnclaveData) public enclaveData;
-
 
     event BountyClaimed(address winner);
 
+    bytes public constant intelRootModulus = hex"9F3C647EB5773CBB512D2732C0D7415EBB55A0FA9EDE2E649199E6821DB910D53177370977466A6A5E4786CCD2DDEBD4149D6A2F6325529DD10CC98737B0779C1A07E29C47A1AE004948476C489F45A5A15D7AC8ECC6ACC645ADB43D87679DF59C093BC5A2E9696C5478541B979E754B573914BE55D32FF4C09DDF27219934CD990527B3F92ED78FBF29246ABECB71240EF39C2D7107B447545A7FFB10EB060A68A98580219E36910952683892D6A5E2A80803193E407531404E36B315623799AA825074409754A2DFE8F5AFD5FE631E1FC2AF3808906F28A790D9DD9FE060939B125790C5805D037DF56A99531B96DE69DE33ED226CC1207D1042B5C9AB7F404FC711C0FE4769FB9578B1DC0EC469EA1A25E0FF9914886EF2699B235BB4847DD6FF40B606E6170793C2FB98B314587F9CFD257362DFEAB10B3BD2D97673A1A4BD44C453AAF47FC1F2D3D0F384F74A06F89C089F0DA6CDB7FCEEE8C9821A8E54F25C0416D18C46839A5F8012FBDD3DC74D256279ADC2C0D55AFF6F0622425D1B";
+    bytes public constant intelRootExponent = hex"010001";
 
     modifier onlyOwner() {
         require(msg.sender == owner);
@@ -36,21 +32,22 @@ contract Honeypot {
         bounty = msg.value;
     }
 
-    function submitEnclave(address enclaveAddr, bytes memory sgxReport, bytes memory iasSig) public {
-        require(!enclaveRequested[enclaveAddr], "address already requested");
+    function submitEnclave(bytes calldata report,
+        bytes calldata sig,
+        bytes memory cert,
+        bytes32 mrenclave,
+        bytes32 mrsigner
+    ) public {
+        // Verify the leafX509Cert was signed with signingMod and signingExp
+        (bytes memory leafCertModulus, bytes memory leafCertExponent) =
+            X509Verifier.verifySignedX509(cert, intelRootModulus, intelRootExponent);
+
+        // Verify report has expected fields then extract its payload
+        bytes memory payload = RemoteAttestation.verifyRemoteAttestation(report, sig, leafCertModulus, leafCertExponent, mrenclave, mrsigner);
+
+        address enclaveAddr = address(bytes20(payload));
+
         require(!enclaveApproved[enclaveAddr], "address already approved");
-        require(sgxReport.length > 0, "empty sgx_report");
-        require(iasSig.length > 0, "empty ias_sig");
-
-        enclaveData[enclaveAddr] = EnclaveData(sgxReport, iasSig);
-        enclaveRequested[enclaveAddr] = true;
-    }
-
-    function approveEnclave(address enclaveAddr) public onlyOwner {
-        require(enclaveRequested[enclaveAddr], "address not requested");
-        require(!enclaveApproved[enclaveAddr], "address already approved");
-
-        enclaveRequested[enclaveAddr] = false;
         enclaveApproved[enclaveAddr] = true;
     }
 

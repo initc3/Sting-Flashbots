@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y python3-venv npm software-properties-co
 
 RUN npm install -g npm@7
 RUN npm install -g truffle@5.4.29
+RUN npm install @truffle/hdwallet-provider
+
+COPY --from=initc3/geth:97745ba /usr/local/bin/geth /usr/local/bin/geth
 
 RUN python3.10 -m venv $VENV_PATH
 
