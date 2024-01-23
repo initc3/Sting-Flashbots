@@ -60,8 +60,9 @@ def submit_enclave(w3):
     quote = base64.b64decode(report_json["isvEnclaveQuoteBody"])
     mrenclave = quote[112:144]
     mrsigner = quote[176:208]
-    send_tx(w3, contract.functions.submitEnclave(report_bytes, ias_sig, cert_der, mrenclave, mrsigner), informant_account.address)
-
+    gas = send_tx(w3, contract.functions.submitEnclave(report_bytes, ias_sig, cert_der, mrenclave, mrsigner), informant_account.address)
+    with open('benchmark_gas.csv', 'a') as f:
+        f.write(f"submitEnclave,{gas}\n")
 
 def collect_bounty(w3):
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
@@ -72,11 +73,13 @@ def collect_bounty(w3):
     contract = w3.eth.contract(abi=abis, bytecode=bins, address=contract_address)
     enclave_address = open("/Sting-Flashbots/searcher/output_data/enclave_address").read()
     balance_before = w3.eth.get_balance(informant_account.address)
-    send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
+    gas = send_tx(w3, contract.functions.collectBounty(enclave_address, proof, sig), informant_account.address)
     balance_after = w3.eth.get_balance(informant_account.address)
     print("profit", balance_after - balance_before)
     assert contract.functions.claimed().call()
     assert balance_after > balance_before
+    with open('benchmark_gas.csv', 'a') as f:
+        f.write(f"collectBounty,{gas}\n")
 
 
 def generate_bundle(w3):
