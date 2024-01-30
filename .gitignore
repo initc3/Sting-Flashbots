@@ -1,6 +1,5 @@
 .idea/
 __pycache__/
-*/build
 chain/poa/data/
 *key.txt
 *sealed*.txt
@@ -25,3 +24,5 @@ sepolia/beacondata
 sepolia/synced
 sepolia/jwtsecret
 *cert
+chain/solidity/build/
+searcher/src/benchmark/*.csv

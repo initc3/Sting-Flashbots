@@ -46,6 +46,7 @@ services:
       - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
       - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
       - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
+      - ./searcher/src/benchmark:/Sting-Flashbots/searcher/src/benchmark
       - shared:/shared
       - cert:/cert/
     working_dir: /Sting-Flashbots/searcher/src

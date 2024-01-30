@@ -18,6 +18,7 @@ from enclave.lib.flashbots import flashbot
 from enclave.lib.ecdsa.account import Account
 from enclave.lib.commitment.elliptic_curves_finite_fields.elliptic import Point
 from enclave.lib.commitment.secp256k1 import uint256_from_str, G, Fq, curve, ser
+from time import perf_counter
 
 
 while True:
@@ -46,7 +47,8 @@ else:
     LOCALNET=True
     CHAIN_ID = 32382
     GAS_MUL=10
-    POF_TXS=5
+    PREC_BUNDLE=1
+    POF_TXS=100#20#5#400#300#200#100#50#20#10#5
     BOUNTY_AMT=150000000000000
 GAS_LIMIT = 25000
 
@@ -169,12 +171,17 @@ def generate_tx(w3, sender=None, gas_price=None, nonce_add=0):
 
 def generate_signed_txs(w3, num, senders=None, gas_price=None):
     txs = []
+    sender = setup_new_account(w3)
+    amt = sample(10000)
+    refill_ether(w3, sender.address, amt+30000000000000)
     for i in range(num):
-        if senders is None:
-            tx, sender = generate_tx(w3)
-        else:
-            sender = senders[i % len(senders)]
-            tx, _ = generate_tx(w3, sender=sender, gas_price=gas_price, nonce_add=int(i/len(senders)))
+        # if senders is None:
+        #     tx, sender = generate_tx(w3)
+        # else:
+        #     sender = senders[i % len(senders)]
+        # tx, _ = generate_tx(w3, sender=sender, gas_price=gas_price, nonce_add=i)
+        receiver = setup_new_account(w3)
+        tx = transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price, i)
         signed_tx = sign_tx(w3, tx, sender)
         txs.append(signed_tx)
     return txs

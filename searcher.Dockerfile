@@ -51,11 +51,16 @@ ENV DEBUG=$DEBUG
 ARG SGX=0
 ENV SGX=$SGX
 
-ADD ./searcher/ /Sting-Flashbots/searcher
+RUN apt-get update && apt-get install -y bc
 
+ADD ./chain/solidity/ /Sting-Flashbots/searcher/solidity/
+WORKDIR /Sting-Flashbots/searcher/solidity/
+RUN rm -rf ./build
+RUN truffle compile
+
+ADD ./searcher/ /Sting-Flashbots/searcher
 WORKDIR /Sting-Flashbots/searcher
 RUN mkdir -p input_data output_data enclave_data
-
 WORKDIR /Sting-Flashbots/searcher/src
 RUN make SGX=$SGX RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE DEBUG=$DEBUG RA_TYPE=$RA_TYPE RA_CLIENT_SPID=$RA_CLIENT_SPID
 

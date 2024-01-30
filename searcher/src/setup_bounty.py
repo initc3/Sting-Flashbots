@@ -13,11 +13,13 @@ SOLIDITY_PATH = "../solidity/build/contracts/Honeypot.json"
 
 cert_ending = '-----END CERTIFICATE-----\n'
 
+
 def setup_bounty_contract(w3):
     bounty_admin = get_account(w3, os.environ.get("BOUNTY_CONTRACT_ADMIN_PK", "0xc8ae83e52a1593ac42fc6868dbdbf9af7a09678b4f3331d191962e582133b78d"))
     contract_address, contract = deploy_contract(w3, bounty_admin.address)
     with open("contract_address", "w") as f:
         f.write(contract_address)
+
 
 def submit_enclave(w3):
     contract = get_contract(w3)
@@ -61,8 +63,9 @@ def submit_enclave(w3):
     mrenclave = quote[112:144]
     mrsigner = quote[176:208]
     gas = send_tx(w3, contract.functions.submitEnclave(report_bytes, ias_sig, cert_der, mrenclave, mrsigner), informant_account.address)
-    with open('benchmark_gas.csv', 'a') as f:
+    with open('benchmark/benchmark_gas.csv', 'a') as f:
         f.write(f"submitEnclave,{gas}\n")
+
 
 def collect_bounty(w3):
     informant_account = get_account(w3, os.environ.get("INFORMANT_PK", "0x3b7cd6efb048079f7e5209c05d74369600df0d15fc177be631b3b4f9a84f8abc"))
@@ -78,11 +81,13 @@ def collect_bounty(w3):
     print("profit", balance_after - balance_before)
     assert contract.functions.claimed().call()
     assert balance_after > balance_before
-    with open('benchmark_gas.csv', 'a') as f:
+    with open('benchmark/benchmark_gas.csv', 'a') as f:
         f.write(f"collectBounty,{gas}\n")
 
 
 def generate_bundle(w3):
+    with open('benchmark/benchmark_latency_critical_loop.csv', 'a') as f:
+        f.write(f"{PREC_BUNDLE},{POF_TXS},")
     stinger_sender = get_account(w3, os.environ.get("STINGER_PK"))
     sting_tx, _ = generate_tx(w3, sender=stinger_sender, gas_price=w3.eth.gas_price * GAS_MUL)
     bundle_txs = private_order_flow(w3, POF_TXS)

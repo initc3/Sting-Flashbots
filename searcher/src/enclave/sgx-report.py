@@ -5,6 +5,8 @@ import sys
 from enclave.utils import *
 
 
+start = perf_counter()
+
 if not os.path.exists("/dev/attestation/report"):
     print("Cannot find `/dev/attestation/report`; are you running under SGX?")
     sys.exit(1)
@@ -28,12 +30,15 @@ with open("/dev/attestation/report", "rb") as f:
 with open(os.path.join(output_dir, "report"), "wb") as f:
     f.write(report)
 
-print(f"Generated SGX report with size = {len(report)} and the following fields:")
-print(f"  ATTRIBUTES.FLAGS: {report[48:56].hex()}  [ Debug bit: {report[48] & 2 > 0} ]")
-print(f"  ATTRIBUTES.XFRM:  {report[56:64].hex()}")
-print(f"  MRENCLAVE:        {report[64:96].hex()}")
-print(f"  MRSIGNER:         {report[128:160].hex()}")
-print(f"  ISVPRODID:        {report[256:258].hex()}")
-print(f"  ISVSVN:           {report[258:260].hex()}")
-print(f"  REPORTDATA:       {report[320:352].hex()}")
-print(f"                    {report[352:384].hex()}")
+end = perf_counter()
+print(f'{end - start}')
+
+# print(f"Generated SGX report with size = {len(report)} and the following fields:")
+# print(f"  ATTRIBUTES.FLAGS: {report[48:56].hex()}  [ Debug bit: {report[48] & 2 > 0} ]")
+# print(f"  ATTRIBUTES.XFRM:  {report[56:64].hex()}")
+# print(f"  MRENCLAVE:        {report[64:96].hex()}")
+# print(f"  MRSIGNER:         {report[128:160].hex()}")
+# print(f"  ISVPRODID:        {report[256:258].hex()}")
+# print(f"  ISVSVN:           {report[258:260].hex()}")
+# print(f"  REPORTDATA:       {report[320:352].hex()}")
+# print(f"                    {report[352:384].hex()}")
