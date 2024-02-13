@@ -47,8 +47,8 @@ else:
     LOCALNET=True
     CHAIN_ID = 32382
     GAS_MUL=10
-    PREC_BUNDLE=1
-    POF_TXS=100#20#5#400#300#200#100#50#20#10#5
+    # PREC_BUNDLE=3#1
+    POF_TXS=100#1#5#10
     BOUNTY_AMT=150000000000000
 GAS_LIMIT = 25000
 
@@ -166,22 +166,28 @@ def generate_tx(w3, sender=None, gas_price=None, nonce_add=0):
     receiver = setup_new_account(w3)
     amt = sample(10000)
     if LOCALNET:
-        refill_ether(w3, sender.address, amt+30000000000000)
+        refill_ether(w3, sender.address, amt+int(3e18))
     return transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price, nonce_add), sender
 
 def generate_signed_txs(w3, num, senders=None, gas_price=None):
     txs = []
-    sender = setup_new_account(w3)
+
     amt = sample(10000)
-    refill_ether(w3, sender.address, amt+30000000000000)
+
+    if senders is None:
+        sender = setup_new_account(w3)
+        refill_ether(w3, sender.address, int(1e20))
+        senders = [sender]
+
     for i in range(num):
         # if senders is None:
         #     tx, sender = generate_tx(w3)
         # else:
-        #     sender = senders[i % len(senders)]
+        sender = senders[i % len(senders)]
         # tx, _ = generate_tx(w3, sender=sender, gas_price=gas_price, nonce_add=i)
         receiver = setup_new_account(w3)
-        tx = transfer_tx(w3, sender.address, receiver.address, amt, w3.eth.gas_price if gas_price is None else gas_price, i)
+        tx = transfer_tx(w3, sender_addr=sender.address, receiver_addr=receiver.address, amt=amt, gas_price=w3.eth.gas_price if gas_price is None else gas_price, nonce_add=i)
+        print(tx)
         signed_tx = sign_tx(w3, tx, sender)
         txs.append(signed_tx)
     return txs

@@ -1,15 +1,17 @@
+import time
+
 from enclave.utils import *
 
 
-def private_order_flow(w3, num_txs):
-    keys = os.environ.get("POF_KEYS")
-    if keys is not None and keys != "":
-        print("POF_KEYS", keys)
-        keys = json.loads(keys)
-        senders = [get_account(w3, pk) for pk in keys]
-    else:
-        senders = None
-    return generate_signed_txs(w3, num_txs, senders=senders, gas_price=w3.eth.gas_price * GAS_MUL)
+# def private_order_flow(w3, num_txs):
+#     keys = os.environ.get("POF_KEYS")
+#     if keys is not None and keys != "":
+#         print("POF_KEYS", keys)
+#         keys = json.loads(keys)
+#         senders = [get_account(w3, pk) for pk in keys]
+#     else:
+#         senders = None
+#     return generate_signed_txs(w3, num_txs, senders=senders, gas_price=w3.eth.gas_price * GAS_MUL)
 
 
 def make_bundle_stinger(w3):
@@ -26,19 +28,27 @@ def make_bundle_stinger(w3):
             "signed_transaction": signed_stinger_tx.rawTransaction
     })
 
+    # print(f'stinger_sender {stinger_sender.address}')
+
     # print(f'sending stinger bundle {bundle}')
 
-    target_block_num = w3.eth.blockNumber + 5
+    target_block_num = w3.eth.blockNumber + 3
 
-    bundles = []
-    for _ in range(1, PREC_BUNDLE):
-        bundle_txs = private_order_flow(w3, POF_TXS)
-        bundles.append(make_bundle(bundle_txs))
-
-    for bundle in bundles:
-        send_bundle(w3, bundle, SEARCHER_KEY.address, block=target_block_num, wait=False)
+    # bundles = []
+    # for _ in range(1, PREC_BUNDLE):
+    #     bundle_txs = private_order_flow(w3, POF_TXS)
+    #     bundles.append(make_bundle(bundle_txs))
+    #
+    # for b in bundles:
+    #     print('*')
+    #     send_bundle(w3, b, ADMIN_ACCOUNT.address, block=target_block_num, wait=False)
 
     send_bundle(w3, bundle, SEARCHER_KEY.address, block=target_block_num, wait=False)
+
+    with open('/Sting-Flashbots/searcher/src/benchmark/benchmark_latency_critical_loop.csv', 'a') as f:
+        f.write(f"{time.time()}\n")
+
+    # print(f'SEARCHER_KEY.address {SEARCHER_KEY.address}')
 
     for i in range(len(bundle)):
         bundle[i]["signed_transaction"] = bundle[i]["signed_transaction"].hex()

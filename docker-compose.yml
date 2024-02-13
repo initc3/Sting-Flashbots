@@ -45,12 +45,14 @@ services:
       - ./chain/solidity/:/Sting-Flashbots/searcher/solidity/
       - ./searcher/src/enclave:/Sting-Flashbots/searcher/src/enclave
       - ./searcher/src/setup_bounty.py:/Sting-Flashbots/searcher/src/setup_bounty.py
+      - ./searcher/src/make_evidence.py:/Sting-Flashbots/searcher/src/make_evidence.py
       - ./searcher/src/run.sh:/Sting-Flashbots/searcher/src/run.sh
       - ./searcher/src/benchmark:/Sting-Flashbots/searcher/src/benchmark
       - shared:/shared
       - cert:/cert/
     working_dir: /Sting-Flashbots/searcher/src
-    command: ./run.sh
+#    command: ./run.sh
+    command: sleep infinity
 
   builder:
     # image: ghcr.io/initc3/geth-sgx-builder:481f1c3c2

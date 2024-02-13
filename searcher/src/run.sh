@@ -11,6 +11,9 @@ else
     GRAMINE="gramine-direct ./python"
 fi
 
+make clean
+make SGX=$SGX RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE DEBUG=$DEBUG RA_TYPE=$RA_TYPE RA_CLIENT_SPID=$RA_CLIENT_SPID
+
 INPUT_PATH=/Sting-Flashbots/searcher/input_data
 OUTPUT_PATH=/Sting-Flashbots/searcher/output_data
 
@@ -50,9 +53,6 @@ if [[ "$SGX" == 1 ]]; then
     gramine-sgx-ias-request report --api-key $RA_TLS_EPID_API_KEY --quote-path "${OUTPUT_PATH}/quote" --report-path ias.report --sig-path ias.sig -c ias.cert -v
 fi
 
-cd /Sting-Flashbots/searcher/solidity/
-rm -rf ./build
-truffle compile
 cd /Sting-Flashbots/searcher/src
 
 python -m setup_bounty setup_bounty_contract

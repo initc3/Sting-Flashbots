@@ -2,7 +2,7 @@
 
 set -e
 set -x
-NUM_TRAILS=5
+NUM_TRAILS=10
 #NUM_TRAILS=1
 #SGX=-1
 
@@ -13,6 +13,9 @@ elif [[ "$SGX" == -1 ]]; then
 else
     GRAMINE="gramine-direct ./python"
 fi
+
+make clean
+make SGX=$SGX RA_CLIENT_LINKABLE=$RA_CLIENT_LINKABLE DEBUG=$DEBUG RA_TYPE=$RA_TYPE RA_CLIENT_SPID=$RA_CLIENT_SPID
 
 INPUT_PATH=/Sting-Flashbots/searcher/input_data
 OUTPUT_PATH=/Sting-Flashbots/searcher/output_data
@@ -89,6 +92,8 @@ do
 
     rm -rf ${INPUT_PATH}/leak/*
 
+    echo "$i," >> benchmark/benchmark_latency_critical_loop.csv
+
     python -m setup_bounty generate_bundle
 
         start=`date +%s.%N`
@@ -98,23 +103,25 @@ do
         runtime_create_stinger=$( echo "$end - $start" | bc -l )
         echo "$i,create_stinger,$runtime_create_stinger" >> benchmark/benchmark_latency.csv
 
-        critical_loop_start=`date +%s.%N`
+#        critical_loop_start=`date +%s.%N`
+
     set +x
     while [ -z "$(ls -A /shared/0x* )" ]
     do
         sleep 0.01
     done
     set -x
-        critical_loop_end=`date +%s.%N`
-        runtime_critical_loop=$( echo "$critical_loop_end - $critical_loop_start" | bc -l )
-        echo "$i,critical_loop,$runtime_critical_loop" >> benchmark/benchmark_latency_critical_loop.csv
-
-    sleep 3
-
-#    mv /shared/0x* "${INPUT_PATH}/leak/"
+#        critical_loop_end=`date +%s.%N`
+#        runtime_critical_loop=$( echo "$critical_loop_end - $critical_loop_start" | bc -l )
+#        echo "$i,critical_loop,$runtime_critical_loop" >> benchmark/benchmark_latency_critical_loop.csv
 #
-#    python -m make_evidence
-#
+
+    mv /shared/0x* ${INPUT_PATH}/leak/
+
+    python -m make_evidence
+
+    sleep 5
+
 #        start=`date +%s.%N`
 ##    $GRAMINE -m enclave.verify_evidence
 #    echo "$i,verify_evidence,$($GRAMINE -m enclave.verify_evidence)" >> benchmark/benchmark_latency_pure_python.csv
@@ -126,10 +133,8 @@ do
 #        python -m setup_bounty collect_bounty
 #    fi
 
-done 
+done
 
 #rm -rf ${INPUT_PATH}/leak/*
-#
-#echo "done"
-#cat benchmark/benchmark_latency.csv
-#cat benchmark/benchmark_gas.csv
+
+echo "done"

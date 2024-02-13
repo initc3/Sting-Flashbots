@@ -63,7 +63,7 @@ def submit_enclave(w3):
     mrenclave = quote[112:144]
     mrsigner = quote[176:208]
     gas = send_tx(w3, contract.functions.submitEnclave(report_bytes, ias_sig, cert_der, mrenclave, mrsigner), informant_account.address)
-    with open('benchmark/benchmark_gas.csv', 'a') as f:
+    with open('"/Sting-Flashbots/searcher/benchmark/benchmark_gas.csv', 'a') as f:
         f.write(f"submitEnclave,{gas}\n")
 
 
@@ -87,8 +87,9 @@ def collect_bounty(w3):
 
 def generate_bundle(w3):
     with open('benchmark/benchmark_latency_critical_loop.csv', 'a') as f:
-        f.write(f"{PREC_BUNDLE},{POF_TXS},")
+        f.write(f"{POF_TXS},\n")
     stinger_sender = get_account(w3, os.environ.get("STINGER_PK"))
+    refill_ether(w3, stinger_sender.address, int(1e20))
     sting_tx, _ = generate_tx(w3, sender=stinger_sender, gas_price=w3.eth.gas_price * GAS_MUL)
     bundle_txs = private_order_flow(w3, POF_TXS)
     sting_bundle = make_bundle(bundle_txs)
